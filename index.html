@@ -497,6 +497,140 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* VIEW TOGGLE */
+  .view-toggle {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .view-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 14px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .view-btn:hover { color: var(--ink); }
+  .view-btn.active {
+    background: var(--ink);
+    color: white;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .tl-day {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .tl-day-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 14px 22px;
+    background: var(--ink);
+    color: white;
+    border-bottom: 3px solid var(--orange);
+  }
+  .tl-day-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .tl-day-date {
+    font-size: 13px;
+    color: rgba(255,255,255,.7);
+  }
+  .tl-day-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'Source Sans 3', monospace;
+    color: var(--orange-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .tl-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .tl-row {
+    display: flex;
+    gap: 16px;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background .12s ease;
+  }
+  .tl-row:last-child { border-bottom: none; }
+  .tl-row:hover { background: var(--bg); }
+  .tl-time {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--red);
+    min-width: 105px;
+    flex-shrink: 0;
+    padding-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  .tl-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .tl-title-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 4px;
+  }
+  .tl-title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .tl-venue {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .tl-venue .venue-dot {
+    color: var(--orange);
+    margin-right: 4px;
+  }
+  .tl-venue .tl-org {
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .tl-rank-mini {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    background: var(--line-soft);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-right: 6px;
+    letter-spacing: 0.04em;
+  }
+
   /* FOOTER */
   footer {
     margin-top: 64px;
@@ -517,6 +651,9 @@
     .event-card { padding: 14px 16px; }
     .rank-num { font-size: 22px; min-width: 28px; }
     .event-title { font-size: 17px; }
+    .tl-row { flex-direction: column; gap: 4px; padding: 12px 14px; }
+    .tl-time { min-width: 0; }
+    .tl-day-header { padding: 12px 14px; flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -607,12 +744,23 @@ const STORAGE_KEY = "folkemodet_groq_key";
 const FALLBACK_MODEL = "llama-3.3-70b-versatile";
 const LOW_TPM_MODELS = new Set(["llama-3.1-8b-instant"]);
 
+const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+const DAY_DATES = {
+  "Torsdag": "11. juni",
+  "Fredag": "12. juni",
+  "Lørdag": "13. juni",
+  "Søndag": "14. juni"
+};
+
 // ============================================================
 // STATE
 // ============================================================
 const state = {
   selectedThemes: new Set(),
-  apiKey: ""
+  apiKey: "",
+  lastEvents: null,
+  lastModel: null,
+  viewMode: "ranked"  // "ranked" | "timeline"
 };
 
 // ============================================================
@@ -895,23 +1043,44 @@ function showStatus(msg, isError = false) {
 // RENDER
 // ============================================================
 function renderEvents(events, model) {
-  const html = [];
-  html.push(`
+  state.lastEvents = events;
+  state.lastModel = model;
+
+  const headerHtml = `
     <div class="results-header">
       <div class="results-title">Anbefalede events</div>
-      <div class="results-meta">${events.length} resultater · ${model}</div>
+      <div class="view-toggle" id="viewToggle">
+        <button class="view-btn ${state.viewMode==='ranked'?'active':''}" data-view="ranked">Rangeret</button>
+        <button class="view-btn ${state.viewMode==='timeline'?'active':''}" data-view="timeline">Tidslinje</button>
+      </div>
+      <div class="results-meta">${events.length} resultater · ${esc(model)}</div>
     </div>
-    <div class="event-grid">
-  `);
+  `;
 
-  events.forEach((ev, i) => {
+  const bodyHtml = state.viewMode === "timeline"
+    ? renderTimeline(events)
+    : renderRanked(events);
+
+  resultsEl.innerHTML = headerHtml + bodyHtml;
+
+  // Attach view toggle handlers
+  resultsEl.querySelectorAll(".view-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.viewMode = btn.dataset.view;
+      renderEvents(state.lastEvents, state.lastModel);
+    });
+  });
+}
+
+function renderRanked(events) {
+  const cards = events.map((ev, i) => {
     const rank = i + 1;
     const rankClass = rank <= 5 ? "rank-top" : rank <= 12 ? "rank-mid" : "rank-low";
     const conf = (ev.confidence || "speculative").toLowerCase();
     const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
     const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
 
-    html.push(`
+    return `
       <div class="event-card ${rankClass}">
         <div class="card-head">
           <div class="rank-num">${String(rank).padStart(2, "0")}</div>
@@ -934,11 +1103,72 @@ function renderEvents(events, model) {
 
         ${ev.why_match ? `<div class="why-match">${esc(ev.why_match)}</div>` : ""}
       </div>
-    `);
+    `;
+  }).join("");
+
+  return `<div class="event-grid">${cards}</div>`;
+}
+
+function parseStartMinutes(time) {
+  if (!time) return 9999;
+  const m = String(time).match(/(\d{1,2}):(\d{2})/);
+  if (!m) return 9999;
+  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+}
+
+function renderTimeline(events) {
+  // Attach original rank index so we can show it
+  const indexed = events.map((ev, i) => ({ ev, rank: i + 1 }));
+
+  // Group by day
+  const byDay = {};
+  indexed.forEach(item => {
+    const day = item.ev.day || "Andet";
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(item);
   });
 
-  html.push("</div>");
-  resultsEl.innerHTML = html.join("");
+  // Sort each day chronologically by start time
+  Object.values(byDay).forEach(list => {
+    list.sort((a, b) => parseStartMinutes(a.ev.time) - parseStartMinutes(b.ev.time));
+  });
+
+  // Day order: defined order first, then any unknowns
+  const days = DAY_ORDER.filter(d => byDay[d]);
+  Object.keys(byDay).forEach(d => { if (!days.includes(d)) days.push(d); });
+
+  const html = days.map(day => {
+    const date = DAY_DATES[day] || "";
+    const count = byDay[day].length;
+    const items = byDay[day].map(({ ev, rank }) => {
+      const conf = (ev.confidence || "speculative").toLowerCase();
+      return `
+        <div class="tl-row">
+          <div class="tl-time">${esc(ev.time || "?")}</div>
+          <div class="tl-body">
+            <div class="tl-title-row">
+              <div class="tl-title"><span class="tl-rank-mini">#${rank}</span>${esc(ev.title || "")}</div>
+              <span class="confidence-badge ${conf}">${conf}</span>
+            </div>
+            <div class="tl-venue"><span class="venue-dot">◆</span>${esc(ev.venue || "?")} <span class="tl-org">· ${esc(ev.organizer || "")}</span></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="tl-day">
+        <div class="tl-day-header">
+          <span class="tl-day-name">${esc(day)}</span>
+          <span class="tl-day-date">${esc(date)}</span>
+          <span class="tl-day-count">${count} event${count===1?"":"s"}</span>
+        </div>
+        <div class="tl-list">${items}</div>
+      </div>
+    `;
+  }).join("");
+
+  return `<div class="timeline">${html}</div>`;
 }
 
 function esc(s) {
