@@ -1190,7 +1190,7 @@
       <div class="program-filters">
         <select id="filterDay"><option value="">Alle dage</option></select>
         <select id="filterVenue"><option value="">Alle venues</option></select>
-        <input type="search" id="filterSearch" placeholder="Søg titel/arrangør…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet">
+        <input type="search" id="filterSearch" placeholder="Søg titel/arrangør…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
         <button class="filter-clear" id="filterClear" type="button">Nulstil</button>
       </div>
       <div class="program-meta" id="programMeta"></div>
@@ -2430,6 +2430,15 @@ async function loadOfficialProgram() {
     document.getElementById("filterDay").addEventListener("change", applyFilters);
     document.getElementById("filterVenue").addEventListener("change", applyFilters);
     document.getElementById("filterSearch").addEventListener("input", debounce(applyFilters, 200));
+    document.getElementById("filterSearch").addEventListener("change", applyFilters);
+    document.getElementById("filterSearch").addEventListener("search", applyFilters);
+    document.getElementById("filterSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.target.blur(); // close mobile keyboard
+        applyFilters();
+      }
+    });
     document.getElementById("filterClear").addEventListener("click", clearFilters);
     document.getElementById("loadMoreBtn").addEventListener("click", () => {
       programState.shown += programState.pageSize;
