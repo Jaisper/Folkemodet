@@ -1363,104 +1363,157 @@ function updateCounter() {
 // ============================================================
 // PROMPTS
 // ============================================================
-function buildEventCatalog(maxChars = 60000) {
-  // Build a compact text catalog of all real events the AI can choose from.
-  // Format: "ID|day|time|venue|organizer|title|summary"
-  if (!programState.events || programState.events.length === 0) return null;
+// Theme → search keywords mapping (Danish)
+const THEME_KEYWORDS = {
+  "Demokrati": ["demokrati", "folkestyre", "valg", "borgerskab", "deltagelse", "stemme", "politik"],
+  "Klima & grøn omstilling": ["klima", "grøn", "omstilling", "co2", "bæredygtig", "energi", "miljø", "natur", "biodiversitet", "vedvarende"],
+  "Sundhed": ["sundhed", "sygehus", "patient", "læge", "psyk", "kræft", "diabetes", "hjerte", "demens", "trivsel"],
+  "Uddannelse": ["uddannelse", "skole", "elev", "universitet", "studerend", "lærer", "pædagog", "folkeskole", "gymnasi", "efterskole"],
+  "Økonomi & skat": ["økonomi", "skat", "finans", "moms", "vækst", "konkurrence", "investering", "bnp", "inflation"],
+  "Udenrigspolitik": ["udenrigs", "international", "diplomat", "globalt", "udland", "ukraine", "rusland", "kina", "usa", "afrika"],
+  "Forsvar & sikkerhed": ["forsvar", "sikkerhed", "militær", "krig", "nato", "beredskab", "værnepligt", "politi", "cyber"],
+  "EU": ["eu", "europa", "europæisk", "bruxelles", "kommission", "parlament", "union"],
+  "Teknologi & AI": ["teknologi", "ai", "kunstig intelligens", "digital", "tech", "data", "automatis", "robot", "innovation"],
+  "Socialpolitik": ["social", "udsat", "fattig", "ulighed", "hjemløs", "kontanthjælp", "førtidspension", "børn", "familie"],
+  "Arbejdsmarked": ["arbejde", "job", "fagforening", "overenskomst", "ledighed", "iværksætter", "kvalifikation", "kompetence", "rekrutter"],
+  "Ligestilling": ["ligestilling", "køn", "kvinder", "lgbt", "minoritet", "diversitet", "lige løn", "barsel"],
+  "Integration": ["integration", "indvandr", "flygt", "etnisk", "migration", "asyl", "udlænding", "kultur"],
+  "Medier & ytringsfrihed": ["medier", "presse", "journalist", "ytring", "censur", "fake news", "misinformation", "tv", "radio", "avis"],
+  "Velfærd & ældre": ["velfærd", "ældre", "pension", "plejehjem", "omsorg", "demens", "alder", "folkepension"],
+  "Kultur & dannelse": ["kultur", "kunst", "musik", "litteratur", "teater", "film", "dannelse", "højskole", "bibliotek", "museum"]
+};
 
-  const lines = ["ID|DAY|TIME|VENUE|ORGANIZER|TITLE|SUMMARY"];
+// Score an event by relevance to themes + favorites (free text)
+function scoreEvent(event, themeKeywords, favoriteTerms) {
+  const hay = (
+    (event.title || "") + " " +
+    (event.summary || "") + " " +
+    (event.organizers || "") + " " +
+    (event.venue || "")
+  ).toLowerCase();
+
+  let score = 0;
+  // Theme matches: weight 2 (each keyword hit)
+  for (const kw of themeKeywords) {
+    if (hay.includes(kw)) score += 2;
+  }
+  // Favorite term matches: weight 3 (more personal)
+  for (const term of favoriteTerms) {
+    if (term.length < 3) continue;
+    if (hay.includes(term)) score += 3;
+  }
+  return score;
+}
+
+// Pre-filter events client-side BEFORE sending to AI.
+// This is critical to stay under TPM limits.
+function preFilterEvents(themes, favorites, maxEvents = 200) {
+  if (!programState.events || programState.events.length === 0) return [];
+
+  // Collect all keywords from selected themes
+  const themeKeywords = [];
+  for (const t of themes) {
+    const kws = THEME_KEYWORDS[t];
+    if (kws) themeKeywords.push(...kws);
+  }
+
+  // Parse favorites: split on commas, "og", and whitespace; lowercase
+  const favoriteTerms = favorites
+    .toLowerCase()
+    .split(/[,;]| og | samt /)
+    .map(s => s.trim())
+    .filter(s => s.length >= 3);
+
+  // Score all events
+  const scored = programState.events
+    .map(e => ({ event: e, score: scoreEvent(e, themeKeywords, favoriteTerms) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  // Take top N
+  return scored.slice(0, maxEvents).map(x => x.event);
+}
+
+function buildEventCatalog(events, maxChars = 28000) {
+  // Build a compact text catalog. Stays well under 12k TPM token limit.
+  // ~3.5 chars per token → 28000 chars ≈ 8000 tokens, leaves room for response.
+  if (!events || events.length === 0) return null;
+
+  const lines = ["ID|DAY|TIME|VENUE|ORG|TITLE|DESC"];
   let chars = lines[0].length;
 
-  for (const e of programState.events) {
+  for (const e of events) {
     const line = [
       e.id,
-      e.day || "",
+      (e.day || "").slice(0, 3), // Tor/Fre/Lør (saves tokens)
       e.time || "",
-      (e.venue || "").replace(/\|/g, "/"),
-      (e.organizers || "").replace(/\|/g, "/").slice(0, 80),
-      (e.title || "").replace(/\|/g, "/").slice(0, 120),
-      (e.summary || "").replace(/\|/g, "/").slice(0, 140)
+      (e.venue || "").replace(/\|/g, "/").slice(0, 35),
+      (e.organizers || "").replace(/\|/g, "/").slice(0, 50),
+      (e.title || "").replace(/\|/g, "/").slice(0, 90),
+      (e.summary || "").replace(/\|/g, "/").slice(0, 100)
     ].join("|");
-    if (chars + line.length + 1 > maxChars) {
-      lines.push(`[... ${programState.events.length - (lines.length - 1)} flere events trunkeret pga. context window]`);
-      break;
-    }
+    if (chars + line.length + 1 > maxChars) break;
     lines.push(line);
     chars += line.length + 1;
   }
-  return lines.join("\n");
+  return { catalog: lines.join("\n"), count: lines.length - 1 };
 }
 
 function buildFullPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "(ingen valgt)";
   const favStr = favorites.trim() || "(ingen)";
-  const catalog = buildEventCatalog();
 
-  // If we have the real program, do retrieval/ranking. If not, fall back to old "speculate" mode.
-  if (catalog) {
-    return `Du er ekspert i Folkemødet på Bornholm 2026 (11.–13. juni, Allinge).
+  // Pre-filter events client-side to stay under TPM limits
+  const filtered = preFilterEvents(themes, favorites, 150);
+  const result = buildEventCatalog(filtered, 28000);
 
-Brugeren har valgt:
-- Temaer: ${themesStr}
-- Personlige interesser: ${favStr}
+  if (result) {
+    return `Folkemødet 2026 (11.–13. juni, Allinge). Bruger vil prioritere:
+Temaer: ${themesStr}
+Interesser: ${favStr}
 
-OPGAVE: Vælg de mest relevante events fra det officielle program nedenfor. Brug KUN events fra listen — opfind ALDRIG nye. Vælg op til 10 events pr. dag (max 30 total), kronologisk uden tidsoverlap (sluttid event N ≤ starttid event N+1, gerne 15 min buffer).
+OPGAVE: Vælg op til 30 events (max ~10 pr. dag) fra programmet nedenfor — KUN events fra listen, opfind aldrig nye. Inden for samme dag: kronologisk, ingen tidsoverlap (sluttid event N ≤ starttid event N+1, gerne 15 min buffer for gå-tid).
 
-REGLER:
-1. Returner KUN event-IDs fra katalogen. Aldrig opfundne events.
-2. Inden for samme dag: kronologisk, ingen overlap.
-3. Prioriter events der matcher temaer + personlige interesser.
-4. why_match: konkret reference til brugerens valg, 1-2 sætninger på dansk.
-5. Hvis et tema ikke har gode matches en given dag, vælg færre events den dag — kvalitet over kvantitet.
+Returner KUN event-IDs som er præ-filtreret efter relevans. Hvis en dag ikke har gode matches, vælg færre — kvalitet over kvantitet.
 
-OFFICIELT PROGRAM (pipe-separeret):
-${catalog}
+PROGRAM (${result.count} kandidater, pipe-separeret):
+${result.catalog}
 
-OUTPUT — KUN gyldig JSON:
-{
-  "selections": [
-    { "id": "31784", "why_match": "Kort dansk forklaring på match" },
-    ...
-  ]
-}
-
-Returner KUN JSON. Ingen markdown, ingen forklaring uden for JSON.`;
+KUN gyldig JSON:
+{"selections":[{"id":"31784","why_match":"Kort dansk forklaring (1 sætning)"}, ...]}`;
   }
 
-  // Fallback: original "speculate" prompt for when program.json isn't available yet
-  return `Du er ekspert i Folkemødet på Bornholm 2026 (11.–13. juni, Allinge).
+  // Fallback: program ikke tilgængelig
+  return `Folkemødet 2026 (11.–13. juni). Programmet er ikke tilgængeligt — foreslå plausible events.
+Temaer: ${themesStr}
+Interesser: ${favStr}
 
-BRUGEREN HAR VALGT:
-- Temaer: ${themesStr}
-- Personlige interesser: ${favStr}
+10 events/dag x 3 dage, kronologisk, ingen overlap. Marker confidence: "likely" eller "speculative".
 
-Det officielle program er ikke tilgængeligt endnu. Foreslå plausible events baseret på tilbagevendende arrangører.
-
-Lav 10 events pr. dag (30 total), kronologisk uden tidsoverlap. Marker hvert event med confidence: "likely" eller "speculative".
-
-OUTPUT — KUN gyldig JSON:
-{"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
+KUN JSON: {"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
 }
 
 function buildCompactPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "ingen";
   const favStr = favorites.trim() || "ingen";
-  const catalog = buildEventCatalog(40000); // smaller for 8B
 
-  if (catalog) {
-    return `Folkemødet 2026. Vælg op til 30 events fra programmet der matcher:
+  // Even smaller for 8B model
+  const filtered = preFilterEvents(themes, favorites, 80);
+  const result = buildEventCatalog(filtered, 15000);
+
+  if (result) {
+    return `Folkemødet 2026. Vælg op til 25 events fra listen der matcher.
 Temaer: ${themesStr}
 Interesser: ${favStr}
+Regler: kun ID'er fra listen, kronologisk pr. dag, ingen overlap.
 
-Regler: kun ID'er fra listen, ingen tidsoverlap pr. dag, kronologisk.
-
-PROGRAM:
-${catalog}
+PROGRAM (${result.count} kandidater):
+${result.catalog}
 
 KUN JSON: {"selections":[{"id":"","why_match":""}]}`;
   }
 
-  return `Folkemødet 2026, 10 events/dag x 3 dage, kronologisk, ingen overlap.
+  return `Folkemødet 2026, 10 events/dag x 3 dage, ingen overlap.
 Temaer: ${themesStr}
 Interesser: ${favStr}
 KUN JSON: {"events":[{"title":"","organizer":"","day":"","time":"","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
@@ -1654,7 +1707,13 @@ async function generate() {
 
   const usingRealData = programState.events && programState.events.length > 0;
   if (usingRealData) {
-    showStatus(`Vælger fra ${programState.events.length} officielle events…`);
+    const preFiltered = preFilterEvents(themes, favorites, 150);
+    if (preFiltered.length === 0) {
+      showStatus("Ingen events i programmet matchede dine temaer eller interesser. Prøv andre temaer eller skriv mere i 'Personlige interesser'.", true);
+      resetButton();
+      return;
+    }
+    showStatus(`Forfiltrerede ${preFiltered.length} relevante events fra ${programState.events.length} total. Kalder AI…`);
   } else {
     showStatus(`Program ikke tilgængeligt — AI'en gætter ud fra typiske arrangører…`);
   }
