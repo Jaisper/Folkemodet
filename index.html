@@ -1512,23 +1512,35 @@ KUN JSON: {"events":[{"title":"","organizer":"","day":"","time":"","venue":"","t
 // GROQ API
 // ============================================================
 async function callGroq(model, prompt) {
-  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + state.apiKey
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [
-        { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown, aldrig forklarende tekst. Start direkte med { og slut med }." },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.6,
-      max_tokens: 3000,
-      response_format: { type: "json_object" }
-    })
-  });
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 60000); // 60s timeout
+
+  let resp;
+  try {
+    resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + state.apiKey
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown, aldrig forklarende tekst. Start direkte med { og slut med }." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.6,
+        max_tokens: 3000,
+        response_format: { type: "json_object" }
+      }),
+      signal: ctrl.signal
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") throw new Error(`Timeout efter 60s (model: ${model})`);
+    throw new Error(`Netværksfejl: ${err.message}`);
+  }
+  clearTimeout(timeoutId);
 
   if (!resp.ok) {
     const errText = await resp.text();
@@ -1537,7 +1549,7 @@ async function callGroq(model, prompt) {
     try {
       const errObj = JSON.parse(errText);
       if (errObj.error?.failed_generation) {
-        detail = `${errObj.error.message} (model returnerede tom/ugyldig JSON — sandsynligvis afkortet output eller for kompleks prompt)`;
+        detail = `${errObj.error.message} (tom/ugyldig JSON — output afkortet)`;
       } else if (errObj.error?.message) {
         detail = errObj.error.message;
       }
@@ -1702,46 +1714,59 @@ async function generate() {
       resetButton();
       return;
     }
-    const estTokens = Math.ceil(prompt.length / 3.5);
-    showStatus(`Forfiltrerede ${preFiltered.length} relevante events (~${estTokens} tokens). Kalder AI…`);
+  }
+
+  // Build prompt FIRST so we can estimate tokens
+  const promptBuilder = LOW_TPM_MODELS.has(selectedModel) ? buildCompactPrompt : buildFullPrompt;
+  const prompt = promptBuilder(themes, favorites);
+  const estInputTokens = Math.ceil(prompt.length / 3.5);
+  const estTotalTokens = estInputTokens + 3000; // + max output
+
+  console.log(`Prompt: ${prompt.length} chars, ~${estInputTokens} input tokens, ~${estTotalTokens} total (incl. response)`);
+
+  // Hard TPM guard for free-tier 70B model (12k limit)
+  const TPM_LIMIT_70B = 12000;
+  if (selectedModel === FALLBACK_MODEL && estTotalTokens > TPM_LIMIT_70B - 500) {
+    showStatus(`Prompt for stor (~${estTotalTokens} tokens, max 12k). Reducer antal valgte temaer eller skift til GPT-OSS 120B.`, true);
+    resetButton();
+    return;
+  }
+
+  if (usingRealData) {
+    showStatus(`Klar med ~${estInputTokens} input-tokens. Kalder ${selectedModel}…`);
   } else {
     showStatus(`Program ikke tilgængeligt — AI'en gætter ud fra typiske arrangører…`);
   }
-
-  // Pick prompt based on model TPM
-  const promptBuilder = LOW_TPM_MODELS.has(selectedModel) ? buildCompactPrompt : buildFullPrompt;
-  const prompt = promptBuilder(themes, favorites);
 
   let usedModel = selectedModel;
   let content;
 
   try {
-    showStatus(`Kalder ${selectedModel}…`);
     content = await callGroq(selectedModel, prompt);
   } catch (err) {
     const is429 = err.status === 429;
-    const isTPM = /rate.?limit|tokens? per|tpm/i.test(err.body || "");
+    const isTPM = /rate.?limit|tokens? per|tpm|413/i.test(err.body || err.message || "");
     const isJsonValidateFailed = /json_validate_failed/i.test(err.body || "");
     const shouldFallback = (is429 || isTPM || isJsonValidateFailed) && selectedModel !== FALLBACK_MODEL;
 
     if (shouldFallback) {
+      // Check if compact prompt would even fit
+      const fallbackPrompt = buildCompactPrompt(themes, favorites);
+      const fallbackTokens = Math.ceil(fallbackPrompt.length / 3.5) + 3000;
+      if (fallbackTokens > TPM_LIMIT_70B - 500) {
+        showStatus(`Både primær og fallback prompt er for store (${fallbackTokens} > 12k tokens). Vælg færre temaer eller vent 1 min på TPM reset.`, true);
+        resetButton();
+        return;
+      }
       try {
-        const reason = isJsonValidateFailed ? "JSON validering fejlede" : "rate-limit";
-        showStatus(`${selectedModel} ${reason} — fallback til ${FALLBACK_MODEL}…`);
+        const reason = isJsonValidateFailed ? "JSON-fejl" : isTPM ? "TPM-overskridelse" : "rate-limit";
+        showStatus(`${selectedModel}: ${reason} — fallback til ${FALLBACK_MODEL} (~${Math.ceil(fallbackPrompt.length/3.5)} tokens)…`);
         usedModel = FALLBACK_MODEL;
-        // Always use compact prompt for fallback to maximize success rate
-        const fallbackPrompt = buildCompactPrompt(themes, favorites);
         content = await callGroq(FALLBACK_MODEL, fallbackPrompt);
       } catch (err2) {
-        // Last resort: try fallback model with compact prompt without response_format
-        try {
-          showStatus(`Sidste forsøg uden JSON-mode…`);
-          content = await callGroqLoose(FALLBACK_MODEL, buildCompactPrompt(themes, favorites));
-        } catch (err3) {
-          showStatus(`Fejl ved fallback: ${err2.message}`, true);
-          resetButton();
-          return;
-        }
+        showStatus(`Fejl: ${err2.message}`, true);
+        resetButton();
+        return;
       }
     } else {
       showStatus(`Fejl: ${err.message}`, true);
@@ -1979,6 +2004,65 @@ const programState = {
   scrapedAt: null
 };
 
+// Fix scrape artifacts: detect run-on title+summary like "TitlenHer kommer beskrivelsen…"
+// where heading and description got concatenated with no separator.
+// Heuristic: split at first transition from a lowercase letter directly into an uppercase
+// letter (or a Danish capital ÆØÅ) — but only if the resulting title looks sensible.
+function normalizeEvent(ev) {
+  const out = { ...ev };
+  let title = (out.title || "").trim();
+  let summary = (out.summary || "").trim();
+
+  // Case 1: Title looks like "X-titelYrest..." with no space at boundary.
+  // Find lowercase→uppercase transitions inside the title.
+  // We split at the LAST such transition where the rest looks like a sentence.
+  if (title && title.length > 20) {
+    const splitPoint = findRunonSplit(title);
+    if (splitPoint !== -1) {
+      const realTitle = title.slice(0, splitPoint).trim();
+      const extracted = title.slice(splitPoint).trim();
+      // Only split if both pieces are substantial
+      if (realTitle.length >= 5 && extracted.length >= 5) {
+        title = realTitle;
+        // Prepend extracted text to existing summary
+        summary = summary ? extracted + " " + summary : extracted;
+      }
+    }
+  }
+
+  // Case 2: Summary starts by repeating the title (also happens)
+  if (summary && title && summary.toLowerCase().startsWith(title.toLowerCase())) {
+    summary = summary.slice(title.length).trim();
+    // Strip leading punctuation
+    summary = summary.replace(/^[\s.,;:!?-]+/, '');
+  }
+
+  out.title = title;
+  out.summary = summary;
+  return out;
+}
+
+// Find the index where a run-on title transitions to its description.
+// Looks for a lowercase letter immediately followed by an uppercase one,
+// where the lowercase letter is at least 5 chars in (to avoid breaking after "I" or "På").
+function findRunonSplit(text) {
+  // Pattern: [a-zæøå][A-ZÆØÅ] — boundary between joined sentences
+  // We want the FIRST such boundary that doesn't break a known compound or acronym.
+  const re = /([a-zæøå])([A-ZÆØÅ])/g;
+  let match;
+  const candidates = [];
+  while ((match = re.exec(text)) !== null) {
+    const idx = match.index + 1; // split between the two letters
+    if (idx < 5) continue; // too early — probably "iPhone" or similar
+    // Skip if previous word is an acronym-like all-caps preceded by space (e.g. "DK Ungdom")
+    const before = text.slice(Math.max(0, idx - 4), idx);
+    if (/[A-ZÆØÅ]{2,}$/.test(before)) continue;
+    candidates.push(idx);
+  }
+  // Return the FIRST plausible boundary — that's where title ends
+  return candidates.length > 0 ? candidates[0] : -1;
+}
+
 async function loadOfficialProgram() {
   const statusEl = document.getElementById("programStatus");
   const controlsEl = document.getElementById("programControls");
@@ -1987,7 +2071,7 @@ async function loadOfficialProgram() {
     const resp = await fetch("./program.json?t=" + Date.now());
     if (!resp.ok) throw new Error("Not found");
     const data = await resp.json();
-    programState.events = data.events || [];
+    programState.events = (data.events || []).map(normalizeEvent);
     programState.scrapedAt = data.scraped_at;
 
     if (programState.events.length === 0) {
