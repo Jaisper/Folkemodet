@@ -1,0 +1,42 @@
+name: Scrape Folkemødet Program
+
+on:
+  schedule:
+    # Daily at 06:00 UTC = 08:00 CEST
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # Manual trigger from Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install playwright@1.49.0
+          npx playwright install chromium --with-deps
+
+      - name: Run scraper
+        run: node scripts/scrape.mjs
+
+      - name: Commit program.json if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add program.json
+          if git diff --staged --quiet; then
+            echo "No changes to program"
+          else
+            EVENTS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('program.json')).events.length)")
+            git commit -m "Update program.json (${EVENTS} events)"
+            git push
+          fi
