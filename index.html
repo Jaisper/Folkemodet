@@ -158,6 +158,40 @@
     border-color: var(--orange);
     background: white;
   }
+  /* Custom masking — looks like password field but isn't,
+     so browsers don't trigger their password manager. */
+  .api-key-input {
+    -webkit-text-security: disc;
+    text-security: disc;
+    font-family: 'Source Sans 3', monospace;
+    letter-spacing: 0.1em;
+  }
+  .api-key-input.revealed {
+    -webkit-text-security: none;
+    text-security: none;
+    letter-spacing: normal;
+  }
+  .key-reveal-btn {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: all .12s ease;
+    flex-shrink: 0;
+  }
+  .key-reveal-btn:hover {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--orange);
+  }
+  .key-reveal-btn.active {
+    background: var(--orange-pale);
+    color: var(--ink);
+    border-color: var(--orange);
+  }
   .key-status {
     font-size: 12px;
     color: var(--ink-muted);
@@ -1203,7 +1237,21 @@
     <div class="panel-title">Groq API-nøgle</div>
     <div class="panel-help">Nøglen gemmes lokalt i din browser (localStorage) og sendes kun direkte til Groq. Hentes gratis på <a href="https://console.groq.com" target="_blank" style="color:var(--orange)">console.groq.com</a>.</div>
     <div class="key-row">
-      <input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <input
+        type="text"
+        id="apiKey"
+        placeholder="gsk_..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        data-form-type="other"
+        data-lpignore="true"
+        data-1p-ignore="true"
+        aria-label="Groq API-nøgle"
+        name="groq-api-token-x9z2"
+        class="api-key-input">
+      <button type="button" class="key-reveal-btn" id="revealKey" title="Vis/skjul">👁</button>
       <button class="generate-btn" id="saveKey" style="background:var(--ink)">Gem</button>
     </div>
     <div class="key-status" id="keyStatus"></div>
@@ -1597,6 +1645,17 @@ function init() {
   // Listeners
   saveKeyBtn.addEventListener("click", saveKey);
   apiKeyEl.addEventListener("keydown", (e) => { if (e.key === "Enter") saveKey(); });
+
+  // Reveal/hide API key
+  const revealBtn = document.getElementById("revealKey");
+  if (revealBtn) {
+    revealBtn.addEventListener("click", () => {
+      apiKeyEl.classList.toggle("revealed");
+      revealBtn.classList.toggle("active");
+      revealBtn.textContent = apiKeyEl.classList.contains("revealed") ? "🙈" : "👁";
+    });
+  }
+
   favoritesEl.addEventListener("input", updateCounter);
   generateBtn.addEventListener("click", generate);
 
