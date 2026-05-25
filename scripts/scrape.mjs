@@ -65,43 +65,92 @@ async function scrape() {
       const events = await page.evaluate(() => {
         const out = [];
         const links = document.querySelectorAll('a[href*="/events/2026/"]');
+
+        // Helper: get text from first matching child
+        const getText = (root, selectors) => {
+          for (const sel of selectors) {
+            const el = root.querySelector(sel);
+            if (el && el.textContent && el.textContent.trim()) {
+              return el.textContent.trim();
+            }
+          }
+          return '';
+        };
+
+        // Helper: slug → readable Danish (last-resort fallback only)
+        const slugToTitle = (slug) => {
+          if (!slug) return '';
+          let s = slug
+            .replace(/-/g, ' ')
+            .replace(/\baa\b/gi, 'å')
+            .replace(/\bae\b/gi, 'æ')
+            .replace(/\boe\b/gi, 'ø');
+          // Sentence-case: only first letter capitalized
+          return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+        };
+
         links.forEach(link => {
           const href = link.getAttribute('href') || '';
           const idMatch = href.match(/\/events\/2026\/(\d+)\//);
           if (!idMatch) return;
           const id = idMatch[1];
 
-          // Walk children to extract structured fields. The layout text starts with KL.HH:MM-HH:MM
-          const text = link.textContent || '';
-          const timeMatch = text.match(/^KL\.(\d{2}:\d{2})-(\d{2}:\d{2})(.*)$/s);
-          if (!timeMatch) return;
-          const [, start, end, rest] = timeMatch;
+          // STRATEGY 1: Extract title from heading elements (h1-h4) inside the card
+          // This preserves the original Danish capitalization as authored on the site.
+          let title = getText(link, ['h2', 'h3', 'h4', 'h5', 'h1',
+            '[class*="title" i]', '[class*="heading" i]', '[class*="name" i]']);
 
-          // The rest is: <title><description>Arrangører<orgs><venue>
-          // Title and description are concatenated; we recover title from URL slug
-          const slugMatch = href.match(/\/events\/2026\/\d+\/(.+)$/);
-          let title = '';
-          if (slugMatch) {
-            title = slugMatch[1]
-              .replace(/-/g, ' ')
-              .replace(/aa/g, 'å').replace(/ae/g, 'æ').replace(/oe/g, 'ø')
-              .replace(/\b\w/g, c => c.toUpperCase());
-            // Restore lowercase for connectors
-            title = title.replace(/\b(Og|I|På|Til|Med|Af|For|En|Et|Den|Det|De|Som|Når|Hvor|Hvad|Du|Vi|Er|Skal|Kan|Ikke)\b/g,
-              w => w.toLowerCase());
-            // Always capitalize first letter
-            title = title.charAt(0).toUpperCase() + title.slice(1);
+          // Get the time which usually sits in a distinct element
+          let time = '';
+          const text = link.textContent || '';
+          const timeMatch = text.match(/KL\.?\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/i);
+          if (timeMatch) {
+            time = `${timeMatch[1].replace('.', ':')}-${timeMatch[2].replace('.', ':')}`;
           }
 
-          // Try to split "rest" into title/desc + organizers + venue
-          // The text "Arrangører" separates the two halves
-          const arrIdx = rest.indexOf('Arrangører');
-          let summary = rest;
+          // STRATEGY 2: If no heading found, parse the textContent layout
+          // Layout: "KL.HH:MM-HH:MM<title><description>Arrangører<orgs><venue>"
+          if (!title) {
+            const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}(.*)$/is);
+            const rest = restMatch ? restMatch[1] : text;
+            const arrIdx = rest.indexOf('Arrangører');
+            const beforeArr = arrIdx !== -1 ? rest.substring(0, arrIdx) : rest;
+            // First sentence (up to first . ? !) is usually the title
+            const firstSentence = beforeArr.match(/^(.+?[.?!])\s/);
+            if (firstSentence) {
+              title = firstSentence[1].trim();
+            } else if (beforeArr.length < 200) {
+              title = beforeArr.trim();
+            }
+          }
+
+          // STRATEGY 3: Last resort — reconstruct from URL slug
+          if (!title) {
+            const slugMatch = href.match(/\/events\/2026\/\d+\/(.+?)\/?$/);
+            if (slugMatch) title = slugToTitle(slugMatch[1]);
+          }
+
+          // Clean up title
+          title = title.replace(/\s+/g, ' ').trim();
+          if (title.length > 300) title = title.slice(0, 300) + '…';
+
+          // Now split out summary, organizers, venue from the rest of the text
+          const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}(.*)$/is);
+          const rest = restMatch ? restMatch[1] : '';
+
+          // Remove the title prefix from rest to get the description portion
+          let afterTitle = rest;
+          if (title && rest.startsWith(title)) {
+            afterTitle = rest.substring(title.length);
+          }
+
+          const arrIdx = afterTitle.indexOf('Arrangører');
+          let summary = '';
           let organizers = '';
           let venue = '';
           if (arrIdx !== -1) {
-            summary = rest.substring(0, arrIdx).trim();
-            const after = rest.substring(arrIdx + 'Arrangører'.length).trim();
+            summary = afterTitle.substring(0, arrIdx).trim();
+            const after = afterTitle.substring(arrIdx + 'Arrangører'.length).trim();
             // Venue pattern at end: <code> - <name>, where code is e.g. "B4", "G12", "J27"
             const venueMatch = after.match(/([A-ZÆØÅ]\d{1,3}\s*-\s*.+)$/);
             if (venueMatch) {
@@ -110,13 +159,18 @@ async function scrape() {
             } else {
               organizers = after;
             }
+          } else {
+            summary = afterTitle.trim();
           }
+
+          // Clean summary
+          if (summary.length > 400) summary = summary.slice(0, 400) + '…';
 
           out.push({
             id,
             title,
             summary,
-            time: `${start}-${end}`,
+            time,
             organizers,
             venue,
             url: href.startsWith('http') ? href : `https://program.folkemoedet.dk${href}`
