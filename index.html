@@ -221,7 +221,7 @@
     font-weight: 600;
   }
 
-  /* FAVORITES  */
+  /* FAVORITES */
   textarea {
     width: 100%;
     min-height: 80px;
@@ -712,7 +712,6 @@
     gap: 12px;
     padding: 10px 12px;
     border-bottom: 1px solid var(--line-soft);
-    text-decoration: none;
     color: inherit;
     transition: background .12s ease;
   }
@@ -728,12 +727,38 @@
     padding-top: 1px;
   }
   .pg-body { flex: 1; min-width: 0; }
+  .pg-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
   .pg-title {
     font-size: 14px;
     font-weight: 600;
     color: var(--ink);
     line-height: 1.3;
-    margin-bottom: 2px;
+    text-decoration: none;
+    flex: 1;
+  }
+  .pg-title:hover {
+    color: var(--orange);
+    text-decoration: underline;
+  }
+  .pg-map-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .pg-map-btn:hover {
+    background: var(--orange-pale);
+    border-color: var(--orange);
   }
   .pg-summary {
     font-size: 12px;
@@ -1122,54 +1147,47 @@ const ISO_DAY = {
   "2026-06-13": "Lørdag"
 };
 
-// Allinge center / harbor — used as fallback when venue coord unknown
+// Allinge center / harbor — used as fallback when venue zone unknown
 const ALLINGE_DEFAULT = [55.27620, 14.80470];
 
-// Approximate venue coordinates in Allinge.
-// These follow Folkemødet's recurring layout but are NOT official —
-// always verify on folkemoedet.dk's official venue map.
-const VENUE_COORDS = {
-  "cirkuspladsen": [55.27628, 14.80483],
-  "folkemødeteltet": [55.27660, 14.80520],
-  "folkemodeteltet": [55.27660, 14.80520],
-  "danmarks-scenen": [55.27590, 14.80410],
-  "danmarks scenen": [55.27590, 14.80410],
-  "hovedscenen": [55.27640, 14.80460],
-  "havn": [55.27720, 14.80560],
-  "kæmpestranden": [55.27480, 14.80450],
-  "kaempestranden": [55.27480, 14.80450],
-  "damgårdshave": [55.27550, 14.80250],
-  "damgaardshave": [55.27550, 14.80250],
-  "bagergade": [55.27680, 14.80440],
-  "kirkepladsen": [55.27710, 14.80390],
-  // Party tent fallbacks (typically clustered around Cirkuspladsen)
-  "socialdemokratiet": [55.27600, 14.80460],
-  "venstre": [55.27600, 14.80520],
-  "konservativ": [55.27620, 14.80520],
-  "konservative": [55.27620, 14.80520],
-  "sf": [55.27580, 14.80480],
-  "enhedslisten": [55.27580, 14.80520],
-  "radikale": [55.27620, 14.80460],
-  "liberal alliance": [55.27600, 14.80550],
-  "moderaterne": [55.27600, 14.80440],
-  "dansk folkeparti": [55.27620, 14.80540],
-  // Common organisation tents
-  "di ": [55.27640, 14.80500],
-  "dansk industri": [55.27640, 14.80500],
-  "fh ": [55.27660, 14.80480],
-  "lo ": [55.27660, 14.80480],
-  "dr ": [55.27650, 14.80410],
-  "mandag morgen": [55.27620, 14.80500],
-  "altinget": [55.27600, 14.80420]
+// Venue zones in Allinge — based on Folkemødet's letter-coded grid system.
+// First letter of venue code (e.g. "B4", "G11", "J27") indicates area.
+// Coordinates are approximate centroids; the precise spot inside each zone
+// can vary year to year. Always verify on the official festival map.
+const VENUE_ZONES = {
+  "A": { coords: [55.27595, 14.80420], name: "Cirkuspladsen syd / Ungdomsområdet" },
+  "B": { coords: [55.27630, 14.80380], name: "Cirkuspladsen vest / Tech & EU" },
+  "C": { coords: [55.27675, 14.80395], name: "Cirkuspladsen nord / Verdensmål & Norden" },
+  "F": { coords: [55.27640, 14.80490], name: "Centrum / DI Hjørnet" },
+  "G": { coords: [55.27680, 14.80540], name: "Havn nord / Erhvervsområdet" },
+  "H": { coords: [55.27620, 14.80595], name: "Vandkantsscenen / Havn syd" },
+  "J": { coords: [55.27500, 14.80470], name: "Kæmpestranden" },
+  "K": { coords: [55.27710, 14.80400], name: "Allinge by / Kirkepladsen" },
+  "N": { coords: [55.27735, 14.80375], name: "Bymidten / Kræftens Bekæmpelse" },
+  "M": { coords: [55.27710, 14.80450], name: "Havnetorvet" },
+  "L": { coords: [55.27490, 14.80330], name: "Damgårdshave" }
 };
 
+function parseVenueCode(venue) {
+  if (!venue) return null;
+  // Match patterns like "B4 - Europa-Kommissionen" or "G11" or "J27 -"
+  const m = String(venue).match(/^([A-ZÆØÅ])(\d{1,3})\b/);
+  if (!m) return null;
+  return { letter: m[1], number: parseInt(m[2], 10), code: m[1] + m[2] };
+}
+
 function findVenueCoords(venue) {
-  if (!venue) return { coords: ALLINGE_DEFAULT, exact: false };
-  const v = (" " + venue.toLowerCase() + " ");
-  for (const [key, coords] of Object.entries(VENUE_COORDS)) {
-    if (v.includes(key)) return { coords, exact: true };
+  const parsed = parseVenueCode(venue);
+  if (parsed && VENUE_ZONES[parsed.letter]) {
+    const zone = VENUE_ZONES[parsed.letter];
+    return {
+      coords: zone.coords,
+      exact: true,
+      zoneName: zone.name,
+      code: parsed.code
+    };
   }
-  return { coords: ALLINGE_DEFAULT, exact: false };
+  return { coords: ALLINGE_DEFAULT, exact: false, zoneName: "Allinge centrum", code: null };
 }
 
 function buildSearchLink(title, organizer) {
@@ -1214,16 +1232,18 @@ const mapFooterEl = $("#mapFooter");
 let leafletMap = null;
 
 function openVenueMap(venue, eventTitle) {
-  const { coords, exact } = findVenueCoords(venue);
+  const { coords, exact, zoneName, code } = findVenueCoords(venue);
 
   mapTitleEl.textContent = venue || "Lokation";
   mapSubEl.textContent = eventTitle || "";
 
+  const officialMapLink = `<a href="https://folkemoedet.dk/praktisk/kort-over-folkemodet/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:600">Officielt kort ↗</a>`;
+
   if (exact) {
-    mapFooterEl.textContent = "Omtrentlig placering i Allinge — verificer på officielt kort på folkemoedet.dk";
+    mapFooterEl.innerHTML = `<b>${esc(code)}</b> · ${esc(zoneName)} — omtrentlig zoneplacering. For præcis stade-position, se ${officialMapLink}`;
     mapFooterEl.className = "modal-footer";
   } else {
-    mapFooterEl.textContent = "⚠ Eksakt placering ukendt — viser Allinge centrum. Tjek folkemoedet.dk for officielt venue-kort.";
+    mapFooterEl.innerHTML = `⚠ Venue-kode ikke genkendt — viser Allinge centrum. Tjek ${officialMapLink} for stadenummer.`;
     mapFooterEl.className = "modal-footer warn";
   }
 
@@ -1343,91 +1363,107 @@ function updateCounter() {
 // ============================================================
 // PROMPTS
 // ============================================================
+function buildEventCatalog(maxChars = 60000) {
+  // Build a compact text catalog of all real events the AI can choose from.
+  // Format: "ID|day|time|venue|organizer|title|summary"
+  if (!programState.events || programState.events.length === 0) return null;
+
+  const lines = ["ID|DAY|TIME|VENUE|ORGANIZER|TITLE|SUMMARY"];
+  let chars = lines[0].length;
+
+  for (const e of programState.events) {
+    const line = [
+      e.id,
+      e.day || "",
+      e.time || "",
+      (e.venue || "").replace(/\|/g, "/"),
+      (e.organizers || "").replace(/\|/g, "/").slice(0, 80),
+      (e.title || "").replace(/\|/g, "/").slice(0, 120),
+      (e.summary || "").replace(/\|/g, "/").slice(0, 140)
+    ].join("|");
+    if (chars + line.length + 1 > maxChars) {
+      lines.push(`[... ${programState.events.length - (lines.length - 1)} flere events trunkeret pga. context window]`);
+      break;
+    }
+    lines.push(line);
+    chars += line.length + 1;
+  }
+  return lines.join("\n");
+}
+
 function buildFullPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "(ingen valgt)";
   const favStr = favorites.trim() || "(ingen)";
+  const catalog = buildEventCatalog();
 
-  return `Du er ekspert i Folkemødet på Bornholm — Danmarks årlige demokratifestival i Allinge, der i 2026 afholdes 11.–13. juni (torsdag–lørdag, 3 dage).
+  // If we have the real program, do retrieval/ranking. If not, fall back to old "speculate" mode.
+  if (catalog) {
+    return `Du er ekspert i Folkemødet på Bornholm 2026 (11.–13. juni, Allinge).
 
-Folkemødet har hvert år 3.000+ events fordelt på telte (partitelte, organisationer, fagforeninger, virksomheder, ministerier, NGO'er, medier) i Allinge havn og byen. Typiske formater: paneldebatter, talks, samtaler, workshops, præsentationer, kunst, samtalesaloner.
+Brugeren har valgt:
+- Temaer: ${themesStr}
+- Personlige interesser: ${favStr}
+
+OPGAVE: Vælg de mest relevante events fra det officielle program nedenfor. Brug KUN events fra listen — opfind ALDRIG nye. Vælg op til 10 events pr. dag (max 30 total), kronologisk uden tidsoverlap (sluttid event N ≤ starttid event N+1, gerne 15 min buffer).
+
+REGLER:
+1. Returner KUN event-IDs fra katalogen. Aldrig opfundne events.
+2. Inden for samme dag: kronologisk, ingen overlap.
+3. Prioriter events der matcher temaer + personlige interesser.
+4. why_match: konkret reference til brugerens valg, 1-2 sætninger på dansk.
+5. Hvis et tema ikke har gode matches en given dag, vælg færre events den dag — kvalitet over kvantitet.
+
+OFFICIELT PROGRAM (pipe-separeret):
+${catalog}
+
+OUTPUT — KUN gyldig JSON:
+{
+  "selections": [
+    { "id": "31784", "why_match": "Kort dansk forklaring på match" },
+    ...
+  ]
+}
+
+Returner KUN JSON. Ingen markdown, ingen forklaring uden for JSON.`;
+  }
+
+  // Fallback: original "speculate" prompt for when program.json isn't available yet
+  return `Du er ekspert i Folkemødet på Bornholm 2026 (11.–13. juni, Allinge).
 
 BRUGEREN HAR VALGT:
 - Temaer: ${themesStr}
 - Personlige interesser: ${favStr}
 
-OPGAVE: Lav et komplet dagsprogram med PRÆCIS 10 events PER DAG på alle 3 dage (30 events i alt), kuraterede efter brugerens valg.
+Det officielle program er ikke tilgængeligt endnu. Foreslå plausible events baseret på tilbagevendende arrangører.
 
-═══════════════════════════════════════════════════════
-KRITISK — INGEN TIDSOVERLAP PR. DAG:
-═══════════════════════════════════════════════════════
-Brugeren skal kunne gå fra det ene event direkte til det næste.
-- Inden for samme dag MÅ events IKKE overlappe i tid.
-- Sluttiden på event N skal være ≤ starttiden på event N+1 (minimum 15 min mellem hvis muligt for gå-tid mellem telte).
-- Sortér events kronologisk inden for hver dag.
-- Realistiske tidsspand: Folkemødet kører typisk 09:00–22:00, med events à 30–90 min.
+Lav 10 events pr. dag (30 total), kronologisk uden tidsoverlap. Marker hvert event med confidence: "likely" eller "speculative".
 
-DAGENES KARAKTER:
-- Torsdag (11/6): Åbningsdag. 09:00–22:00.
-- Fredag (12/6): Fuld debatdag, 09:00–22:00.
-- Lørdag (13/6): Afslutningsdag, 09:00–18:00 (festen slutter typisk her).
-
-═══════════════════════════════════════════════════════
-ANTI-HALLUCINATION:
-═══════════════════════════════════════════════════════
-Du har sandsynligvis IKKE adgang til det fulde 2026-program. For HVERT event angiv confidence-niveau:
-• "confirmed" — Bekræftet i officielle 2026-kilder du har set
-• "likely" — Sandsynligt: arrangører der ALTID er der med faste formater (Mandag Morgen, DI/FH/LO, partidebatter, lørdagens politiske ledere-debat) eller årligt tilbagevendende events
-• "speculative" — Plausibelt koncept baseret på temaer og kendte arrangører, IKKE bekræftet
-
-REGLER:
-1. Opfind ALDRIG specifikke titler/talere/tidspunkter som "confirmed" uden faktisk kildegrundlag.
-2. For "likely": brug realistiske mønstre (etablerede arrangører, typiske emner).
-3. For "speculative": marker ærligt, angiv plausible arrangører (større danske organisationer, partier, NGO'er).
-4. Brug realistiske Allinge-lokationer: Cirkuspladsen, Folkemødeteltet, Danmarks-scenen, Hovedscenen, partitelte (Socialdemokratiet/Venstre/Konservative/SF/Enhedslisten/Radikale/Liberal Alliance/Moderaterne/DF), organisationstelte (DI, Dansk Erhverv, FH, Akademikerne, DA), medietelte (DR, Berlingske, Politiken, Mandag Morgen, Altinget).
-5. why_match: konkret og personligt — referer til brugerens valg.
-
-═══════════════════════════════════════════════════════
-OUTPUT — KUN gyldig JSON, intet andet:
-═══════════════════════════════════════════════════════
-{
-  "events": [
-    {
-      "title": "Event-titel på dansk",
-      "organizer": "Arrangørens navn",
-      "day": "Torsdag" | "Fredag" | "Lørdag",
-      "time": "HH:MM–HH:MM",
-      "venue": "Telt/scene/lokation i Allinge",
-      "themes": ["valgt tema", "..."],
-      "speakers": ["Navn Navnesen (titel)", "..."],
-      "why_match": "1-2 sætninger på dansk om hvorfor netop dette event matcher brugerens valg",
-      "confidence": "confirmed" | "likely" | "speculative"
-    }
-  ]
-}
-
-Total: 30 events (10 pr. dag × 3 dage). Inden for hver dag: kronologisk og uden tidsoverlap. Returner KUN JSON, ingen markdown eller kommentarer.`;
+OUTPUT — KUN gyldig JSON:
+{"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
 }
 
 function buildCompactPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "ingen";
   const favStr = favorites.trim() || "ingen";
+  const catalog = buildEventCatalog(40000); // smaller for 8B
 
-  return `Folkemødet 2026 (Allinge, Bornholm, 11.-13. juni, tor-lør, 3 dage).
-Lav PRÆCIS 10 events pr. dag (30 i alt), kronologisk, UDEN tidsoverlap inden for samme dag (sluttid event N ≤ starttid event N+1).
-Torsdag-fredag: 09:00-22:00. Lørdag: 09:00-18:00.
-
+  if (catalog) {
+    return `Folkemødet 2026. Vælg op til 30 events fra programmet der matcher:
 Temaer: ${themesStr}
 Interesser: ${favStr}
 
-For HVERT event angiv confidence:
-- "confirmed": bekræftet i 2026-program
-- "likely": fast/tilbagevendende arrangør & format
-- "speculative": plausibelt koncept
+Regler: kun ID'er fra listen, ingen tidsoverlap pr. dag, kronologisk.
 
-Opfind ALDRIG som "confirmed". Brug realistiske danske arrangører (partier, DI, FH, DR, Mandag Morgen, NGO'er) og Allinge-lokationer.
+PROGRAM:
+${catalog}
 
-KUN JSON, 30 events total:
-{"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"confirmed|likely|speculative"}]}`;
+KUN JSON: {"selections":[{"id":"","why_match":""}]}`;
+  }
+
+  return `Folkemødet 2026, 10 events/dag x 3 dage, kronologisk, ingen overlap.
+Temaer: ${themesStr}
+Interesser: ${favStr}
+KUN JSON: {"events":[{"title":"","organizer":"","day":"","time":"","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
 }
 
 // ============================================================
@@ -1518,53 +1554,81 @@ function parseEvents(content) {
   clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
 
   // Try direct parse first
+  let obj = null;
   try {
-    const obj = JSON.parse(clean);
-    if (!obj.events || !Array.isArray(obj.events)) {
-      throw new Error("JSON mangler 'events' array");
-    }
-    return obj.events.slice(0, 40);
+    obj = JSON.parse(clean);
   } catch (e) {
-    // Recovery: try extracting events array by finding the first { and balancing
-    // For truncated responses, try to find the last complete event object
-    const eventsMatch = clean.match(/"events"\s*:\s*\[([\s\S]*?)$/);
-    if (!eventsMatch) throw new Error("Kunne ikke finde 'events' array i svaret");
+    // Recovery attempt below
+  }
 
-    // Find complete event objects (balanced braces)
-    const arrayBody = eventsMatch[1];
-    const events = [];
-    let depth = 0;
-    let start = -1;
-    let inString = false;
-    let escape = false;
+  // Mode 1: selections — AI picked from real program
+  if (obj && Array.isArray(obj.selections)) {
+    return hydrateSelections(obj.selections);
+  }
 
-    for (let i = 0; i < arrayBody.length; i++) {
-      const c = arrayBody[i];
-      if (escape) { escape = false; continue; }
-      if (c === "\\") { escape = true; continue; }
-      if (c === '"') { inString = !inString; continue; }
-      if (inString) continue;
+  // Mode 2: events — AI fabricated events (fallback mode)
+  if (obj && Array.isArray(obj.events)) {
+    return obj.events.slice(0, 40);
+  }
 
-      if (c === "{") {
-        if (depth === 0) start = i;
-        depth++;
-      } else if (c === "}") {
-        depth--;
-        if (depth === 0 && start !== -1) {
-          const objStr = arrayBody.slice(start, i + 1);
-          try {
-            events.push(JSON.parse(objStr));
-          } catch {}
-          start = -1;
-        }
+  // Recovery: balanced-brace extraction for truncated JSON
+  const selMatch = clean.match(/"selections"\s*:\s*\[([\s\S]*?)$/);
+  const evMatch = clean.match(/"events"\s*:\s*\[([\s\S]*?)$/);
+  const match = selMatch || evMatch;
+  if (!match) throw new Error("Kunne ikke finde 'selections' eller 'events' i svaret");
+
+  const arrayBody = match[1];
+  const items = [];
+  let depth = 0, start = -1, inString = false, escape = false;
+  for (let i = 0; i < arrayBody.length; i++) {
+    const c = arrayBody[i];
+    if (escape) { escape = false; continue; }
+    if (c === "\\") { escape = true; continue; }
+    if (c === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (c === "{") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (c === "}") {
+      depth--;
+      if (depth === 0 && start !== -1) {
+        try { items.push(JSON.parse(arrayBody.slice(start, i + 1))); } catch {}
+        start = -1;
       }
     }
-
-    if (events.length === 0) {
-      throw new Error("Kunne ikke udtrække events fra svaret");
-    }
-    return events.slice(0, 40);
   }
+  if (items.length === 0) throw new Error("Kunne ikke udtrække events fra svaret");
+
+  // Are these selections or events?
+  if (selMatch) return hydrateSelections(items);
+  return items.slice(0, 40);
+}
+
+// Convert AI selections (just IDs + why_match) into full event objects
+// by looking up the real data from programState.events
+function hydrateSelections(selections) {
+  const byId = new Map(programState.events.map(e => [e.id, e]));
+  const out = [];
+  for (const sel of selections) {
+    const id = String(sel.id || "").trim();
+    const real = byId.get(id);
+    if (!real) continue; // AI returned ID that doesn't exist — skip
+    out.push({
+      id: real.id,
+      title: real.title,
+      organizer: real.organizers,
+      day: real.day,
+      time: real.time,
+      venue: real.venue,
+      url: real.url,
+      summary: real.summary,
+      themes: [],
+      speakers: [],
+      why_match: sel.why_match || "",
+      confidence: "confirmed" // From real program = always confirmed
+    });
+  }
+  return out.slice(0, 40);
 }
 
 // ============================================================
@@ -1587,6 +1651,13 @@ async function generate() {
   generateBtn.disabled = true;
   generateBtn.innerHTML = '<span class="spinner"></span>Søger…';
   resultsEl.innerHTML = "";
+
+  const usingRealData = programState.events && programState.events.length > 0;
+  if (usingRealData) {
+    showStatus(`Vælger fra ${programState.events.length} officielle events…`);
+  } else {
+    showStatus(`Program ikke tilgængeligt — AI'en gætter ud fra typiske arrangører…`);
+  }
 
   // Pick prompt based on model TPM
   const promptBuilder = LOW_TPM_MODELS.has(selectedModel) ? buildCompactPrompt : buildFullPrompt;
@@ -1707,7 +1778,8 @@ function renderRanked(events) {
     const conf = (ev.confidence || "speculative").toLowerCase();
     const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
     const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
-    const searchUrl = buildSearchLink(ev.title, ev.organizer);
+    const searchUrl = ev.url || buildSearchLink(ev.title, ev.organizer);
+    const linkText = ev.url ? "Se på folkemoedet.dk" : "Søg event";
     const venueAttr = esc(ev.venue || "");
     const titleAttr = esc(ev.title || "");
 
@@ -1735,7 +1807,7 @@ function renderRanked(events) {
         ${ev.why_match ? `<div class="why-match">${esc(ev.why_match)}</div>` : ""}
 
         <div class="event-actions">
-          <a class="action-link" href="${searchUrl}" target="_blank" rel="noopener"><span class="ico">🔗</span>Søg event</a>
+          <a class="action-link" href="${searchUrl}" target="_blank" rel="noopener"><span class="ico">🔗</span>${linkText}</a>
           <button class="action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button"><span class="ico">📍</span>Vis på kort</button>
         </div>
       </div>
@@ -1800,7 +1872,8 @@ function renderTimeline(events) {
     const items = byDay[day].map(({ ev, rank }) => {
       const conf = (ev.confidence || "speculative").toLowerCase();
       const overlap = overlapSet.has(rank);
-      const searchUrl = buildSearchLink(ev.title, ev.organizer);
+      const searchUrl = ev.url || buildSearchLink(ev.title, ev.organizer);
+      const linkLabel = ev.url ? "🔗 Åbn" : "🔗 Søg";
       const venueAttr = esc(ev.venue || "");
       const titleAttr = esc(ev.title || "");
       return `
@@ -1813,7 +1886,7 @@ function renderTimeline(events) {
             </div>
             <div class="tl-venue"><span class="venue-dot">◆</span>${esc(ev.venue || "?")} <span class="tl-org">· ${esc(ev.organizer || "")}</span></div>
             <div class="tl-actions">
-              <a class="tl-action" href="${searchUrl}" target="_blank" rel="noopener">🔗 Søg</a>
+              <a class="tl-action" href="${searchUrl}" target="_blank" rel="noopener">${linkLabel}</a>
               <button class="tl-action" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Kort</button>
             </div>
           </div>
@@ -1983,23 +2056,40 @@ function renderProgram() {
   const html = days.map(d => {
     const events = byDay[d];
     const date = DAY_DATES[d] || "";
-    const rows = events.map(e => `
-      <a class="pg-event" href="${esc(e.url || "#")}" target="_blank" rel="noopener">
+    const rows = events.map(e => {
+      const venueAttr = esc(e.venue || "");
+      const titleAttr = esc(e.title || "");
+      return `
+      <div class="pg-event">
         <div class="pg-time">${esc(e.time || "?")}</div>
         <div class="pg-body">
-          <div class="pg-title">${esc(e.title || "")}</div>
+          <div class="pg-title-row">
+            <a class="pg-title" href="${esc(e.url || "#")}" target="_blank" rel="noopener">${esc(e.title || "")}</a>
+            <button class="pg-map-btn" data-venue="${venueAttr}" data-title="${titleAttr}" type="button" title="Vis på kort">📍</button>
+          </div>
           ${e.summary ? `<div class="pg-summary">${esc(e.summary)}</div>` : ""}
           <div class="pg-meta">
             <span class="pg-venue">◆ ${esc(e.venue || "?")}</span>
             ${e.organizers ? `<span>${esc(e.organizers)}</span>` : ""}
           </div>
         </div>
-      </a>
-    `).join("");
+      </div>
+    `;
+    }).join("");
     return `<div class="pg-day-header">${esc(d)} ${esc(date)} · ${events.length}</div>${rows}`;
   }).join("");
 
   out.innerHTML = html;
+
+  // Attach map button handlers
+  out.querySelectorAll(".pg-map-btn").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openVenueMap(btn.getAttribute("data-venue"), btn.getAttribute("data-title"));
+    });
+  });
+
   loadBtn.style.display = visible < total ? "block" : "none";
 }
 
