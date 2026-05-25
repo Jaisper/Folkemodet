@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
   :root {
     --orange: #E87722;
@@ -925,8 +923,61 @@
   .modal-close:hover { background: rgba(255,255,255,.15); }
   #mapContainer {
     width: 100%;
-    height: 420px;
+    min-height: 280px;
     background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .venue-info {
+    text-align: center;
+    padding: 28px 24px;
+    max-width: 420px;
+  }
+  .venue-info-icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .venue-info-text {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .venue-info-text b {
+    color: var(--orange);
+  }
+  .venue-info-btn {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background .15s ease;
+  }
+  .venue-info-btn:hover {
+    background: var(--red-dark);
+  }
+  .venue-info-tip {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+  .venue-info-tip b {
+    color: var(--ink);
+    background: var(--orange-pale);
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.04em;
   }
   .modal-footer {
     padding: 10px 18px;
@@ -938,52 +989,6 @@
   .modal-footer.warn {
     background: #FBF1D9;
     color: #7A5410;
-  }
-
-  /* BLINKING DOT */
-  .blink-dot-wrap {
-    position: relative;
-    width: 22px;
-    height: 22px;
-  }
-  .blink-dot {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 18px;
-    height: 18px;
-    background: var(--red);
-    border: 3px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 2px 6px rgba(0,0,0,.3);
-    z-index: 2;
-  }
-  .blink-dot::before {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 14px;
-    height: 14px;
-    background: var(--red);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: blinkPulse 1.4s ease-out infinite;
-    z-index: 1;
-  }
-  @keyframes blinkPulse {
-    0% {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 0.8;
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(4);
-      opacity: 0;
-    }
-  }
-  /* Override Leaflet's default marker shadow */
-  .blink-marker {
-    background: transparent !important;
-    border: none !important;
   }
 
   /* FOOTER */
@@ -1229,61 +1234,43 @@ const mapFooterEl = $("#mapFooter");
 // ============================================================
 // MAP MODAL
 // ============================================================
-let leafletMap = null;
 
 function openVenueMap(venue, eventTitle) {
-  const { coords, exact, zoneName, code } = findVenueCoords(venue);
+  const parsed = parseVenueCode(venue);
+  const officialMapUrl = "https://folkemoedet.dk/praktisk/kort-over-folkemodet/";
 
+  // Show a small popup with venue info + button to open official map
   mapTitleEl.textContent = venue || "Lokation";
   mapSubEl.textContent = eventTitle || "";
 
-  const officialMapLink = `<a href="https://folkemoedet.dk/praktisk/kort-over-folkemodet/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:600">Officielt kort ↗</a>`;
-
-  if (exact) {
-    mapFooterEl.innerHTML = `<b>${esc(code)}</b> · ${esc(zoneName)} — omtrentlig zoneplacering. For præcis stade-position, se ${officialMapLink}`;
-    mapFooterEl.className = "modal-footer";
+  let zoneInfo = "";
+  if (parsed && VENUE_ZONES[parsed.letter]) {
+    zoneInfo = `<b>${esc(parsed.code)}</b> ligger i området <b>${esc(VENUE_ZONES[parsed.letter].name)}</b>.`;
   } else {
-    mapFooterEl.innerHTML = `⚠ Venue-kode ikke genkendt — viser Allinge centrum. Tjek ${officialMapLink} for stadenummer.`;
-    mapFooterEl.className = "modal-footer warn";
+    zoneInfo = `Venue-kode ikke genkendt.`;
   }
 
+  // Replace map container with simple info content + big button
+  const container = document.getElementById("mapContainer");
+  container.innerHTML = `
+    <div class="venue-info">
+      <div class="venue-info-icon">📍</div>
+      <div class="venue-info-text">
+        ${zoneInfo}
+      </div>
+      <a class="venue-info-btn" href="${officialMapUrl}" target="_blank" rel="noopener">
+        Åbn officielt kort på folkemoedet.dk ↗
+      </a>
+      <div class="venue-info-tip">
+        Søg efter <b>${esc(parsed ? parsed.code : (venue || ""))}</b> på kortet for præcis placering.
+      </div>
+    </div>
+  `;
+
+  mapFooterEl.innerHTML = `Folkemødets officielle kort er det mest opdaterede — tilgængeligt som PDF og trykt festivalkort i Allinge.`;
+  mapFooterEl.className = "modal-footer";
+
   mapModalEl.classList.add("show");
-
-  // Init or reuse Leaflet map
-  setTimeout(() => {
-    if (!leafletMap) {
-      leafletMap = L.map("mapContainer", {
-        zoomControl: true,
-        attributionControl: true
-      }).setView(coords, 17);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-      }).addTo(leafletMap);
-    } else {
-      leafletMap.setView(coords, 17);
-      // Remove old markers
-      leafletMap.eachLayer((layer) => {
-        if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
-      });
-      leafletMap.invalidateSize();
-    }
-
-    // Add blinking red dot marker
-    const blinkIcon = L.divIcon({
-      className: "blink-marker",
-      html: '<div class="blink-dot-wrap"><div class="blink-dot"></div></div>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    });
-    L.marker(coords, { icon: blinkIcon })
-      .addTo(leafletMap)
-      .bindPopup(`<b>${esc(venue || "")}</b>${eventTitle ? "<br>" + esc(eventTitle) : ""}`);
-
-    // Re-invalidate after modal animation
-    leafletMap.invalidateSize();
-  }, 50);
 }
 
 function closeMap() {
