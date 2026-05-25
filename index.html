@@ -379,6 +379,24 @@
     color: var(--ink);
     margin-bottom: 4px;
   }
+  .event-title-link {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color .12s ease, color .12s ease;
+  }
+  .event-title-link:hover {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+  .event-summary {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 8px 0 12px 50px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--line-soft);
+  }
   .event-organizer {
     font-size: 13px;
     color: var(--ink-soft);
@@ -609,6 +627,41 @@
     min-width: 0;
     line-height: 1.3;
   }
+  .tl-title-link {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .12s ease, color .12s ease;
+  }
+  .tl-title-link:hover {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+  .tl-summary {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin: 4px 0 0 0;
+  }
+  .tl-why {
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.45;
+    margin: 6px 0 0 0;
+    padding: 6px 10px;
+    background: var(--orange-pale);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 3px 3px 0;
+  }
+  .tl-why::before {
+    content: "Match: ";
+    font-weight: 700;
+    color: var(--red);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
   .tl-venue {
     font-size: 13px;
     color: var(--ink-soft);
@@ -761,14 +814,10 @@
     border-color: var(--orange);
   }
   .pg-summary {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink-soft);
-    line-height: 1.4;
-    margin: 3px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    line-height: 1.45;
+    margin: 4px 0 0 0;
   }
   .pg-meta {
     font-size: 11px;
@@ -2065,21 +2114,25 @@ function renderRanked(events) {
     const conf = (ev.confidence || "speculative").toLowerCase();
     const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
     const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
-    const searchUrl = ev.url || buildSearchLink(ev.title, ev.organizer);
-    const linkText = ev.url ? "Se på folkemoedet.dk" : "Søg event";
+    const officialUrl = ev.url || "";
     const venueAttr = esc(ev.venue || "");
     const titleAttr = esc(ev.title || "");
+    const titleHtml = officialUrl
+      ? `<a class="event-title-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(ev.title || "Untitled")}</a>`
+      : esc(ev.title || "Untitled");
 
     return `
       <div class="event-card ${rankClass}">
         <div class="card-head">
           <div class="rank-num">${String(rank).padStart(2, "0")}</div>
           <div class="card-title-block">
-            <div class="event-title">${esc(ev.title || "Untitled")}</div>
+            <div class="event-title">${titleHtml}</div>
             <div class="event-organizer">${esc(ev.organizer || "Ukendt arrangør")}</div>
           </div>
           <div class="confidence-badge ${conf}">${conf}</div>
         </div>
+
+        ${ev.summary ? `<div class="event-summary">${esc(ev.summary)}</div>` : ""}
 
         <div class="meta-grid">
           <div class="meta-item"><span class="meta-label">Dag</span><span class="meta-value">${esc(ev.day || "?")}</span></div>
@@ -2094,7 +2147,7 @@ function renderRanked(events) {
         ${ev.why_match ? `<div class="why-match">${esc(ev.why_match)}</div>` : ""}
 
         <div class="event-actions">
-          <a class="action-link" href="${searchUrl}" target="_blank" rel="noopener"><span class="ico">🔗</span>${linkText}</a>
+          ${officialUrl ? `<a class="action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener"><span class="ico">🔗</span>Officiel side</a>` : `<a class="action-link" href="${buildSearchLink(ev.title, ev.organizer)}" target="_blank" rel="noopener"><span class="ico">🔗</span>Søg event</a>`}
           <button class="action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button"><span class="ico">📍</span>Vis på kort</button>
         </div>
       </div>
@@ -2159,21 +2212,26 @@ function renderTimeline(events) {
     const items = byDay[day].map(({ ev, rank }) => {
       const conf = (ev.confidence || "speculative").toLowerCase();
       const overlap = overlapSet.has(rank);
-      const searchUrl = ev.url || buildSearchLink(ev.title, ev.organizer);
-      const linkLabel = ev.url ? "🔗 Åbn" : "🔗 Søg";
+      const officialUrl = ev.url || "";
       const venueAttr = esc(ev.venue || "");
       const titleAttr = esc(ev.title || "");
+      // Title links directly to the official event page when we have a real URL
+      const titleHtml = officialUrl
+        ? `<a class="tl-title-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(ev.title || "")}</a>`
+        : esc(ev.title || "");
       return `
         <div class="tl-row${overlap ? " tl-overlap" : ""}">
           <div class="tl-time">${esc(ev.time || "?")}${overlap ? ' <span class="tl-overlap-flag" title="Overlapper foregående event">⚠</span>' : ""}</div>
           <div class="tl-body">
             <div class="tl-title-row">
-              <div class="tl-title"><span class="tl-rank-mini">#${rank}</span>${esc(ev.title || "")}</div>
+              <div class="tl-title"><span class="tl-rank-mini">#${rank}</span>${titleHtml}</div>
               <span class="confidence-badge ${conf}">${conf}</span>
             </div>
+            ${ev.summary ? `<div class="tl-summary">${esc(ev.summary)}</div>` : ""}
+            ${ev.why_match ? `<div class="tl-why">${esc(ev.why_match)}</div>` : ""}
             <div class="tl-venue"><span class="venue-dot">◆</span>${esc(ev.venue || "?")} <span class="tl-org">· ${esc(ev.organizer || "")}</span></div>
             <div class="tl-actions">
-              <a class="tl-action" href="${searchUrl}" target="_blank" rel="noopener">${linkLabel}</a>
+              ${officialUrl ? `<a class="tl-action" href="${esc(officialUrl)}" target="_blank" rel="noopener">🔗 Officiel side</a>` : `<a class="tl-action" href="${buildSearchLink(ev.title, ev.organizer)}" target="_blank" rel="noopener">🔗 Søg event</a>`}
               <button class="tl-action" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Kort</button>
             </div>
           </div>
