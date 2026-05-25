@@ -66,7 +66,7 @@ async function scrape() {
         const out = [];
         const links = document.querySelectorAll('a[href*="/events/2026/"]');
 
-        // Helper: get text from first matching child
+        // Helper: get text from first matching child, with whitespace preserved
         const getText = (root, selectors) => {
           for (const sel of selectors) {
             const el = root.querySelector(sel);
@@ -77,6 +77,31 @@ async function scrape() {
           return '';
         };
 
+        // Walk DOM and insert spaces at block element boundaries
+        const getStructuredText = (root) => {
+          const BLOCK_TAGS = new Set(['DIV', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+            'LI', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'BR', 'TD', 'TR']);
+          const parts = [];
+          const walk = (node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              const t = node.textContent;
+              if (t && t.trim()) parts.push(t);
+              return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const isBlock = BLOCK_TAGS.has(node.tagName);
+            if (isBlock && parts.length && !/\s$/.test(parts[parts.length - 1])) {
+              parts.push(' '); // boundary space
+            }
+            for (const child of node.childNodes) walk(child);
+            if (isBlock && parts.length && !/\s$/.test(parts[parts.length - 1])) {
+              parts.push(' ');
+            }
+          };
+          walk(root);
+          return parts.join('').replace(/\s+/g, ' ').trim();
+        };
+
         // Helper: slug → readable Danish (last-resort fallback only)
         const slugToTitle = (slug) => {
           if (!slug) return '';
@@ -85,7 +110,6 @@ async function scrape() {
             .replace(/\baa\b/gi, 'å')
             .replace(/\bae\b/gi, 'æ')
             .replace(/\boe\b/gi, 'ø');
-          // Sentence-case: only first letter capitalized
           return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
         };
 
@@ -95,27 +119,26 @@ async function scrape() {
           if (!idMatch) return;
           const id = idMatch[1];
 
-          // STRATEGY 1: Extract title from heading elements (h1-h4) inside the card
-          // This preserves the original Danish capitalization as authored on the site.
+          // STRATEGY 1: Extract title from heading elements
           let title = getText(link, ['h2', 'h3', 'h4', 'h5', 'h1',
             '[class*="title" i]', '[class*="heading" i]', '[class*="name" i]']);
 
-          // Get the time which usually sits in a distinct element
+          // Use structured text walking that preserves block boundaries
+          const text = getStructuredText(link);
+
+          // Time
           let time = '';
-          const text = link.textContent || '';
           const timeMatch = text.match(/KL\.?\s*(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/i);
           if (timeMatch) {
             time = `${timeMatch[1].replace('.', ':')}-${timeMatch[2].replace('.', ':')}`;
           }
 
-          // STRATEGY 2: If no heading found, parse the textContent layout
-          // Layout: "KL.HH:MM-HH:MM<title><description>Arrangører<orgs><venue>"
+          // STRATEGY 2: If no heading found, parse text layout
           if (!title) {
-            const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}(.*)$/is);
+            const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}\s*(.*)$/is);
             const rest = restMatch ? restMatch[1] : text;
             const arrIdx = rest.indexOf('Arrangører');
             const beforeArr = arrIdx !== -1 ? rest.substring(0, arrIdx) : rest;
-            // First sentence (up to first . ? !) is usually the title
             const firstSentence = beforeArr.match(/^(.+?[.?!])\s/);
             if (firstSentence) {
               title = firstSentence[1].trim();
@@ -124,24 +147,27 @@ async function scrape() {
             }
           }
 
-          // STRATEGY 3: Last resort — reconstruct from URL slug
+          // STRATEGY 3: Reconstruct from URL slug
           if (!title) {
             const slugMatch = href.match(/\/events\/2026\/\d+\/(.+?)\/?$/);
             if (slugMatch) title = slugToTitle(slugMatch[1]);
           }
 
-          // Clean up title
           title = title.replace(/\s+/g, ' ').trim();
           if (title.length > 300) title = title.slice(0, 300) + '…';
 
-          // Now split out summary, organizers, venue from the rest of the text
-          const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}(.*)$/is);
+          // Extract summary / organizers / venue from rest
+          const restMatch = text.match(/KL\.?\s*\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}\s*(.*)$/is);
           const rest = restMatch ? restMatch[1] : '';
 
-          // Remove the title prefix from rest to get the description portion
           let afterTitle = rest;
-          if (title && rest.startsWith(title)) {
-            afterTitle = rest.substring(title.length);
+          // Try to strip title from beginning of rest (it's often duplicated)
+          if (title) {
+            const lowerRest = rest.toLowerCase();
+            const lowerTitle = title.toLowerCase();
+            if (lowerRest.startsWith(lowerTitle)) {
+              afterTitle = rest.substring(title.length).trim();
+            }
           }
 
           const arrIdx = afterTitle.indexOf('Arrangører');
@@ -151,7 +177,6 @@ async function scrape() {
           if (arrIdx !== -1) {
             summary = afterTitle.substring(0, arrIdx).trim();
             const after = afterTitle.substring(arrIdx + 'Arrangører'.length).trim();
-            // Venue pattern at end: <code> - <name>, where code is e.g. "B4", "G12", "J27"
             const venueMatch = after.match(/([A-ZÆØÅ]\d{1,3}\s*-\s*.+)$/);
             if (venueMatch) {
               venue = venueMatch[1].trim();
@@ -163,7 +188,8 @@ async function scrape() {
             summary = afterTitle.trim();
           }
 
-          // Clean summary
+          // Strip leading punctuation from summary
+          summary = summary.replace(/^[\s.,;:!?-]+/, '');
           if (summary.length > 400) summary = summary.slice(0, 400) + '…';
 
           out.push({
