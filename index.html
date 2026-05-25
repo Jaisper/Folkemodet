@@ -954,15 +954,29 @@ async function callGroq(model, prompt) {
     },
     body: JSON.stringify({
       model: model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
+      messages: [
+        { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown, aldrig forklarende tekst. Start direkte med { og slut med }." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 8000,
       response_format: { type: "json_object" }
     })
   });
 
   if (!resp.ok) {
     const errText = await resp.text();
-    const err = new Error(`Groq ${resp.status}: ${errText}`);
+    // Try to parse Groq's error to extract failed_generation
+    let detail = errText;
+    try {
+      const errObj = JSON.parse(errText);
+      if (errObj.error?.failed_generation) {
+        detail = `${errObj.error.message} (model returnerede tom/ugyldig JSON — sandsynligvis afkortet output eller for kompleks prompt)`;
+      } else if (errObj.error?.message) {
+        detail = errObj.error.message;
+      }
+    } catch {}
+    const err = new Error(`Groq ${resp.status}: ${detail}`);
     err.status = resp.status;
     err.body = errText;
     throw err;
@@ -970,18 +984,99 @@ async function callGroq(model, prompt) {
 
   const data = await resp.json();
   const content = data.choices?.[0]?.message?.content || "";
+  const finishReason = data.choices?.[0]?.finish_reason;
+  if (finishReason === "length") {
+    console.warn("Response truncated at max_tokens");
+  }
   return content;
 }
 
+// Loose call without response_format constraint — for when json_object mode fails
+async function callGroqLoose(model, prompt) {
+  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + state.apiKey
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown. Start direkte med { og slut med }." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.5,
+      max_tokens: 8000
+    })
+  });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    const err = new Error(`Groq ${resp.status}: ${errText}`);
+    err.status = resp.status;
+    err.body = errText;
+    throw err;
+  }
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
 function parseEvents(content) {
-  // Strip any markdown fences just in case
+  if (!content || !content.trim()) {
+    throw new Error("Tomt svar fra modellen");
+  }
+
+  // Strip any markdown fences
   let clean = content.trim();
   clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
-  const obj = JSON.parse(clean);
-  if (!obj.events || !Array.isArray(obj.events)) {
-    throw new Error("JSON mangler 'events' array");
+
+  // Try direct parse first
+  try {
+    const obj = JSON.parse(clean);
+    if (!obj.events || !Array.isArray(obj.events)) {
+      throw new Error("JSON mangler 'events' array");
+    }
+    return obj.events.slice(0, 40);
+  } catch (e) {
+    // Recovery: try extracting events array by finding the first { and balancing
+    // For truncated responses, try to find the last complete event object
+    const eventsMatch = clean.match(/"events"\s*:\s*\[([\s\S]*?)$/);
+    if (!eventsMatch) throw new Error("Kunne ikke finde 'events' array i svaret");
+
+    // Find complete event objects (balanced braces)
+    const arrayBody = eventsMatch[1];
+    const events = [];
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escape = false;
+
+    for (let i = 0; i < arrayBody.length; i++) {
+      const c = arrayBody[i];
+      if (escape) { escape = false; continue; }
+      if (c === "\\") { escape = true; continue; }
+      if (c === '"') { inString = !inString; continue; }
+      if (inString) continue;
+
+      if (c === "{") {
+        if (depth === 0) start = i;
+        depth++;
+      } else if (c === "}") {
+        depth--;
+        if (depth === 0 && start !== -1) {
+          const objStr = arrayBody.slice(start, i + 1);
+          try {
+            events.push(JSON.parse(objStr));
+          } catch {}
+          start = -1;
+        }
+      }
+    }
+
+    if (events.length === 0) {
+      throw new Error("Kunne ikke udtrække events fra svaret");
+    }
+    return events.slice(0, 40);
   }
-  return obj.events.slice(0, 40);
 }
 
 // ============================================================
@@ -1018,18 +1113,27 @@ async function generate() {
   } catch (err) {
     const is429 = err.status === 429;
     const isTPM = /rate.?limit|tokens? per|tpm/i.test(err.body || "");
-    const shouldFallback = (is429 || isTPM) && selectedModel !== FALLBACK_MODEL;
+    const isJsonValidateFailed = /json_validate_failed/i.test(err.body || "");
+    const shouldFallback = (is429 || isTPM || isJsonValidateFailed) && selectedModel !== FALLBACK_MODEL;
 
     if (shouldFallback) {
       try {
-        showStatus(`${selectedModel} ramte rate-limit — fallback til ${FALLBACK_MODEL}…`);
+        const reason = isJsonValidateFailed ? "JSON validering fejlede" : "rate-limit";
+        showStatus(`${selectedModel} ${reason} — fallback til ${FALLBACK_MODEL}…`);
         usedModel = FALLBACK_MODEL;
-        const fallbackPrompt = LOW_TPM_MODELS.has(FALLBACK_MODEL) ? buildCompactPrompt(themes, favorites) : buildFullPrompt(themes, favorites);
+        // Always use compact prompt for fallback to maximize success rate
+        const fallbackPrompt = buildCompactPrompt(themes, favorites);
         content = await callGroq(FALLBACK_MODEL, fallbackPrompt);
       } catch (err2) {
-        showStatus(`Fejl ved fallback: ${err2.message}`, true);
-        resetButton();
-        return;
+        // Last resort: try fallback model with compact prompt without response_format
+        try {
+          showStatus(`Sidste forsøg uden JSON-mode…`);
+          content = await callGroqLoose(FALLBACK_MODEL, buildCompactPrompt(themes, favorites));
+        } catch (err3) {
+          showStatus(`Fejl ved fallback: ${err2.message}`, true);
+          resetButton();
+          return;
+        }
       }
     } else {
       showStatus(`Fejl: ${err.message}`, true);
