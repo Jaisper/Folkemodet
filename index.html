@@ -644,6 +644,146 @@
     margin-left: 4px;
   }
 
+  /* PROGRAM LIST */
+  .program-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .program-filters select,
+  .program-filters input {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    background: white;
+    color: var(--ink);
+    flex: 1;
+    min-width: 130px;
+  }
+  .program-filters select:focus,
+  .program-filters input:focus {
+    outline: none;
+    border-color: var(--orange);
+  }
+  .filter-clear {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .filter-clear:hover {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .program-meta {
+    font-size: 12px;
+    font-family: 'Source Sans 3', monospace;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .program-results {
+    display: flex;
+    flex-direction: column;
+  }
+  .pg-day-header {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: white;
+    background: var(--ink);
+    padding: 8px 12px;
+    border-left: 4px solid var(--orange);
+    margin: 16px 0 0 0;
+  }
+  .pg-day-header:first-child { margin-top: 0; }
+  .pg-event {
+    display: flex;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background .12s ease;
+  }
+  .pg-event:hover { background: var(--bg); }
+  .pg-event:last-child { border-bottom: none; }
+  .pg-time {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+    min-width: 95px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .pg-body { flex: 1; min-width: 0; }
+  .pg-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .pg-summary {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin: 3px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pg-meta {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .pg-venue {
+    color: var(--orange);
+    font-weight: 600;
+  }
+  .load-more {
+    margin: 16px auto 0;
+    display: block;
+    padding: 10px 24px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .load-more:hover {
+    background: var(--orange-pale);
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .program-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+
   /* EVENT LINKS */
   .event-actions {
     display: flex;
@@ -851,10 +991,26 @@
 <div class="wrap">
 
   <header>
-    <div class="eyebrow">Allinge · Bornholm · 11.–14. juni 2026</div>
+    <div class="eyebrow">Allinge · Bornholm · 11.–13. juni 2026</div>
     <h1>Folkemødet <span class="ampersand">·</span> AI</h1>
-    <div class="subtitle"><b>Event-anbefaler.</b> Vælg temaer og fortæl hvad der optager dig — få op til <b>10 events pr. dag</b> (40 i alt), kronologisk og uden tidsoverlap.</div>
+    <div class="subtitle"><b>Program & AI-anbefaler.</b> Hele det officielle program + personligt prioriterede anbefalinger.</div>
   </header>
+
+  <section class="panel" id="programPanel">
+    <div class="panel-title">Officielt program</div>
+    <div id="programStatus" class="panel-help">Loader…</div>
+    <div id="programControls" style="display:none">
+      <div class="program-filters">
+        <select id="filterDay"><option value="">Alle dage</option></select>
+        <select id="filterVenue"><option value="">Alle venues</option></select>
+        <input type="text" id="filterSearch" placeholder="Søg titel/arrangør…">
+        <button class="filter-clear" id="filterClear" type="button">Nulstil</button>
+      </div>
+      <div class="program-meta" id="programMeta"></div>
+      <div id="programResults" class="program-results"></div>
+      <button class="load-more" id="loadMoreBtn" type="button" style="display:none">Vis flere</button>
+    </div>
+  </section>
 
   <section class="panel">
     <div class="panel-title">Temaer (16)</div>
@@ -949,12 +1105,21 @@ const STORAGE_KEY = "folkemodet_groq_key";
 const FALLBACK_MODEL = "llama-3.3-70b-versatile";
 const LOW_TPM_MODELS = new Set(["llama-3.1-8b-instant"]);
 
-const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag"];
 const DAY_DATES = {
   "Torsdag": "11. juni",
   "Fredag": "12. juni",
-  "Lørdag": "13. juni",
-  "Søndag": "14. juni"
+  "Lørdag": "13. juni"
+};
+const DAY_ISO = {
+  "Torsdag": "2026-06-11",
+  "Fredag": "2026-06-12",
+  "Lørdag": "2026-06-13"
+};
+const ISO_DAY = {
+  "2026-06-11": "Torsdag",
+  "2026-06-12": "Fredag",
+  "2026-06-13": "Lørdag"
 };
 
 // Allinge center / harbor — used as fallback when venue coord unknown
@@ -1182,7 +1347,7 @@ function buildFullPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "(ingen valgt)";
   const favStr = favorites.trim() || "(ingen)";
 
-  return `Du er ekspert i Folkemødet på Bornholm — Danmarks årlige demokratifestival i Allinge, der i 2026 afholdes 11.–14. juni (torsdag–søndag).
+  return `Du er ekspert i Folkemødet på Bornholm — Danmarks årlige demokratifestival i Allinge, der i 2026 afholdes 11.–13. juni (torsdag–lørdag, 3 dage).
 
 Folkemødet har hvert år 3.000+ events fordelt på telte (partitelte, organisationer, fagforeninger, virksomheder, ministerier, NGO'er, medier) i Allinge havn og byen. Typiske formater: paneldebatter, talks, samtaler, workshops, præsentationer, kunst, samtalesaloner.
 
@@ -1190,7 +1355,7 @@ BRUGEREN HAR VALGT:
 - Temaer: ${themesStr}
 - Personlige interesser: ${favStr}
 
-OPGAVE: Lav et komplet dagsprogram med PRÆCIS 10 events PER DAG på alle 4 dage (40 events i alt), kuraterede efter brugerens valg.
+OPGAVE: Lav et komplet dagsprogram med PRÆCIS 10 events PER DAG på alle 3 dage (30 events i alt), kuraterede efter brugerens valg.
 
 ═══════════════════════════════════════════════════════
 KRITISK — INGEN TIDSOVERLAP PR. DAG:
@@ -1201,18 +1366,17 @@ Brugeren skal kunne gå fra det ene event direkte til det næste.
 - Sortér events kronologisk inden for hver dag.
 - Realistiske tidsspand: Folkemødet kører typisk 09:00–22:00, med events à 30–90 min.
 
-DAGENES KARAKTER (følg det):
-- Torsdag (11/6): Åbningsdag, halv dag, fra eftermiddag. Lav 10 events, men start tidligst kl. 10:00 — flere events i eftermiddag/aften.
+DAGENES KARAKTER:
+- Torsdag (11/6): Åbningsdag. 09:00–22:00.
 - Fredag (12/6): Fuld debatdag, 09:00–22:00.
-- Lørdag (13/6): Fuld debatdag, 09:00–22:00.
-- Søndag (14/6): Afslutningsdag, typisk slut ca. 16:00, partilederdebat lørdag/søndag.
+- Lørdag (13/6): Afslutningsdag, 09:00–18:00 (festen slutter typisk her).
 
 ═══════════════════════════════════════════════════════
 ANTI-HALLUCINATION:
 ═══════════════════════════════════════════════════════
 Du har sandsynligvis IKKE adgang til det fulde 2026-program. For HVERT event angiv confidence-niveau:
 • "confirmed" — Bekræftet i officielle 2026-kilder du har set
-• "likely" — Sandsynligt: arrangører der ALTID er der med faste formater (Mandag Morgen, DI/FH/LO, partidebatter, søndagens politiske ledere-debat) eller årligt tilbagevendende events
+• "likely" — Sandsynligt: arrangører der ALTID er der med faste formater (Mandag Morgen, DI/FH/LO, partidebatter, lørdagens politiske ledere-debat) eller årligt tilbagevendende events
 • "speculative" — Plausibelt koncept baseret på temaer og kendte arrangører, IKKE bekræftet
 
 REGLER:
@@ -1230,7 +1394,7 @@ OUTPUT — KUN gyldig JSON, intet andet:
     {
       "title": "Event-titel på dansk",
       "organizer": "Arrangørens navn",
-      "day": "Torsdag" | "Fredag" | "Lørdag" | "Søndag",
+      "day": "Torsdag" | "Fredag" | "Lørdag",
       "time": "HH:MM–HH:MM",
       "venue": "Telt/scene/lokation i Allinge",
       "themes": ["valgt tema", "..."],
@@ -1241,16 +1405,16 @@ OUTPUT — KUN gyldig JSON, intet andet:
   ]
 }
 
-Total: 40 events (10 pr. dag × 4 dage). Inden for hver dag: kronologisk og uden tidsoverlap. Returner KUN JSON, ingen markdown eller kommentarer.`;
+Total: 30 events (10 pr. dag × 3 dage). Inden for hver dag: kronologisk og uden tidsoverlap. Returner KUN JSON, ingen markdown eller kommentarer.`;
 }
 
 function buildCompactPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "ingen";
   const favStr = favorites.trim() || "ingen";
 
-  return `Folkemødet 2026 (Allinge, Bornholm, 11.-14. juni, tors-søn).
-Lav PRÆCIS 10 events pr. dag (40 i alt), kronologisk, UDEN tidsoverlap inden for samme dag (sluttid event N ≤ starttid event N+1).
-Torsdag: start kl. 10:00. Fredag/Lørdag: 09:00-22:00. Søndag: slut ca. 16:00.
+  return `Folkemødet 2026 (Allinge, Bornholm, 11.-13. juni, tor-lør, 3 dage).
+Lav PRÆCIS 10 events pr. dag (30 i alt), kronologisk, UDEN tidsoverlap inden for samme dag (sluttid event N ≤ starttid event N+1).
+Torsdag-fredag: 09:00-22:00. Lørdag: 09:00-18:00.
 
 Temaer: ${themesStr}
 Interesser: ${favStr}
@@ -1262,8 +1426,8 @@ For HVERT event angiv confidence:
 
 Opfind ALDRIG som "confirmed". Brug realistiske danske arrangører (partier, DI, FH, DR, Mandag Morgen, NGO'er) og Allinge-lokationer.
 
-KUN JSON, 40 events total:
-{"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag|Søndag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"confirmed|likely|speculative"}]}`;
+KUN JSON, 30 events total:
+{"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"confirmed|likely|speculative"}]}`;
 }
 
 // ============================================================
@@ -1680,6 +1844,172 @@ function esc(s) {
 
 // GO
 init();
+loadOfficialProgram();
+
+// ============================================================
+// OFFICIAL PROGRAM
+// ============================================================
+const programState = {
+  events: [],
+  filtered: [],
+  shown: 0,
+  pageSize: 50,
+  scrapedAt: null
+};
+
+async function loadOfficialProgram() {
+  const statusEl = document.getElementById("programStatus");
+  const controlsEl = document.getElementById("programControls");
+
+  try {
+    const resp = await fetch("./program.json?t=" + Date.now());
+    if (!resp.ok) throw new Error("Not found");
+    const data = await resp.json();
+    programState.events = data.events || [];
+    programState.scrapedAt = data.scraped_at;
+
+    if (programState.events.length === 0) {
+      statusEl.innerHTML = "Programmet er tomt. Kør GitHub Action <b>Scrape Folkemødet Program</b> for at populere.";
+      return;
+    }
+
+    statusEl.style.display = "none";
+    controlsEl.style.display = "block";
+
+    populateFilters();
+    applyFilters();
+
+    // Wire up filter events
+    document.getElementById("filterDay").addEventListener("change", applyFilters);
+    document.getElementById("filterVenue").addEventListener("change", applyFilters);
+    document.getElementById("filterSearch").addEventListener("input", debounce(applyFilters, 200));
+    document.getElementById("filterClear").addEventListener("click", clearFilters);
+    document.getElementById("loadMoreBtn").addEventListener("click", () => {
+      programState.shown += programState.pageSize;
+      renderProgram();
+    });
+  } catch (err) {
+    statusEl.innerHTML = `<b>Programmet er ikke scraped endnu.</b><br>
+      Gå til repo'ets <b>Actions</b>-fane på GitHub og kør <b>Scrape Folkemødet Program</b> manuelt første gang.
+      Derefter kører den automatisk hver morgen og opdaterer <code>program.json</code>.<br>
+      <span style="color:var(--ink-muted);font-size:12px">(${esc(err.message)})</span>`;
+  }
+}
+
+function populateFilters() {
+  const days = [...new Set(programState.events.map(e => e.day).filter(Boolean))];
+  const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+  days.sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
+  const daySel = document.getElementById("filterDay");
+  days.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d; opt.textContent = d;
+    daySel.appendChild(opt);
+  });
+
+  // Venues: extract unique venue names (strip code prefix like "B4 - ")
+  const venues = new Set();
+  programState.events.forEach(e => {
+    if (!e.venue) return;
+    venues.add(e.venue.trim());
+  });
+  const venueArr = [...venues].sort((a, b) => a.localeCompare(b, "da"));
+  const venueSel = document.getElementById("filterVenue");
+  venueArr.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v.length > 50 ? v.slice(0, 47) + "…" : v;
+    venueSel.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const day = document.getElementById("filterDay").value;
+  const venue = document.getElementById("filterVenue").value;
+  const search = document.getElementById("filterSearch").value.trim().toLowerCase();
+
+  programState.filtered = programState.events.filter(e => {
+    if (day && e.day !== day) return false;
+    if (venue && e.venue !== venue) return false;
+    if (search) {
+      const hay = `${e.title} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+  programState.shown = programState.pageSize;
+  renderProgram();
+}
+
+function clearFilters() {
+  document.getElementById("filterDay").value = "";
+  document.getElementById("filterVenue").value = "";
+  document.getElementById("filterSearch").value = "";
+  applyFilters();
+}
+
+function renderProgram() {
+  const out = document.getElementById("programResults");
+  const meta = document.getElementById("programMeta");
+  const loadBtn = document.getElementById("loadMoreBtn");
+
+  const total = programState.filtered.length;
+  const visible = Math.min(programState.shown, total);
+
+  const scrapedStr = programState.scrapedAt
+    ? new Date(programState.scrapedAt).toLocaleString("da-DK", { dateStyle: "short", timeStyle: "short" })
+    : "ukendt";
+  meta.innerHTML = `Viser <b>${visible}</b> af <b>${total}</b> events · Programmet senest opdateret: ${esc(scrapedStr)} · Kilde: <a href="https://program.folkemoedet.dk/2026" target="_blank" style="color:var(--orange)">program.folkemoedet.dk</a>`;
+
+  if (total === 0) {
+    out.innerHTML = `<div class="program-empty">Ingen events matcher dine filtre.</div>`;
+    loadBtn.style.display = "none";
+    return;
+  }
+
+  // Group by day
+  const slice = programState.filtered.slice(0, visible);
+  const byDay = {};
+  slice.forEach(e => {
+    const d = e.day || "Andet";
+    if (!byDay[d]) byDay[d] = [];
+    byDay[d].push(e);
+  });
+
+  const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+  const DAY_DATES = { "Torsdag": "11. juni", "Fredag": "12. juni", "Lørdag": "13. juni", "Søndag": "14. juni" };
+  const days = Object.keys(byDay).sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
+  const html = days.map(d => {
+    const events = byDay[d];
+    const date = DAY_DATES[d] || "";
+    const rows = events.map(e => `
+      <a class="pg-event" href="${esc(e.url || "#")}" target="_blank" rel="noopener">
+        <div class="pg-time">${esc(e.time || "?")}</div>
+        <div class="pg-body">
+          <div class="pg-title">${esc(e.title || "")}</div>
+          ${e.summary ? `<div class="pg-summary">${esc(e.summary)}</div>` : ""}
+          <div class="pg-meta">
+            <span class="pg-venue">◆ ${esc(e.venue || "?")}</span>
+            ${e.organizers ? `<span>${esc(e.organizers)}</span>` : ""}
+          </div>
+        </div>
+      </a>
+    `).join("");
+    return `<div class="pg-day-header">${esc(d)} ${esc(date)} · ${events.length}</div>${rows}`;
+  }).join("");
+
+  out.innerHTML = html;
+  loadBtn.style.display = visible < total ? "block" : "none";
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
 </script>
 </body>
 </html>
