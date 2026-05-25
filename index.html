@@ -732,6 +732,41 @@
   }
 
   /* PROGRAM LIST */
+  .program-theme-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .pg-chip {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all .12s ease;
+    user-select: none;
+  }
+  .pg-chip:hover {
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .pg-chip.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+    font-weight: 600;
+  }
+  .pg-chip.all-chip.active {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
   .program-filters {
     display: flex;
     gap: 8px;
@@ -1187,6 +1222,7 @@
     <div class="panel-title">Officielt program</div>
     <div id="programStatus" class="panel-help">Loader…</div>
     <div id="programControls" style="display:none">
+      <div class="program-theme-chips" id="programThemeChips"></div>
       <div class="program-filters">
         <select id="filterDay"><option value="">Alle dage</option></select>
         <select id="filterVenue"><option value="">Alle venues</option></select>
@@ -1762,8 +1798,20 @@ function preFilterEvents(themes, favorites, maxEvents = 200) {
     .filter(x => x.score > 0)
     .sort((a, b) => b.score - a.score);
 
-  // Take top N
-  return scored.slice(0, maxEvents).map(x => x.event);
+  // Dedupe by day + time + normalized title — Folkemødet has many duplicate events
+  // (same talk, different stadenumre) which would otherwise dominate the AI's input.
+  const seen = new Set();
+  const deduped = [];
+  for (const x of scored) {
+    const e = x.event;
+    const titleKey = (e.title || "").toLowerCase().trim().replace(/\s+/g, " ");
+    const slot = `${e.day}|${e.time}|${titleKey}`;
+    if (seen.has(slot)) continue;
+    seen.add(slot);
+    deduped.push(e);
+    if (deduped.length >= maxEvents) break;
+  }
+  return deduped;
 }
 
 function buildEventCatalog(events, maxChars = 18000) {
@@ -1994,11 +2042,23 @@ function parseEvents(content) {
 // by looking up the real data from programState.events
 function hydrateSelections(selections) {
   const byId = new Map(programState.events.map(e => [e.id, e]));
+  const seenIds = new Set();
+  const seenTitleSlots = new Set(); // dedupe by "day|time|title" — catches re-runs of same event
   const out = [];
   for (const sel of selections) {
     const id = String(sel.id || "").trim();
+    if (seenIds.has(id)) continue; // exact duplicate ID
     const real = byId.get(id);
     if (!real) continue; // AI returned ID that doesn't exist — skip
+
+    // Dedupe by content fingerprint: same day + time + normalized title
+    // catches when AI picks two different IDs that are actually the same event
+    const titleKey = (real.title || "").toLowerCase().trim().replace(/\s+/g, " ");
+    const slot = `${real.day}|${real.time}|${titleKey}`;
+    if (seenTitleSlots.has(slot)) continue;
+
+    seenIds.add(id);
+    seenTitleSlots.add(slot);
     out.push({
       id: real.id,
       title: real.title,
@@ -2011,7 +2071,7 @@ function hydrateSelections(selections) {
       themes: [],
       speakers: [],
       why_match: sel.why_match || "",
-      confidence: "confirmed" // From real program = always confirmed
+      confidence: "confirmed"
     });
   }
   return out.slice(0, 40);
@@ -2342,7 +2402,8 @@ const programState = {
   filtered: [],
   shown: 0,
   pageSize: 50,
-  scrapedAt: null
+  scrapedAt: null,
+  selectedThemes: new Set()
 };
 
 // Fix scrape artifacts: detect run-on title+summary like "TitlenHer kommer beskrivelsen…"
@@ -2464,6 +2525,42 @@ function populateFilters() {
     daySel.appendChild(opt);
   });
 
+  // Render theme chips
+  const chipsEl = document.getElementById("programThemeChips");
+  // "Alle" chip
+  const allChip = document.createElement("div");
+  allChip.className = "pg-chip all-chip active";
+  allChip.textContent = "Alle temaer";
+  allChip.addEventListener("click", () => {
+    programState.selectedThemes.clear();
+    chipsEl.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
+    allChip.classList.add("active");
+    applyFilters();
+  });
+  chipsEl.appendChild(allChip);
+
+  THEMES.forEach(theme => {
+    const chip = document.createElement("div");
+    chip.className = "pg-chip";
+    chip.textContent = theme;
+    chip.dataset.theme = theme;
+    chip.addEventListener("click", () => {
+      if (programState.selectedThemes.has(theme)) {
+        programState.selectedThemes.delete(theme);
+        chip.classList.remove("active");
+      } else {
+        programState.selectedThemes.add(theme);
+        chip.classList.add("active");
+        allChip.classList.remove("active");
+      }
+      if (programState.selectedThemes.size === 0) {
+        allChip.classList.add("active");
+      }
+      applyFilters();
+    });
+    chipsEl.appendChild(chip);
+  });
+
   // Venues: extract unique venue names (strip code prefix like "B4 - ")
   const venues = new Set();
   programState.events.forEach(e => {
@@ -2483,6 +2580,17 @@ function applyFilters() {
   const day = document.getElementById("filterDay").value;
   const venue = document.getElementById("filterVenue").value;
   const search = document.getElementById("filterSearch").value.trim().toLowerCase();
+  const selectedThemes = [...programState.selectedThemes];
+
+  // Build keyword list from selected themes
+  let themeKeywords = null;
+  if (selectedThemes.length > 0) {
+    themeKeywords = [];
+    for (const t of selectedThemes) {
+      const kws = THEME_KEYWORDS[t];
+      if (kws) themeKeywords.push(...kws);
+    }
+  }
 
   programState.filtered = programState.events.filter(e => {
     if (day && e.day !== day) return false;
@@ -2490,6 +2598,12 @@ function applyFilters() {
     if (search) {
       const hay = `${e.title} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
       if (!hay.includes(search)) return false;
+    }
+    if (themeKeywords) {
+      const hay = `${e.title || ""} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
+      // OR-logic: event matches if ANY selected theme's keyword is found
+      const matches = themeKeywords.some(kw => hay.includes(kw));
+      if (!matches) return false;
     }
     return true;
   });
@@ -2501,6 +2615,13 @@ function clearFilters() {
   document.getElementById("filterDay").value = "";
   document.getElementById("filterVenue").value = "";
   document.getElementById("filterSearch").value = "";
+  programState.selectedThemes.clear();
+  const chips = document.getElementById("programThemeChips");
+  if (chips) {
+    chips.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
+    const allChip = chips.querySelector(".all-chip");
+    if (allChip) allChip.classList.add("active");
+  }
   applyFilters();
 }
 
