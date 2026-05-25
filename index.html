@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
   :root {
     --orange: #E87722;
@@ -642,6 +644,183 @@
     margin-left: 4px;
   }
 
+  /* EVENT LINKS */
+  .event-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .12s ease;
+  }
+  .action-link:hover {
+    background: var(--orange-pale);
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .action-link .ico {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .tl-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .tl-action {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+  }
+  .tl-action:hover { color: var(--red); }
+
+  /* MAP MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,.6);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 14px 18px;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 3px solid var(--orange);
+  }
+  .modal-title-block { flex: 1; min-width: 0; }
+  .modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .modal-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.75);
+    margin-top: 2px;
+  }
+  .modal-close {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.3);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.15); }
+  #mapContainer {
+    width: 100%;
+    height: 420px;
+    background: var(--bg);
+  }
+  .modal-footer {
+    padding: 10px 18px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .modal-footer.warn {
+    background: #FBF1D9;
+    color: #7A5410;
+  }
+
+  /* BLINKING DOT */
+  .blink-dot-wrap {
+    position: relative;
+    width: 22px;
+    height: 22px;
+  }
+  .blink-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 18px;
+    height: 18px;
+    background: var(--red);
+    border: 3px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    z-index: 2;
+  }
+  .blink-dot::before {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 14px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: blinkPulse 1.4s ease-out infinite;
+    z-index: 1;
+  }
+  @keyframes blinkPulse {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(4);
+      opacity: 0;
+    }
+  }
+  /* Override Leaflet's default marker shadow */
+  .blink-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+
   /* FOOTER */
   footer {
     margin-top: 64px;
@@ -728,6 +907,21 @@
 
 </div>
 
+<!-- MAP MODAL -->
+<div class="modal-overlay" id="mapModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title" id="mapTitle">Lokation</div>
+        <div class="modal-sub" id="mapSub"></div>
+      </div>
+      <button class="modal-close" id="mapClose" aria-label="Luk">×</button>
+    </div>
+    <div id="mapContainer"></div>
+    <div class="modal-footer" id="mapFooter">Allinge, Bornholm</div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // DATA
@@ -763,6 +957,61 @@ const DAY_DATES = {
   "Søndag": "14. juni"
 };
 
+// Allinge center / harbor — used as fallback when venue coord unknown
+const ALLINGE_DEFAULT = [55.27620, 14.80470];
+
+// Approximate venue coordinates in Allinge.
+// These follow Folkemødet's recurring layout but are NOT official —
+// always verify on folkemoedet.dk's official venue map.
+const VENUE_COORDS = {
+  "cirkuspladsen": [55.27628, 14.80483],
+  "folkemødeteltet": [55.27660, 14.80520],
+  "folkemodeteltet": [55.27660, 14.80520],
+  "danmarks-scenen": [55.27590, 14.80410],
+  "danmarks scenen": [55.27590, 14.80410],
+  "hovedscenen": [55.27640, 14.80460],
+  "havn": [55.27720, 14.80560],
+  "kæmpestranden": [55.27480, 14.80450],
+  "kaempestranden": [55.27480, 14.80450],
+  "damgårdshave": [55.27550, 14.80250],
+  "damgaardshave": [55.27550, 14.80250],
+  "bagergade": [55.27680, 14.80440],
+  "kirkepladsen": [55.27710, 14.80390],
+  // Party tent fallbacks (typically clustered around Cirkuspladsen)
+  "socialdemokratiet": [55.27600, 14.80460],
+  "venstre": [55.27600, 14.80520],
+  "konservativ": [55.27620, 14.80520],
+  "konservative": [55.27620, 14.80520],
+  "sf": [55.27580, 14.80480],
+  "enhedslisten": [55.27580, 14.80520],
+  "radikale": [55.27620, 14.80460],
+  "liberal alliance": [55.27600, 14.80550],
+  "moderaterne": [55.27600, 14.80440],
+  "dansk folkeparti": [55.27620, 14.80540],
+  // Common organisation tents
+  "di ": [55.27640, 14.80500],
+  "dansk industri": [55.27640, 14.80500],
+  "fh ": [55.27660, 14.80480],
+  "lo ": [55.27660, 14.80480],
+  "dr ": [55.27650, 14.80410],
+  "mandag morgen": [55.27620, 14.80500],
+  "altinget": [55.27600, 14.80420]
+};
+
+function findVenueCoords(venue) {
+  if (!venue) return { coords: ALLINGE_DEFAULT, exact: false };
+  const v = (" " + venue.toLowerCase() + " ");
+  for (const [key, coords] of Object.entries(VENUE_COORDS)) {
+    if (v.includes(key)) return { coords, exact: true };
+  }
+  return { coords: ALLINGE_DEFAULT, exact: false };
+}
+
+function buildSearchLink(title, organizer) {
+  const q = `${title || ""} ${organizer || ""} folkemoedet 2026`.trim();
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+}
+
 // ============================================================
 // STATE
 // ============================================================
@@ -788,6 +1037,81 @@ const counterEl = $("#counter");
 const generateBtn = $("#generateBtn");
 const statusEl = $("#status");
 const resultsEl = $("#results");
+const mapModalEl = $("#mapModal");
+const mapCloseEl = $("#mapClose");
+const mapTitleEl = $("#mapTitle");
+const mapSubEl = $("#mapSub");
+const mapFooterEl = $("#mapFooter");
+
+// ============================================================
+// MAP MODAL
+// ============================================================
+let leafletMap = null;
+
+function openVenueMap(venue, eventTitle) {
+  const { coords, exact } = findVenueCoords(venue);
+
+  mapTitleEl.textContent = venue || "Lokation";
+  mapSubEl.textContent = eventTitle || "";
+
+  if (exact) {
+    mapFooterEl.textContent = "Omtrentlig placering i Allinge — verificer på officielt kort på folkemoedet.dk";
+    mapFooterEl.className = "modal-footer";
+  } else {
+    mapFooterEl.textContent = "⚠ Eksakt placering ukendt — viser Allinge centrum. Tjek folkemoedet.dk for officielt venue-kort.";
+    mapFooterEl.className = "modal-footer warn";
+  }
+
+  mapModalEl.classList.add("show");
+
+  // Init or reuse Leaflet map
+  setTimeout(() => {
+    if (!leafletMap) {
+      leafletMap = L.map("mapContainer", {
+        zoomControl: true,
+        attributionControl: true
+      }).setView(coords, 17);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(leafletMap);
+    } else {
+      leafletMap.setView(coords, 17);
+      // Remove old markers
+      leafletMap.eachLayer((layer) => {
+        if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
+      });
+      leafletMap.invalidateSize();
+    }
+
+    // Add blinking red dot marker
+    const blinkIcon = L.divIcon({
+      className: "blink-marker",
+      html: '<div class="blink-dot-wrap"><div class="blink-dot"></div></div>',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11]
+    });
+    L.marker(coords, { icon: blinkIcon })
+      .addTo(leafletMap)
+      .bindPopup(`<b>${esc(venue || "")}</b>${eventTitle ? "<br>" + esc(eventTitle) : ""}`);
+
+    // Re-invalidate after modal animation
+    leafletMap.invalidateSize();
+  }, 50);
+}
+
+function closeMap() {
+  mapModalEl.classList.remove("show");
+}
+
+mapCloseEl.addEventListener("click", closeMap);
+mapModalEl.addEventListener("click", (e) => {
+  if (e.target === mapModalEl) closeMap();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && mapModalEl.classList.contains("show")) closeMap();
+});
 
 // ============================================================
 // INIT
@@ -1201,6 +1525,15 @@ function renderEvents(events, model) {
       renderEvents(state.lastEvents, state.lastModel);
     });
   });
+
+  // Attach map button handlers (event delegation across both views)
+  resultsEl.querySelectorAll("[data-venue]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const venue = btn.getAttribute("data-venue");
+      const title = btn.getAttribute("data-title");
+      openVenueMap(venue, title);
+    });
+  });
 }
 
 function renderRanked(events) {
@@ -1210,6 +1543,9 @@ function renderRanked(events) {
     const conf = (ev.confidence || "speculative").toLowerCase();
     const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
     const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
+    const searchUrl = buildSearchLink(ev.title, ev.organizer);
+    const venueAttr = esc(ev.venue || "");
+    const titleAttr = esc(ev.title || "");
 
     return `
       <div class="event-card ${rankClass}">
@@ -1233,6 +1569,11 @@ function renderRanked(events) {
         ${speakersArr.length ? `<div class="speakers-line"><strong>Deltagere:</strong>${esc(speakersArr.join(" · "))}</div>` : ""}
 
         ${ev.why_match ? `<div class="why-match">${esc(ev.why_match)}</div>` : ""}
+
+        <div class="event-actions">
+          <a class="action-link" href="${searchUrl}" target="_blank" rel="noopener"><span class="ico">🔗</span>Søg event</a>
+          <button class="action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button"><span class="ico">📍</span>Vis på kort</button>
+        </div>
       </div>
     `;
   }).join("");
@@ -1295,6 +1636,9 @@ function renderTimeline(events) {
     const items = byDay[day].map(({ ev, rank }) => {
       const conf = (ev.confidence || "speculative").toLowerCase();
       const overlap = overlapSet.has(rank);
+      const searchUrl = buildSearchLink(ev.title, ev.organizer);
+      const venueAttr = esc(ev.venue || "");
+      const titleAttr = esc(ev.title || "");
       return `
         <div class="tl-row${overlap ? " tl-overlap" : ""}">
           <div class="tl-time">${esc(ev.time || "?")}${overlap ? ' <span class="tl-overlap-flag" title="Overlapper foregående event">⚠</span>' : ""}</div>
@@ -1304,6 +1648,10 @@ function renderTimeline(events) {
               <span class="confidence-badge ${conf}">${conf}</span>
             </div>
             <div class="tl-venue"><span class="venue-dot">◆</span>${esc(ev.venue || "?")} <span class="tl-org">· ${esc(ev.organizer || "")}</span></div>
+            <div class="tl-actions">
+              <a class="tl-action" href="${searchUrl}" target="_blank" rel="noopener">🔗 Søg</a>
+              <button class="tl-action" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Kort</button>
+            </div>
           </div>
         </div>
       `;
