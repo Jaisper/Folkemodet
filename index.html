@@ -630,6 +630,17 @@
     margin-right: 6px;
     letter-spacing: 0.04em;
   }
+  .tl-overlap {
+    background: #FBE5E8;
+  }
+  .tl-overlap:hover {
+    background: #F8D6DA;
+  }
+  .tl-overlap-flag {
+    color: var(--red);
+    font-size: 13px;
+    margin-left: 4px;
+  }
 
   /* FOOTER */
   footer {
@@ -663,31 +674,8 @@
   <header>
     <div class="eyebrow">Allinge · Bornholm · 11.–14. juni 2026</div>
     <h1>Folkemødet <span class="ampersand">·</span> AI</h1>
-    <div class="subtitle"><b>Event-anbefaler.</b> Vælg temaer og fortæl hvad der optager dig — få op til 20 personligt rangerede debatter og arrangementer.</div>
+    <div class="subtitle"><b>Event-anbefaler.</b> Vælg temaer og fortæl hvad der optager dig — få op til <b>10 events pr. dag</b> (40 i alt), kronologisk og uden tidsoverlap.</div>
   </header>
-
-  <section class="panel">
-    <div class="panel-title">Groq API-nøgle</div>
-    <div class="panel-help">Nøglen gemmes lokalt i din browser (localStorage) og sendes kun direkte til Groq. Hentes gratis på <a href="https://console.groq.com" target="_blank" style="color:var(--orange)">console.groq.com</a>.</div>
-    <div class="key-row">
-      <input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" spellcheck="false">
-      <button class="generate-btn" id="saveKey" style="background:var(--ink)">Gem</button>
-    </div>
-    <div class="key-status" id="keyStatus"></div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-title">AI-model</div>
-    <div class="model-row">
-      <select id="modelSelect">
-        <option value="openai/gpt-oss-120b">GPT-OSS 120B — bedst til detaljerede svar (anbefalet)</option>
-        <option value="llama-3.3-70b-versatile">Llama 3.3 70B — solid alternativ</option>
-        <option value="compound-beta">Compound Beta — Groq's agent-model</option>
-        <option value="llama-3.1-8b-instant">Llama 3.1 8B — hurtig, kompakt prompt</option>
-      </select>
-      <span class="model-note">Auto-fallback til Llama 3.3 70B ved 429/TPM-fejl</span>
-    </div>
-  </section>
 
   <section class="panel">
     <div class="panel-title">Temaer (16)</div>
@@ -709,6 +697,29 @@
   <div class="status" id="status"></div>
 
   <section id="results"></section>
+
+  <section class="panel" style="margin-top:48px">
+    <div class="panel-title">AI-model</div>
+    <div class="model-row">
+      <select id="modelSelect">
+        <option value="openai/gpt-oss-120b">GPT-OSS 120B — bedst til detaljerede svar (anbefalet)</option>
+        <option value="llama-3.3-70b-versatile">Llama 3.3 70B — solid alternativ</option>
+        <option value="compound-beta">Compound Beta — Groq's agent-model</option>
+        <option value="llama-3.1-8b-instant">Llama 3.1 8B — hurtig, kompakt prompt</option>
+      </select>
+      <span class="model-note">Auto-fallback til Llama 3.3 70B ved 429/TPM-fejl</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">Groq API-nøgle</div>
+    <div class="panel-help">Nøglen gemmes lokalt i din browser (localStorage) og sendes kun direkte til Groq. Hentes gratis på <a href="https://console.groq.com" target="_blank" style="color:var(--orange)">console.groq.com</a>.</div>
+    <div class="key-row">
+      <input type="password" id="apiKey" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <button class="generate-btn" id="saveKey" style="background:var(--ink)">Gem</button>
+    </div>
+    <div class="key-status" id="keyStatus"></div>
+  </section>
 
   <footer>
     <div>Bygget med Groq · Folkemødet 2026 program-data er udgivet løbende — AI'en markerer hvert event med <b>confirmed / likely / speculative</b>.</div>
@@ -760,7 +771,7 @@ const state = {
   apiKey: "",
   lastEvents: null,
   lastModel: null,
-  viewMode: "ranked"  // "ranked" | "timeline"
+  viewMode: "timeline"  // "ranked" | "timeline"
 };
 
 // ============================================================
@@ -855,24 +866,37 @@ BRUGEREN HAR VALGT:
 - Temaer: ${themesStr}
 - Personlige interesser: ${favStr}
 
-OPGAVE: Foreslå op til 20 events, RANGERET efter relevans (vigtigste først).
+OPGAVE: Lav et komplet dagsprogram med PRÆCIS 10 events PER DAG på alle 4 dage (40 events i alt), kuraterede efter brugerens valg.
 
 ═══════════════════════════════════════════════════════
-KRITISK — ANTI-HALLUCINATION:
+KRITISK — INGEN TIDSOVERLAP PR. DAG:
 ═══════════════════════════════════════════════════════
-Du har sandsynligvis IKKE adgang til det fulde 2026-program (det udgives løbende frem mod festivalen). For HVERT event skal du angive et confidence-niveau:
+Brugeren skal kunne gå fra det ene event direkte til det næste.
+- Inden for samme dag MÅ events IKKE overlappe i tid.
+- Sluttiden på event N skal være ≤ starttiden på event N+1 (minimum 15 min mellem hvis muligt for gå-tid mellem telte).
+- Sortér events kronologisk inden for hver dag.
+- Realistiske tidsspand: Folkemødet kører typisk 09:00–22:00, med events à 30–90 min.
 
-• "confirmed" — Event er bekræftet i officielle 2026-kilder du har set
-• "likely" — Sandsynligt event: arrangører som ALTID er der med faste formater (fx Mandag Morgen-debatter, partiers store debatter, DI/FH/LO-tilstedeværelse, statsministerens 1. maj-stil tale, søndagens politiske ledere-debat), eller årligt tilbagevendende events
-• "speculative" — Plausibelt event-koncept baseret på temaerne og kendte arrangører, men IKKE bekræftet — opfundet til brugerens interesser
+DAGENES KARAKTER (følg det):
+- Torsdag (11/6): Åbningsdag, halv dag, fra eftermiddag. Lav 10 events, men start tidligst kl. 10:00 — flere events i eftermiddag/aften.
+- Fredag (12/6): Fuld debatdag, 09:00–22:00.
+- Lørdag (13/6): Fuld debatdag, 09:00–22:00.
+- Søndag (14/6): Afslutningsdag, typisk slut ca. 16:00, partilederdebat lørdag/søndag.
+
+═══════════════════════════════════════════════════════
+ANTI-HALLUCINATION:
+═══════════════════════════════════════════════════════
+Du har sandsynligvis IKKE adgang til det fulde 2026-program. For HVERT event angiv confidence-niveau:
+• "confirmed" — Bekræftet i officielle 2026-kilder du har set
+• "likely" — Sandsynligt: arrangører der ALTID er der med faste formater (Mandag Morgen, DI/FH/LO, partidebatter, søndagens politiske ledere-debat) eller årligt tilbagevendende events
+• "speculative" — Plausibelt koncept baseret på temaer og kendte arrangører, IKKE bekræftet
 
 REGLER:
-1. Opfind ALDRIG specifikke titler, talere eller præcise tidspunkter for et "confirmed" event uden faktisk kildegrundlag.
-2. For "likely" events: brug realistiske mønstre (etablerede arrangører, typiske emner for året, faste programpunkter).
-3. For "speculative" events: marker dem ærligt og angiv plausible arrangører (større danske organisationer, partier, NGO'er).
-4. Spred på alle 4 dage. Brug realistiske Allinge-lokationer: Cirkuspladsen, Folkemødeteltet, Danmarks-scenen, Hovedscenen, partitelte, organisationstelte, telte ved havnen.
-5. why_match skal være konkret og personligt — referer til brugerens valg.
-6. Spread af confidence-niveauer: gerne flere "likely" end "confirmed", og brug "speculative" til at fylde med relevante koncepter.
+1. Opfind ALDRIG specifikke titler/talere/tidspunkter som "confirmed" uden faktisk kildegrundlag.
+2. For "likely": brug realistiske mønstre (etablerede arrangører, typiske emner).
+3. For "speculative": marker ærligt, angiv plausible arrangører (større danske organisationer, partier, NGO'er).
+4. Brug realistiske Allinge-lokationer: Cirkuspladsen, Folkemødeteltet, Danmarks-scenen, Hovedscenen, partitelte (Socialdemokratiet/Venstre/Konservative/SF/Enhedslisten/Radikale/Liberal Alliance/Moderaterne/DF), organisationstelte (DI, Dansk Erhverv, FH, Akademikerne, DA), medietelte (DR, Berlingske, Politiken, Mandag Morgen, Altinget).
+5. why_match: konkret og personligt — referer til brugerens valg.
 
 ═══════════════════════════════════════════════════════
 OUTPUT — KUN gyldig JSON, intet andet:
@@ -893,25 +917,28 @@ OUTPUT — KUN gyldig JSON, intet andet:
   ]
 }
 
-Returner KUN JSON. Ingen markdown, ingen kommentarer, ingen forklaring før eller efter.`;
+Total: 40 events (10 pr. dag × 4 dage). Inden for hver dag: kronologisk og uden tidsoverlap. Returner KUN JSON, ingen markdown eller kommentarer.`;
 }
 
 function buildCompactPrompt(themes, favorites) {
   const themesStr = themes.length ? themes.join(", ") : "ingen";
   const favStr = favorites.trim() || "ingen";
 
-  return `Folkemødet 2026 (Allinge, Bornholm, 11.-14. juni, tors-søn). Op til 20 events rangeret efter match.
+  return `Folkemødet 2026 (Allinge, Bornholm, 11.-14. juni, tors-søn).
+Lav PRÆCIS 10 events pr. dag (40 i alt), kronologisk, UDEN tidsoverlap inden for samme dag (sluttid event N ≤ starttid event N+1).
+Torsdag: start kl. 10:00. Fredag/Lørdag: 09:00-22:00. Søndag: slut ca. 16:00.
+
 Temaer: ${themesStr}
 Interesser: ${favStr}
 
 For HVERT event angiv confidence:
 - "confirmed": bekræftet i 2026-program
 - "likely": fast/tilbagevendende arrangør & format
-- "speculative": plausibelt koncept baseret på temaer
+- "speculative": plausibelt koncept
 
-Opfind ALDRIG som "confirmed". Brug realistiske danske arrangører (partier, DI, FH, NGO'er, medier) og Allinge-lokationer.
+Opfind ALDRIG som "confirmed". Brug realistiske danske arrangører (partier, DI, FH, DR, Mandag Morgen, NGO'er) og Allinge-lokationer.
 
-KUN JSON:
+KUN JSON, 40 events total:
 {"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag|Søndag","time":"HH:MM-HH:MM","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"confirmed|likely|speculative"}]}`;
 }
 
@@ -954,7 +981,7 @@ function parseEvents(content) {
   if (!obj.events || !Array.isArray(obj.events)) {
     throw new Error("JSON mangler 'events' array");
   }
-  return obj.events.slice(0, 20);
+  return obj.events.slice(0, 40);
 }
 
 // ============================================================
@@ -1075,7 +1102,7 @@ function renderEvents(events, model) {
 function renderRanked(events) {
   const cards = events.map((ev, i) => {
     const rank = i + 1;
-    const rankClass = rank <= 5 ? "rank-top" : rank <= 12 ? "rank-mid" : "rank-low";
+    const rankClass = rank <= 10 ? "rank-top" : rank <= 24 ? "rank-mid" : "rank-low";
     const conf = (ev.confidence || "speculative").toLowerCase();
     const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
     const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
@@ -1116,6 +1143,15 @@ function parseStartMinutes(time) {
   return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
 }
 
+function parseEndMinutes(time) {
+  if (!time) return -1;
+  // Match the SECOND HH:MM in the string (after the dash)
+  const matches = [...String(time).matchAll(/(\d{1,2}):(\d{2})/g)];
+  if (matches.length < 2) return -1;
+  const m = matches[1];
+  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+}
+
 function renderTimeline(events) {
   // Attach original rank index so we can show it
   const indexed = events.map((ev, i) => ({ ev, rank: i + 1 }));
@@ -1133,6 +1169,18 @@ function renderTimeline(events) {
     list.sort((a, b) => parseStartMinutes(a.ev.time) - parseStartMinutes(b.ev.time));
   });
 
+  // Detect overlaps per day (end of prev > start of next)
+  const overlapSet = new Set();
+  Object.values(byDay).forEach(list => {
+    for (let i = 1; i < list.length; i++) {
+      const prevEnd = parseEndMinutes(list[i-1].ev.time);
+      const currStart = parseStartMinutes(list[i].ev.time);
+      if (prevEnd > 0 && currStart < 9999 && prevEnd > currStart) {
+        overlapSet.add(list[i].rank);
+      }
+    }
+  });
+
   // Day order: defined order first, then any unknowns
   const days = DAY_ORDER.filter(d => byDay[d]);
   Object.keys(byDay).forEach(d => { if (!days.includes(d)) days.push(d); });
@@ -1142,9 +1190,10 @@ function renderTimeline(events) {
     const count = byDay[day].length;
     const items = byDay[day].map(({ ev, rank }) => {
       const conf = (ev.confidence || "speculative").toLowerCase();
+      const overlap = overlapSet.has(rank);
       return `
-        <div class="tl-row">
-          <div class="tl-time">${esc(ev.time || "?")}</div>
+        <div class="tl-row${overlap ? " tl-overlap" : ""}">
+          <div class="tl-time">${esc(ev.time || "?")}${overlap ? ' <span class="tl-overlap-flag" title="Overlapper foregående event">⚠</span>' : ""}</div>
           <div class="tl-body">
             <div class="tl-title-row">
               <div class="tl-title"><span class="tl-rank-mini">#${rank}</span>${esc(ev.title || "")}</div>
