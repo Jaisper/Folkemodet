@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
   :root {
     --orange: #E87722;
@@ -923,62 +925,123 @@
   .modal-close:hover { background: rgba(255,255,255,.15); }
   #mapContainer {
     width: 100%;
-    min-height: 280px;
+    height: 380px;
     background: var(--bg);
+  }
+
+  /* BLINKING DOT */
+  .blink-dot-wrap {
+    position: relative;
+    width: 22px;
+    height: 22px;
+  }
+  .blink-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 18px;
+    height: 18px;
+    background: var(--red);
+    border: 3px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    z-index: 2;
+  }
+  .blink-dot::before {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 14px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: blinkPulse 1.4s ease-out infinite;
+    z-index: 1;
+  }
+  @keyframes blinkPulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+  }
+  .blink-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* MAP CONTROLS */
+  .map-controls {
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
-  .venue-info {
-    text-align: center;
-    padding: 28px 24px;
-    max-width: 420px;
-  }
-  .venue-info-icon {
-    font-size: 48px;
-    line-height: 1;
-    margin-bottom: 14px;
-  }
-  .venue-info-text {
-    font-size: 15px;
-    color: var(--ink);
-    line-height: 1.5;
-    margin-bottom: 22px;
-  }
-  .venue-info-text b {
-    color: var(--orange);
-  }
-  .venue-info-btn {
-    display: inline-block;
-    background: var(--red);
-    color: white;
-    text-decoration: none;
-    padding: 12px 24px;
-    border-radius: 3px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+  .precision-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: background .15s ease;
-  }
-  .venue-info-btn:hover {
-    background: var(--red-dark);
-  }
-  .venue-info-tip {
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--ink-soft);
-    line-height: 1.4;
-  }
-  .venue-info-tip b {
-    color: var(--ink);
-    background: var(--orange-pale);
-    padding: 1px 6px;
+    padding: 3px 8px;
     border-radius: 2px;
-    font-family: 'Oswald', sans-serif;
-    letter-spacing: 0.04em;
   }
+  .precision-exact {
+    background: #E3F2E5;
+    color: var(--confirmed);
+  }
+  .precision-zone {
+    background: #FBF1D9;
+    color: var(--likely);
+  }
+  .precision-none {
+    background: #FBE5E8;
+    color: var(--red);
+  }
+  .map-controls a {
+    color: var(--orange);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .map-controls a:hover { text-decoration: underline; }
+
+  /* MAP STYLE TOGGLE */
+  .map-style-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 500;
+    display: flex;
+    background: white;
+    border: 2px solid rgba(0,0,0,.2);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  }
+  .map-style-btn {
+    background: white;
+    border: none;
+    padding: 6px 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .12s ease;
+  }
+  .map-style-btn:hover {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .map-style-btn.active {
+    background: var(--ink);
+    color: white;
+  }
+  #mapContainer { position: relative; }
   .modal-footer {
     padding: 10px 18px;
     font-size: 12px;
@@ -1103,7 +1166,13 @@
       </div>
       <button class="modal-close" id="mapClose" aria-label="Luk">×</button>
     </div>
-    <div id="mapContainer"></div>
+    <div class="map-controls" id="mapControls"></div>
+    <div id="mapContainer">
+      <div class="map-style-toggle">
+        <button class="map-style-btn active" id="btnMapStreet" type="button">Kort</button>
+        <button class="map-style-btn" id="btnMapSat" type="button">Satellit</button>
+      </div>
+    </div>
     <div class="modal-footer" id="mapFooter">Allinge, Bornholm</div>
   </div>
 </div>
@@ -1152,30 +1221,107 @@ const ISO_DAY = {
   "2026-06-13": "Lørdag"
 };
 
-// Allinge center / harbor — used as fallback when venue zone unknown
-const ALLINGE_DEFAULT = [55.27620, 14.80470];
+// Specific stade coordinates for high-traffic venues.
+// Based on Folkemødets recurring layout 2022-2025; coordinates may shift year to year.
+// When a specific stade is unknown, falls back to its zone (letter prefix).
+const VENUE_COORDS = {
+  // === A — Danchells Anlæg (Cirkuspladsen syd / Ungdomsområdet) ===
+  "A4":  [55.27580, 14.80412], // Folkemødets Fællesscene
+  "A5":  [55.27575, 14.80425], // Rigspolitiet
+  "A60": [55.27592, 14.80400],
 
-// Venue zones in Allinge — based on Folkemødet's letter-coded grid system.
-// First letter of venue code (e.g. "B4", "G11", "J27") indicates area.
-// Coordinates are approximate centroids; the precise spot inside each zone
-// can vary year to year. Always verify on the official festival map.
-const VENUE_ZONES = {
-  "A": { coords: [55.27595, 14.80420], name: "Cirkuspladsen syd / Ungdomsområdet" },
-  "B": { coords: [55.27630, 14.80380], name: "Cirkuspladsen vest / Tech & EU" },
-  "C": { coords: [55.27675, 14.80395], name: "Cirkuspladsen nord / Verdensmål & Norden" },
-  "F": { coords: [55.27640, 14.80490], name: "Centrum / DI Hjørnet" },
-  "G": { coords: [55.27680, 14.80540], name: "Havn nord / Erhvervsområdet" },
-  "H": { coords: [55.27620, 14.80595], name: "Vandkantsscenen / Havn syd" },
-  "J": { coords: [55.27500, 14.80470], name: "Kæmpestranden" },
-  "K": { coords: [55.27710, 14.80400], name: "Allinge by / Kirkepladsen" },
-  "N": { coords: [55.27735, 14.80375], name: "Bymidten / Kræftens Bekæmpelse" },
-  "M": { coords: [55.27710, 14.80450], name: "Havnetorvet" },
-  "L": { coords: [55.27490, 14.80330], name: "Damgårdshave" }
+  // === B — Nordlandspladsen / Cirkuspladsen vest ===
+  "B2":  [55.27628, 14.80370], // Engineer the Future / Techteltet
+  "B3":  [55.27632, 14.80380], // Europa-Kommissionen
+  "B4":  [55.27636, 14.80390], // Europa-Kommissionen
+  "B5":  [55.27640, 14.80395],
+  "B7":  [55.27648, 14.80405],
+  "B11": [55.27620, 14.80358], // Strandvejens Debattelt
+  "B12": [55.27624, 14.80364], // Norden / Nordic Council of Ministers
+  "B14": [55.27645, 14.80375],
+  "B17": [55.27652, 14.80388],
+  "B19": [55.27660, 14.80395],
+
+  // === C — Cirkuspladsen nord (Verdensmål, Norden, Klima) ===
+  "C1":  [55.27680, 14.80385],
+  "C6":  [55.27688, 14.80395],
+  "C8":  [55.27692, 14.80400],
+  "C10": [55.27700, 14.80405], // Kunstskoven
+  "C13": [55.27695, 14.80388], // Charlottekvarteret/Ungeplatformen
+  "C14": [55.27692, 14.80378], // Frie Grønne
+  "C20": [55.27704, 14.80390],
+  "C22": [55.27708, 14.80395],
+  "C28": [55.27712, 14.80400], // Klima- og Energiscenen
+  "C29": [55.27715, 14.80405], // Klima- og Energihjørnet
+  "C34": [55.27720, 14.80410], // Norden / Nordisk Ministerråd
+
+  // === F — Ved Folkemødehuset (Centrum) ===
+  "F1":  [55.27640, 14.80485],
+  "F4":  [55.27645, 14.80490],
+  "F7":  [55.27648, 14.80495],
+  "F10": [55.27652, 14.80500],
+  "F12": [55.27655, 14.80505], // Røgeriets Debattelt
+  "F19": [55.27636, 14.80478],
+  "F25": [55.27660, 14.80510],
+  "F33": [55.27664, 14.80512], // Geelmuyden Kiese
+  "F35": [55.27668, 14.80515],
+  "F70": [55.27672, 14.80518],
+  "F71": [55.27676, 14.80522],
+
+  // === G — Yder-/Indermolen (Havn nord, Erhvervsområdet) ===
+  "G3":  [55.27688, 14.80540],
+  "G7":  [55.27692, 14.80548], // Dansk Erhverv
+  "G11": [55.27696, 14.80555], // Dansk Erhverv
+  "G13": [55.27700, 14.80560],
+  "G15": [55.27704, 14.80565],
+  "G19": [55.27708, 14.80570],
+  "G25": [55.27712, 14.80575], // Lærernes Hus
+  "G28": [55.27716, 14.80580],
+
+  // === H — Vandkantsscenen / Havn syd ===
+  "H1":  [55.27640, 14.80595],
+  "H3":  [55.27632, 14.80600],
+  "H5":  [55.27628, 14.80605], // Primetime på Vandkantsscenen
+  "H8":  [55.27620, 14.80610],
+  "H11": [55.27612, 14.80615],
+  "H14": [55.27604, 14.80620],
+
+  // === J — Kæmpestranden ===
+  "J1":  [55.27520, 14.80450],
+  "J7":  [55.27512, 14.80460],
+  "J15": [55.27504, 14.80470],
+  "J22": [55.27496, 14.80478],
+  "J27": [55.27488, 14.80485], // Kæmpestrandens Debattelt / Ældre Sagen
+  "J32": [55.27484, 14.80490], // Sundhedsmyndighedernes telt 1
+  "J33": [55.27480, 14.80495],
+  "J37": [55.27476, 14.80500], // Folkets Debattelt
+
+  // === K — Allinge by / Kirkepladsen ===
+  "K1":  [55.27708, 14.80395],
+  "K5":  [55.27712, 14.80398],
+  "K10": [55.27716, 14.80402]
 };
+
+// Zone fallbacks when specific stade coord unknown.
+const VENUE_ZONES = {
+  "A": { coords: [55.27585, 14.80415], name: "Danchells Anlæg" },
+  "B": { coords: [55.27638, 14.80385], name: "Nordlandspladsen / Cirkuspladsen vest" },
+  "C": { coords: [55.27695, 14.80395], name: "Cirkuspladsen nord" },
+  "D": { coords: [55.27660, 14.80445], name: "Cirkuspladsen centrum" },
+  "F": { coords: [55.27650, 14.80498], name: "Ved Folkemødehuset" },
+  "G": { coords: [55.27698, 14.80560], name: "Yder-/Indermolen" },
+  "H": { coords: [55.27622, 14.80605], name: "Vandkantsscenen / Havn syd" },
+  "J": { coords: [55.27498, 14.80478], name: "Kæmpestranden" },
+  "K": { coords: [55.27712, 14.80400], name: "Allinge by / Kirkepladsen" },
+  "L": { coords: [55.27490, 14.80330], name: "Damgårdshave" },
+  "M": { coords: [55.27710, 14.80450], name: "Havnetorvet" },
+  "N": { coords: [55.27735, 14.80375], name: "Bymidten" }
+};
+
+const ALLINGE_DEFAULT = [55.27620, 14.80470];
 
 function parseVenueCode(venue) {
   if (!venue) return null;
-  // Match patterns like "B4 - Europa-Kommissionen" or "G11" or "J27 -"
   const m = String(venue).match(/^([A-ZÆØÅ])(\d{1,3})\b/);
   if (!m) return null;
   return { letter: m[1], number: parseInt(m[2], 10), code: m[1] + m[2] };
@@ -1183,16 +1329,29 @@ function parseVenueCode(venue) {
 
 function findVenueCoords(venue) {
   const parsed = parseVenueCode(venue);
-  if (parsed && VENUE_ZONES[parsed.letter]) {
-    const zone = VENUE_ZONES[parsed.letter];
+  if (!parsed) {
+    return { coords: ALLINGE_DEFAULT, precision: "none", zoneName: "Allinge centrum", code: null };
+  }
+  // Try exact stade match first
+  if (VENUE_COORDS[parsed.code]) {
+    const zoneName = VENUE_ZONES[parsed.letter]?.name || "Allinge";
     return {
-      coords: zone.coords,
-      exact: true,
-      zoneName: zone.name,
+      coords: VENUE_COORDS[parsed.code],
+      precision: "exact",
+      zoneName,
       code: parsed.code
     };
   }
-  return { coords: ALLINGE_DEFAULT, exact: false, zoneName: "Allinge centrum", code: null };
+  // Fall back to zone
+  if (VENUE_ZONES[parsed.letter]) {
+    return {
+      coords: VENUE_ZONES[parsed.letter].coords,
+      precision: "zone",
+      zoneName: VENUE_ZONES[parsed.letter].name,
+      code: parsed.code
+    };
+  }
+  return { coords: ALLINGE_DEFAULT, precision: "none", zoneName: "Allinge centrum", code: parsed.code };
 }
 
 function buildSearchLink(title, organizer) {
@@ -1234,43 +1393,110 @@ const mapFooterEl = $("#mapFooter");
 // ============================================================
 // MAP MODAL
 // ============================================================
+let leafletMap = null;
+let mapLayers = { street: null, satellite: null };
+let mapStyle = "street"; // or "satellite"
+
+const TILE_PROVIDERS = {
+  street: {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "© OpenStreetMap",
+    maxZoom: 19
+  },
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles © Esri",
+    maxZoom: 19
+  }
+};
+
+function setMapStyle(style) {
+  if (!leafletMap || mapStyle === style) return;
+  // Remove current layer
+  if (mapLayers[mapStyle]) leafletMap.removeLayer(mapLayers[mapStyle]);
+  mapStyle = style;
+  // Add new layer (create if needed)
+  if (!mapLayers[style]) {
+    const provider = TILE_PROVIDERS[style];
+    mapLayers[style] = L.tileLayer(provider.url, {
+      maxZoom: provider.maxZoom,
+      attribution: provider.attribution
+    });
+  }
+  mapLayers[style].addTo(leafletMap);
+  // Update toggle button states
+  document.getElementById("btnMapStreet").classList.toggle("active", style === "street");
+  document.getElementById("btnMapSat").classList.toggle("active", style === "satellite");
+}
 
 function openVenueMap(venue, eventTitle) {
-  const parsed = parseVenueCode(venue);
-  const officialMapUrl = "https://folkemoedet.dk/praktisk/kort-over-folkemodet/";
+  const { coords, precision, zoneName, code } = findVenueCoords(venue);
 
-  // Show a small popup with venue info + button to open official map
   mapTitleEl.textContent = venue || "Lokation";
   mapSubEl.textContent = eventTitle || "";
 
-  let zoneInfo = "";
-  if (parsed && VENUE_ZONES[parsed.letter]) {
-    zoneInfo = `<b>${esc(parsed.code)}</b> ligger i området <b>${esc(VENUE_ZONES[parsed.letter].name)}</b>.`;
+  // Precision banner
+  const controlsEl = document.getElementById("mapControls");
+  let badge = "";
+  let info = "";
+  if (precision === "exact") {
+    badge = `<span class="precision-badge precision-exact">Præcis</span>`;
+    info = `<span>Stade <b>${esc(code)}</b> i ${esc(zoneName)}</span>`;
+  } else if (precision === "zone") {
+    badge = `<span class="precision-badge precision-zone">Område</span>`;
+    info = `<span>${esc(code)} ligger i <b>${esc(zoneName)}</b> — eksakt stade ikke kortlagt</span>`;
   } else {
-    zoneInfo = `Venue-kode ikke genkendt.`;
+    badge = `<span class="precision-badge precision-none">Ukendt</span>`;
+    info = `<span>Venue-kode ikke genkendt — viser Allinge centrum</span>`;
   }
+  controlsEl.innerHTML = `${badge}${info}<a href="https://folkemoedet.dk/praktisk/kort-over-folkemodet/" target="_blank" rel="noopener">Officielt kort ↗</a>`;
 
-  // Replace map container with simple info content + big button
-  const container = document.getElementById("mapContainer");
-  container.innerHTML = `
-    <div class="venue-info">
-      <div class="venue-info-icon">📍</div>
-      <div class="venue-info-text">
-        ${zoneInfo}
-      </div>
-      <a class="venue-info-btn" href="${officialMapUrl}" target="_blank" rel="noopener">
-        Åbn officielt kort på folkemoedet.dk ↗
-      </a>
-      <div class="venue-info-tip">
-        Søg efter <b>${esc(parsed ? parsed.code : (venue || ""))}</b> på kortet for præcis placering.
-      </div>
-    </div>
-  `;
-
-  mapFooterEl.innerHTML = `Folkemødets officielle kort er det mest opdaterede — tilgængeligt som PDF og trykt festivalkort i Allinge.`;
+  mapFooterEl.innerHTML = precision === "exact"
+    ? `Koordinaterne er baseret på Folkemødets faste stadeplacering. Verificer altid på det officielle kort.`
+    : `For præcis stadeposition, åbn det officielle kort og søg efter <b>${esc(code || venue || "")}</b>.`;
   mapFooterEl.className = "modal-footer";
 
   mapModalEl.classList.add("show");
+
+  // Init or reuse Leaflet map
+  setTimeout(() => {
+    if (!leafletMap) {
+      leafletMap = L.map("mapContainer", {
+        zoomControl: true,
+        attributionControl: true
+      }).setView(coords, 18);
+
+      // Initial layer
+      const provider = TILE_PROVIDERS[mapStyle];
+      mapLayers[mapStyle] = L.tileLayer(provider.url, {
+        maxZoom: provider.maxZoom,
+        attribution: provider.attribution
+      }).addTo(leafletMap);
+
+      // Wire toggle buttons (only once)
+      document.getElementById("btnMapStreet").addEventListener("click", () => setMapStyle("street"));
+      document.getElementById("btnMapSat").addEventListener("click", () => setMapStyle("satellite"));
+    } else {
+      leafletMap.setView(coords, 18);
+      // Remove old markers
+      leafletMap.eachLayer((layer) => {
+        if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
+      });
+    }
+
+    // Add blinking red dot marker
+    const blinkIcon = L.divIcon({
+      className: "blink-marker",
+      html: '<div class="blink-dot-wrap"><div class="blink-dot"></div></div>',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11]
+    });
+    L.marker(coords, { icon: blinkIcon })
+      .addTo(leafletMap)
+      .bindPopup(`<b>${esc(venue || "")}</b>${eventTitle ? "<br>" + esc(eventTitle) : ""}`);
+
+    leafletMap.invalidateSize();
+  }, 50);
 }
 
 function closeMap() {
