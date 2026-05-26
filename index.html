@@ -767,6 +767,21 @@
     background: var(--ink);
     border-color: var(--ink);
   }
+  .pg-chip-count {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    background: var(--bg);
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .pg-chip.active .pg-chip-count {
+    background: rgba(255,255,255,.25);
+    color: white;
+  }
   .program-filters {
     display: flex;
     gap: 8px;
@@ -2403,7 +2418,8 @@ const programState = {
   shown: 0,
   pageSize: 50,
   scrapedAt: null,
-  selectedThemes: new Set()
+  selectedThemes: new Set(),
+  officialThemes: []  // [{name, count}, ...] from program.json
 };
 
 // Fix scrape artifacts: detect run-on title+summary like "TitlenHer kommer beskrivelsen…"
@@ -2475,6 +2491,7 @@ async function loadOfficialProgram() {
     const data = await resp.json();
     programState.events = (data.events || []).map(normalizeEvent);
     programState.scrapedAt = data.scraped_at;
+    programState.officialThemes = data.themes || [];
 
     if (programState.events.length === 0) {
       statusEl.innerHTML = "Programmet er tomt. Kør GitHub Action <b>Scrape Folkemødet Program</b> for at populere.";
@@ -2525,8 +2542,11 @@ function populateFilters() {
     daySel.appendChild(opt);
   });
 
-  // Render theme chips
+  // Render theme chips — use OFFICIAL themes from program.json if available,
+  // falling back to our 16 hardcoded categories
   const chipsEl = document.getElementById("programThemeChips");
+  chipsEl.innerHTML = "";
+
   // "Alle" chip
   const allChip = document.createElement("div");
   allChip.className = "pg-chip all-chip active";
@@ -2539,10 +2559,23 @@ function populateFilters() {
   });
   chipsEl.appendChild(allChip);
 
-  THEMES.forEach(theme => {
+  // Pick theme list: official top 30 if we have them, else our 16 fallback themes
+  const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
+  const themeList = useOfficial
+    ? programState.officialThemes.slice(0, 30).map(t => t.name)
+    : THEMES;
+
+  themeList.forEach(theme => {
     const chip = document.createElement("div");
     chip.className = "pg-chip";
-    chip.textContent = theme;
+    // Show count badge for official themes
+    if (useOfficial) {
+      const themeObj = programState.officialThemes.find(t => t.name === theme);
+      const count = themeObj ? themeObj.count : 0;
+      chip.innerHTML = `${esc(theme)} <span class="pg-chip-count">${count}</span>`;
+    } else {
+      chip.textContent = theme;
+    }
     chip.dataset.theme = theme;
     chip.addEventListener("click", () => {
       if (programState.selectedThemes.has(theme)) {
@@ -2581,10 +2614,11 @@ function applyFilters() {
   const venue = document.getElementById("filterVenue").value;
   const search = document.getElementById("filterSearch").value.trim().toLowerCase();
   const selectedThemes = [...programState.selectedThemes];
+  const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
 
-  // Build keyword list from selected themes
+  // Build keyword list from selected themes (only used if no official themes)
   let themeKeywords = null;
-  if (selectedThemes.length > 0) {
+  if (!useOfficial && selectedThemes.length > 0) {
     themeKeywords = [];
     for (const t of selectedThemes) {
       const kws = THEME_KEYWORDS[t];
@@ -2599,11 +2633,18 @@ function applyFilters() {
       const hay = `${e.title} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
       if (!hay.includes(search)) return false;
     }
-    if (themeKeywords) {
-      const hay = `${e.title || ""} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
-      // OR-logic: event matches if ANY selected theme's keyword is found
-      const matches = themeKeywords.some(kw => hay.includes(kw));
-      if (!matches) return false;
+    if (selectedThemes.length > 0) {
+      if (useOfficial) {
+        // Strict: event's themes array must include at least one selected theme
+        const evThemes = e.themes || [];
+        const matches = selectedThemes.some(t => evThemes.includes(t));
+        if (!matches) return false;
+      } else if (themeKeywords) {
+        // Fallback: keyword match
+        const hay = `${e.title || ""} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
+        const matches = themeKeywords.some(kw => hay.includes(kw));
+        if (!matches) return false;
+      }
     }
     return true;
   });
