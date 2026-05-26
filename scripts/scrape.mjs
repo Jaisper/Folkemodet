@@ -274,11 +274,9 @@ async function scrape() {
             const out = new Set();
 
             // Folkemødet detail pages have a "Tema" label followed by the theme value
-            // as plain text in the next element (sibling or child of next sibling).
-            // Layout: <h3/h4>Tema</h3>  then  <p>Retspolitik og forvaltning</p>
-            // Multiple themes are sometimes comma-separated or in a list.
+            // as plain text. The theme is a complete phrase (e.g. "Sundhed, omsorg og
+            // forebyggelse") — DO NOT split on comma or "og", they're part of the name.
 
-            // Find any element whose ENTIRE text is exactly "Tema" or "Temaer"
             const allEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,div,span,p,label,dt'));
             for (const el of allEls) {
               const t = (el.textContent || '').trim();
@@ -290,21 +288,14 @@ async function scrape() {
                   const txt = (candidate.textContent || '').trim();
                   if (txt && txt.length > 1 && txt.length < 200
                       && txt !== 'Tema' && txt !== 'Temaer' && txt !== 'Emneord') {
-                    // Split on comma or "og" if there are multiple themes
-                    const parts = txt.split(/,\s*|\s+og\s+/);
-                    for (const p of parts) {
-                      const trimmed = p.trim();
-                      if (trimmed && trimmed.length > 2 && trimmed.length < 80) {
-                        out.add(trimmed);
-                      }
-                    }
+                    out.add(txt);
                     break;
                   }
                   candidate = candidate.nextElementSibling;
                   safety++;
                 }
 
-                // Also check the parent's other children (for definition lists / grid layouts)
+                // Also check parent's other children (definition lists, grids)
                 if (out.size === 0 && el.parentElement) {
                   const siblings = Array.from(el.parentElement.children);
                   const idx = siblings.indexOf(el);
@@ -312,13 +303,7 @@ async function scrape() {
                     const txt = (siblings[i].textContent || '').trim();
                     if (txt && txt.length > 2 && txt.length < 200
                         && txt !== 'Tema' && txt !== 'Temaer') {
-                      const parts = txt.split(/,\s*|\s+og\s+/);
-                      for (const p of parts) {
-                        const trimmed = p.trim();
-                        if (trimmed && trimmed.length > 2 && trimmed.length < 80) {
-                          out.add(trimmed);
-                        }
-                      }
+                      out.add(txt);
                       break;
                     }
                   }
@@ -328,7 +313,7 @@ async function scrape() {
               }
             }
 
-            return [...out].slice(0, 10);
+            return [...out].slice(0, 5);
           });
 
           ev.themes = themes;
