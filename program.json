@@ -1,7 +1,7 @@
 {
-  "scraped_at": "2026-05-25T18:06:05.098Z",
+  "scraped_at": "2026-05-26T09:36:20.519Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3576,
+  "event_count": 3583,
   "events": [
     {
       "id": "31784",
@@ -11504,6 +11504,16 @@
       "day": "Torsdag"
     },
     {
+      "id": "34142",
+      "title": "TV 2 Talk – Spin, magtspil og anekdoter fra Christiansborg TV 2-profiler i samtale: Lasse Sjørslev og Hans Redder om at analysere og lave politisk journalistik",
+      "summary": "",
+      "time": "18:00-18:30",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34142/tv-2-talk-spin-magtspil-og-anekdoter-fra-christiansborg",
+      "day": "Torsdag"
+    },
+    {
       "id": "35076",
       "title": "Hvor er Danmark på vej hen?",
       "summary": "Rune Lykkeberg interviewer ukendt medlem af Folketinget.",
@@ -12001,6 +12011,16 @@
       "organizers": "Osted Efterskole",
       "venue": "A3 - Ungdomshøjen",
       "url": "https://program.folkemoedet.dk/events/2026/32020/fanget-bag-skaermen-debat-teater-og-tech-paa-skemaet",
+      "day": "Torsdag"
+    },
+    {
+      "id": "34148",
+      "title": "TV 2 Talk – En magiterning af fakta og følelser på live-tv TV 2-profiler i samtale: Janni Pedersen og Rasmus Staghøj om interview-spændvidden i Go’ aften Live",
+      "summary": "",
+      "time": "19:00-19:30",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34148/tv-2-talk-en-magiterning-af-fakta-og-foelelser-paa-live-tv",
       "day": "Torsdag"
     },
     {
@@ -24344,6 +24364,16 @@
       "day": "Fredag"
     },
     {
+      "id": "34167",
+      "title": "TV 2 Talk - xx",
+      "summary": "",
+      "time": "16:30-17:00",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34167/tv-2-talk-",
+      "day": "Fredag"
+    },
+    {
       "id": "34285",
       "title": "Kom i fængsel med VR-briller Oplev landets mest sikre fængsler indefra med Danmarks Fængslers VR-briller.",
       "summary": "",
@@ -29014,6 +29044,16 @@
       "day": "Lørdag"
     },
     {
+      "id": "34173",
+      "title": "TV 2 Talk – Rød løber og filmmagi til Oscaruddeling TV 2-profiler i samtale: Michèle Bellaiche og Jesper Steinmetz om at dække supereventen The Oscars",
+      "summary": "",
+      "time": "11:00-11:30",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34173/tv-2-talk-roed-loeber-og-filmmagi-til-oscaruddeling",
+      "day": "Lørdag"
+    },
+    {
       "id": "34232",
       "title": "Partiledertale v.",
       "summary": "Morten Messerschmidt Morten Messerschmidt holder partiledertale og svarer på spørgsmål fra publikum.",
@@ -31224,6 +31264,16 @@
       "day": "Lørdag"
     },
     {
+      "id": "31124",
+      "title": "Grønt og galt i halsen?",
+      "summary": "Grønne fødevarer smager godt – men hvorfor når de så stadig ikke vores tallerkener?",
+      "time": "12:05-12:50",
+      "organizers": "Engineer the future, Aalborg Universitet - AAU, Ingeniørforeningen, IDA, DTU, Syddansk Universitet, AU Technical Sciences",
+      "venue": "B2 - Engineer the Future - Techteltet",
+      "url": "https://program.folkemoedet.dk/events/2026/31124/groent-og-galt-i-halsen",
+      "day": "Lørdag"
+    },
+    {
       "id": "33378",
       "title": "Når fagligheden smuldrer – hvad mister vi som samfund?",
       "summary": "Pres på fagligheden truer trivsel, kvalitet, beslutningsgrundlag og tilliden til institutionerne",
@@ -31351,6 +31401,16 @@
       "organizers": "Digital Sundhed Danmark",
       "venue": "J30 - Digital Sundhed Danmark",
       "url": "https://program.folkemoedet.dk/events/2026/33907/quiz-med-sundheddk",
+      "day": "Lørdag"
+    },
+    {
+      "id": "34178",
+      "title": "TV 2 Talk – Anekdoter fra kongelige begivenheder TV 2-profiler i samtale: Ulla Terkelsen og Natasja Crone om timelange kongelige tv-transmissioner",
+      "summary": "",
+      "time": "12:30-13:00",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34178/tv-2-talk-anekdoter-fra-kongelige-begivenheder",
       "day": "Lørdag"
     },
     {
@@ -33611,6 +33671,16 @@
       "organizers": "Diabetesforeningen",
       "venue": "J41 - Diabetesforeningen",
       "url": "https://program.folkemoedet.dk/events/2026/30802/test-din-viden-om-kostfibre-sammen-med-en-diaetist",
+      "day": "Lørdag"
+    },
+    {
+      "id": "34183",
+      "title": "TV 2 Talk – Politisk analyse og nyheder til generation Z TV 2-profiler i samtale: Mille Holkenfeldt og Lawand Hiwa Namo om at lave nyheder målrettet unge",
+      "summary": "",
+      "time": "14:30-15:00",
+      "organizers": "TV 2 Danmark",
+      "venue": "G33 - TV 2 – Mødestedet",
+      "url": "https://program.folkemoedet.dk/events/2026/34183/tv-2-talk-politisk-analyse-og-nyheder-til-generation-z",
       "day": "Lørdag"
     },
     {
