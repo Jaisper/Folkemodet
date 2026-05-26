@@ -2330,7 +2330,7 @@ function renderTimeline(events) {
     byDay[day].push(item);
   });
 
-  // Sort each day chronologically by start time
+  // Sort each day chronologically by start time 
   Object.values(byDay).forEach(list => {
     list.sort((a, b) => parseStartMinutes(a.ev.time) - parseStartMinutes(b.ev.time));
   });
