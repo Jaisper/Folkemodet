@@ -221,6 +221,127 @@ async function scrape() {
 
   await browser.close();
 
+  // === PHASE 2: enrich events with themes from detail pages ===
+  // We re-open browser for parallel page contexts.
+  // Themes rarely change for an event, so we cache by ID from previous program.json
+  let prevEvents = [];
+  try {
+    const prev = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'));
+    prevEvents = prev.events || [];
+  } catch {}
+  const themeCache = new Map();
+  for (const e of prevEvents) {
+    if (e.themes && Array.isArray(e.themes) && e.themes.length > 0) {
+      themeCache.set(e.id, e.themes);
+    }
+  }
+  console.log(`\n=== PHASE 2: Theme enrichment ===`);
+  console.log(`Cached themes for ${themeCache.size} events from previous run`);
+
+  // Identify events we still need to fetch
+  const toFetch = allEvents.filter(e => !themeCache.has(e.id));
+  console.log(`Need to fetch themes for ${toFetch.length} new/uncached events`);
+
+  if (toFetch.length > 0) {
+    const browser2 = await chromium.launch({ headless: true });
+    const ctx2 = await browser2.newContext({
+      userAgent: 'Mozilla/5.0 (compatible; FolkemodetScraper/1.0; github.com/Jaisper/Folkemodet)'
+    });
+
+    const CONCURRENCY = 8;
+    let fetched = 0;
+    let errors = 0;
+
+    // Process in batches
+    for (let i = 0; i < toFetch.length; i += CONCURRENCY) {
+      const batch = toFetch.slice(i, i + CONCURRENCY);
+      await Promise.all(batch.map(async (ev) => {
+        const page = await ctx2.newPage();
+        try {
+          await page.goto(ev.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForTimeout(800);
+
+          const themes = await page.evaluate(() => {
+            // Folkemødet detail pages have an "Emneord" section at bottom
+            // with theme tags. We search for that label and grab nearby tag-like elements.
+            const out = new Set();
+
+            // Strategy 1: find "Emneord" heading and collect siblings/children
+            const allEls = Array.from(document.querySelectorAll('h2, h3, h4, h5, p, strong, div, span'));
+            for (const el of allEls) {
+              const t = (el.textContent || '').trim();
+              if (/^Emneord\s*:?$/i.test(t) || /^Emneord$/i.test(t)) {
+                // Look at parent and siblings for tag-like links/spans
+                let candidates = [];
+                const parent = el.parentElement;
+                if (parent) {
+                  candidates = Array.from(parent.querySelectorAll('a, span, li, div'));
+                  // Also include next siblings of the parent
+                  let sib = parent.nextElementSibling;
+                  while (sib && candidates.length < 50) {
+                    candidates.push(...Array.from(sib.querySelectorAll('a, span, li, div')));
+                    candidates.push(sib);
+                    sib = sib.nextElementSibling;
+                  }
+                }
+                for (const c of candidates) {
+                  const text = (c.textContent || '').trim();
+                  // Filter: short, reasonable theme text
+                  if (text && text.length > 2 && text.length < 60 && !text.includes('\n')
+                      && !/^Emneord/i.test(text) && !/^Arrangør/i.test(text)) {
+                    out.add(text);
+                  }
+                }
+                break;
+              }
+            }
+
+            // Strategy 2: look for tag-link patterns href="/?search=X" or class containing tag/chip/theme
+            document.querySelectorAll('a[href*="search="], a[href*="?tema="], a[href*="?emne="], [class*="tag" i], [class*="chip" i], [class*="theme" i], [class*="topic" i]').forEach(a => {
+              const text = (a.textContent || '').trim();
+              if (text && text.length > 2 && text.length < 60 && !text.includes('\n')) {
+                out.add(text);
+              }
+            });
+
+            return [...out].slice(0, 20);
+          });
+
+          ev.themes = themes;
+          fetched++;
+          if (fetched % 50 === 0) console.log(`  ${fetched}/${toFetch.length} fetched (${errors} errors)`);
+        } catch (err) {
+          errors++;
+          ev.themes = [];
+        }
+        await page.close();
+      }));
+    }
+    await browser2.close();
+    console.log(`  Done: ${fetched} fetched, ${errors} errors`);
+  }
+
+  // Apply cached themes
+  for (const ev of allEvents) {
+    if (!ev.themes && themeCache.has(ev.id)) {
+      ev.themes = themeCache.get(ev.id);
+    }
+    if (!ev.themes) ev.themes = [];
+  }
+
+  // Build official theme catalog: all unique themes across all events
+  const themeFreq = new Map();
+  for (const ev of allEvents) {
+    for (const t of (ev.themes || [])) {
+      themeFreq.set(t, (themeFreq.get(t) || 0) + 1);
+    }
+  }
+  const officialThemes = [...themeFreq.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+  console.log(`\nFound ${officialThemes.length} unique themes`);
+  console.log(`Top 20:`, officialThemes.slice(0, 20).map(t => `${t.name} (${t.count})`).join(', '));
+
   // Sort: by day order, then by start time
   const DAY_ORDER = { 'Torsdag': 0, 'Fredag': 1, 'Lørdag': 2, 'Søndag': 3 };
   allEvents.sort((a, b) => {
@@ -234,6 +355,7 @@ async function scrape() {
     scraped_at: new Date().toISOString(),
     source: PROGRAM_URL,
     event_count: allEvents.length,
+    themes: officialThemes,
     events: allEvents
   };
 
