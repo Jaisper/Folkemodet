@@ -251,6 +251,7 @@ async function scrape() {
     const CONCURRENCY = 8;
     let fetched = 0;
     let errors = 0;
+    let diagnostic_logged = 0;
 
     // Process in batches
     for (let i = 0; i < toFetch.length; i += CONCURRENCY) {
@@ -258,57 +259,96 @@ async function scrape() {
       await Promise.all(batch.map(async (ev) => {
         const page = await ctx2.newPage();
         try {
-          await page.goto(ev.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-          await page.waitForTimeout(800);
+          await page.goto(ev.url, { waitUntil: 'networkidle', timeout: 30000 });
+          // Wait for the "Tema" label to appear in DOM (Nuxt hydration)
+          await page.waitForFunction(() => {
+            const els = document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,div,span,p,label,dt');
+            for (const el of els) {
+              const t = (el.textContent || '').trim();
+              if (t === 'Tema' || t === 'Temaer') return true;
+            }
+            return false;
+          }, { timeout: 5000 }).catch(() => {});
 
           const themes = await page.evaluate(() => {
-            // Folkemødet detail pages have an "Emneord" section at bottom
-            // with theme tags. We search for that label and grab nearby tag-like elements.
             const out = new Set();
 
-            // Strategy 1: find "Emneord" heading and collect siblings/children
-            const allEls = Array.from(document.querySelectorAll('h2, h3, h4, h5, p, strong, div, span'));
+            // Folkemødet detail pages have a "Tema" label followed by the theme value
+            // as plain text in the next element (sibling or child of next sibling).
+            // Layout: <h3/h4>Tema</h3>  then  <p>Retspolitik og forvaltning</p>
+            // Multiple themes are sometimes comma-separated or in a list.
+
+            // Find any element whose ENTIRE text is exactly "Tema" or "Temaer"
+            const allEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,div,span,p,label,dt'));
             for (const el of allEls) {
               const t = (el.textContent || '').trim();
-              if (/^Emneord\s*:?$/i.test(t) || /^Emneord$/i.test(t)) {
-                // Look at parent and siblings for tag-like links/spans
-                let candidates = [];
-                const parent = el.parentElement;
-                if (parent) {
-                  candidates = Array.from(parent.querySelectorAll('a, span, li, div'));
-                  // Also include next siblings of the parent
-                  let sib = parent.nextElementSibling;
-                  while (sib && candidates.length < 50) {
-                    candidates.push(...Array.from(sib.querySelectorAll('a, span, li, div')));
-                    candidates.push(sib);
-                    sib = sib.nextElementSibling;
+              if (t === 'Tema' || t === 'Temaer' || t === 'Emneord') {
+                // Get next element with non-empty text that isn't another label
+                let candidate = el.nextElementSibling;
+                let safety = 0;
+                while (candidate && safety < 5) {
+                  const txt = (candidate.textContent || '').trim();
+                  if (txt && txt.length > 1 && txt.length < 200
+                      && txt !== 'Tema' && txt !== 'Temaer' && txt !== 'Emneord') {
+                    // Split on comma or "og" if there are multiple themes
+                    const parts = txt.split(/,\s*|\s+og\s+/);
+                    for (const p of parts) {
+                      const trimmed = p.trim();
+                      if (trimmed && trimmed.length > 2 && trimmed.length < 80) {
+                        out.add(trimmed);
+                      }
+                    }
+                    break;
+                  }
+                  candidate = candidate.nextElementSibling;
+                  safety++;
+                }
+
+                // Also check the parent's other children (for definition lists / grid layouts)
+                if (out.size === 0 && el.parentElement) {
+                  const siblings = Array.from(el.parentElement.children);
+                  const idx = siblings.indexOf(el);
+                  for (let i = idx + 1; i < Math.min(idx + 4, siblings.length); i++) {
+                    const txt = (siblings[i].textContent || '').trim();
+                    if (txt && txt.length > 2 && txt.length < 200
+                        && txt !== 'Tema' && txt !== 'Temaer') {
+                      const parts = txt.split(/,\s*|\s+og\s+/);
+                      for (const p of parts) {
+                        const trimmed = p.trim();
+                        if (trimmed && trimmed.length > 2 && trimmed.length < 80) {
+                          out.add(trimmed);
+                        }
+                      }
+                      break;
+                    }
                   }
                 }
-                for (const c of candidates) {
-                  const text = (c.textContent || '').trim();
-                  // Filter: short, reasonable theme text
-                  if (text && text.length > 2 && text.length < 60 && !text.includes('\n')
-                      && !/^Emneord/i.test(text) && !/^Arrangør/i.test(text)) {
-                    out.add(text);
-                  }
-                }
-                break;
+
+                if (out.size > 0) break;
               }
             }
 
-            // Strategy 2: look for tag-link patterns href="/?search=X" or class containing tag/chip/theme
-            document.querySelectorAll('a[href*="search="], a[href*="?tema="], a[href*="?emne="], [class*="tag" i], [class*="chip" i], [class*="theme" i], [class*="topic" i]').forEach(a => {
-              const text = (a.textContent || '').trim();
-              if (text && text.length > 2 && text.length < 60 && !text.includes('\n')) {
-                out.add(text);
-              }
-            });
-
-            return [...out].slice(0, 20);
+            return [...out].slice(0, 10);
           });
 
           ev.themes = themes;
           fetched++;
+
+          // Diagnostic: log first 3 events' DOM snippet to help debug if extraction fails
+          if (diagnostic_logged < 3 && themes.length === 0) {
+            diagnostic_logged++;
+            const snippet = await page.evaluate(() => {
+              // Find anything mentioning "Tema" and grab its surroundings
+              const html = document.body.innerHTML;
+              const idx = html.indexOf('Tema');
+              if (idx === -1) return '[no "Tema" found in HTML]';
+              return html.substring(Math.max(0, idx - 50), Math.min(html.length, idx + 800));
+            });
+            console.log(`\n--- DIAGNOSTIC (${ev.url}) ---`);
+            console.log(snippet.replace(/\s+/g, ' ').slice(0, 600));
+            console.log(`--- end diagnostic ---\n`);
+          }
+
           if (fetched % 50 === 0) console.log(`  ${fetched}/${toFetch.length} fetched (${errors} errors)`);
         } catch (err) {
           errors++;
