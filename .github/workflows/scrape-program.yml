@@ -38,5 +38,23 @@ jobs:
           else
             EVENTS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('program.json')).events.length)")
             git commit -m "Update program.json (${EVENTS} events)"
-            git push
+
+            # Retry-push with rebase in case remote has new commits during our long scrape
+            MAX_RETRIES=5
+            for i in $(seq 1 $MAX_RETRIES); do
+              echo "Push attempt $i/$MAX_RETRIES…"
+              if git push; then
+                echo "✓ Pushed successfully"
+                exit 0
+              fi
+              echo "Push rejected — pulling with rebase…"
+              git pull --rebase origin main || {
+                echo "Rebase failed, aborting"
+                git rebase --abort 2>/dev/null || true
+                exit 1
+              }
+              sleep 2
+            done
+            echo "× Could not push after $MAX_RETRIES attempts"
+            exit 1
           fi
