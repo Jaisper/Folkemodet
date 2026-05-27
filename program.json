@@ -1,7 +1,7 @@
 {
-  "scraped_at": "2026-05-26T21:40:34.705Z",
+  "scraped_at": "2026-05-27T09:01:57.758Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3585,
+  "event_count": 3586,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
@@ -17,7 +17,7 @@
     },
     {
       "name": "Andet",
-      "count": 258
+      "count": 259
     },
     {
       "name": "Offentlighed, dialog og diskussion",
@@ -6201,6 +6201,19 @@
       ]
     },
     {
+      "id": "32115",
+      "title": "Gæt & Grimasser – skal vi lave det samme hele livet?",
+      "summary": "Grin og gæt med om det gode sporskifte i arbejdslivet.",
+      "time": "13:00-13:45",
+      "organizers": "Tænketanken DEA",
+      "venue": "C35 - Uddannelsesteltet",
+      "url": "https://program.folkemoedet.dk/events/2026/32115/gaet-grimasser-skal-vi-lave-det-samme-hele-livet",
+      "day": "Torsdag",
+      "themes": [
+        "Uddannelse og forskning"
+      ]
+    },
+    {
       "id": "32465",
       "title": "Digitale konsultationer: En ret, et valg eller tvang?",
       "summary": "Digitale konsultationer: Er det dit valg og din ret – eller systemets beslutning?",
@@ -7199,19 +7212,6 @@
       "day": "Torsdag",
       "themes": [
         "Økonomi, finans og skat"
-      ]
-    },
-    {
-      "id": "32115",
-      "title": "Gæt & Grimasser – skal vi lave det samme hele livet?",
-      "summary": "Grin og gæt med om det gode sporskifte i arbejdslivet.",
-      "time": "13:15-14:00",
-      "organizers": "Tænketanken DEA",
-      "venue": "C35 - Uddannelsesteltet",
-      "url": "https://program.folkemoedet.dk/events/2026/32115/gaet-grimasser-skal-vi-lave-det-samme-hele-livet",
-      "day": "Torsdag",
-      "themes": [
-        "Uddannelse og forskning"
       ]
     },
     {
@@ -30888,6 +30888,19 @@
       ]
     },
     {
+      "id": "34212",
+      "title": "Det store epx derby - Hvilke kæpheste kommer først i mål?",
+      "summary": "Kom til derby i Uddannelsesteltet om den nye ungdomsuddannelse epx",
+      "time": "16:00-16:45",
+      "organizers": "Danske Erhvervsskoler og - Gymnasier, Danske Gymnasier, Tænketanken DEA, Danske Erhvervsakademier, Danske Professionshøjskoler, Danske SOSU-skoler",
+      "venue": "C35 - Uddannelsesteltet",
+      "url": "https://program.folkemoedet.dk/events/2026/34212/det-store-epx-derby-hvilke-kaepheste-kommer-foerst-i-maal",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ]
+    },
+    {
       "id": "34250",
       "title": "Aktiekultur og aktiesparekonto – hvordan får vi flere med?",
       "summary": "Styrkelse af både danskernes økonomiske frihed og erhvervslivet, kræver en stærkere aktiekultur",
@@ -31327,19 +31340,6 @@
       "day": "Fredag",
       "themes": [
         "Socialpolitik og integration"
-      ]
-    },
-    {
-      "id": "34212",
-      "title": "Det store epx derby - Hvilke kæpheste kommer først i mål?",
-      "summary": "Kom til derby i Uddannelsesteltet om den nye ungdomsuddannelse epx",
-      "time": "16:00-17:00",
-      "organizers": "Danske Erhvervsskoler og - Gymnasier, Danske Gymnasier, Tænketanken DEA, Danske Erhvervsakademier, Danske Professionshøjskoler, Danske SOSU-skoler",
-      "venue": "C35 - Uddannelsesteltet",
-      "url": "https://program.folkemoedet.dk/events/2026/34212/det-store-epx-derby-hvilke-kaepheste-kommer-foerst-i-maal",
-      "day": "Fredag",
-      "themes": [
-        "Børn, unge og undervisning"
       ]
     },
     {
@@ -34086,19 +34086,6 @@
       ]
     },
     {
-      "id": "34231",
-      "title": "Tung forskning & metal Gennem heavy-metal og guitar riffs debatteres topaktuelle emner!",
-      "summary": "",
-      "time": "18:45-19:40",
-      "organizers": "Engineer the future, Aalborg Universitet - AAU, Ingeniørforeningen, IDA, DTU, Syddansk Universitet, AU Technical Sciences",
-      "venue": "B2 - Engineer the Future - Techteltet",
-      "url": "https://program.folkemoedet.dk/events/2026/34231/tung-forskning-metal",
-      "day": "Fredag",
-      "themes": [
-        "Andet"
-      ]
-    },
-    {
       "id": "31645",
       "title": "EU på hovedet med Michael Schøt og Mikkel Klint Thorius Oplev skarp satire og politisk debat om europæiske udfordringer med to komikere og Venstrepolitikere",
       "summary": "",
@@ -34161,6 +34148,19 @@
       "day": "Fredag",
       "themes": [
         "Fødevarer og madkultur"
+      ]
+    },
+    {
+      "id": "34231",
+      "title": "Tung forskning & metal Gennem heavy-metal og guitar riffs debatteres topaktuelle emner!",
+      "summary": "",
+      "time": "19:00-20:00",
+      "organizers": "Engineer the future, Aalborg Universitet - AAU, Ingeniørforeningen, IDA, DTU, Syddansk Universitet, AU Technical Sciences",
+      "venue": "B2 - Engineer the Future - Techteltet",
+      "url": "https://program.folkemoedet.dk/events/2026/34231/tung-forskning-metal",
+      "day": "Fredag",
+      "themes": [
+        "Andet"
       ]
     },
     {
@@ -34535,6 +34535,19 @@
       "organizers": "Højskolerne",
       "venue": "B8 - Højskolernes Telt og Bar",
       "url": "https://program.folkemoedet.dk/events/2026/32803/koncert-med-julie-pavon",
+      "day": "Fredag",
+      "themes": [
+        "Andet"
+      ]
+    },
+    {
+      "id": "34033",
+      "title": "DJ - Ungdomsbureauet sætter ild til festen...",
+      "summary": "Kæmpe \"Leave No One Behind\"-fest med Unghdomsbureauet",
+      "time": "22:30-23:00",
+      "organizers": "Bevica Fonden, Muskelsvindfonden, Danske Handicaporganisationer, DTU Skylab",
+      "venue": "C30 - Verdensmålenes Telt",
+      "url": "https://program.folkemoedet.dk/events/2026/34033/dj-ungdomsbureauet-saetter-ild-til-festen",
       "day": "Fredag",
       "themes": [
         "Andet"
