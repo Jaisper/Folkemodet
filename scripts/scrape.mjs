@@ -223,24 +223,30 @@ async function scrape() {
 
   // === PHASE 2: enrich events with themes from detail pages ===
   // We re-open browser for parallel page contexts.
-  // Themes rarely change for an event, so we cache by ID from previous program.json
+  // Details rarely change for an event, so we cache by ID from previous program.json
   let prevEvents = [];
   try {
     const prev = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'));
     prevEvents = prev.events || [];
   } catch {}
-  const themeCache = new Map();
+  const detailCache = new Map();
   for (const e of prevEvents) {
-    if (e.themes && Array.isArray(e.themes) && e.themes.length > 0) {
-      themeCache.set(e.id, e.themes);
+    const hasThemes = e.themes && Array.isArray(e.themes) && e.themes.length > 0;
+    const hasMore = e.more && e.more.length > 0;
+    if (hasThemes || hasMore) {
+      detailCache.set(e.id, {
+        themes: e.themes || [],
+        more: e.more || "",
+        speakers: e.speakers || []
+      });
     }
   }
-  console.log(`\n=== PHASE 2: Theme enrichment ===`);
-  console.log(`Cached themes for ${themeCache.size} events from previous run`);
+  console.log(`\n=== PHASE 2: Event detail enrichment ===`);
+  console.log(`Cached details for ${detailCache.size} events from previous run`);
 
   // Identify events we still need to fetch
-  const toFetch = allEvents.filter(e => !themeCache.has(e.id));
-  console.log(`Need to fetch themes for ${toFetch.length} new/uncached events`);
+  const toFetch = allEvents.filter(e => !detailCache.has(e.id));
+  console.log(`Need to fetch details for ${toFetch.length} new/uncached events`);
 
   if (toFetch.length > 0) {
     const browser2 = await chromium.launch({ headless: true });
@@ -270,60 +276,177 @@ async function scrape() {
             return false;
           }, { timeout: 5000 }).catch(() => {});
 
-          const themes = await page.evaluate(() => {
-            const out = new Set();
-
-            // Folkemødet detail pages have a "Tema" label followed by the theme value
-            // as plain text. The theme is a complete phrase (e.g. "Sundhed, omsorg og
-            // forebyggelse") — DO NOT split on comma or "og", they're part of the name.
-
-            const allEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,div,span,p,label,dt'));
-            for (const el of allEls) {
-              const t = (el.textContent || '').trim();
-              if (t === 'Tema' || t === 'Temaer' || t === 'Emneord') {
-                // Get next element with non-empty text that isn't another label
-                let candidate = el.nextElementSibling;
-                let safety = 0;
-                while (candidate && safety < 5) {
-                  const txt = (candidate.textContent || '').trim();
-                  if (txt && txt.length > 1 && txt.length < 200
-                      && txt !== 'Tema' && txt !== 'Temaer' && txt !== 'Emneord') {
-                    out.add(txt);
-                    break;
+          const details = await page.evaluate(() => {
+            // Helper: find label element and return text of next content element
+            const findLabelValue = (labelTexts) => {
+              const allEls = Array.from(document.querySelectorAll(
+                'h1,h2,h3,h4,h5,h6,strong,b,div,span,p,label,dt'
+              ));
+              for (const el of allEls) {
+                const t = (el.textContent || '').trim();
+                if (labelTexts.includes(t)) {
+                  // Try next sibling first
+                  let candidate = el.nextElementSibling;
+                  let safety = 0;
+                  while (candidate && safety < 5) {
+                    const txt = (candidate.textContent || '').trim();
+                    if (txt && txt.length > 1
+                        && !labelTexts.includes(txt)
+                        && !KNOWN_LABELS.has(txt)) {
+                      return { element: candidate, text: txt };
+                    }
+                    candidate = candidate.nextElementSibling;
+                    safety++;
                   }
-                  candidate = candidate.nextElementSibling;
-                  safety++;
-                }
-
-                // Also check parent's other children (definition lists, grids)
-                if (out.size === 0 && el.parentElement) {
-                  const siblings = Array.from(el.parentElement.children);
-                  const idx = siblings.indexOf(el);
-                  for (let i = idx + 1; i < Math.min(idx + 4, siblings.length); i++) {
-                    const txt = (siblings[i].textContent || '').trim();
-                    if (txt && txt.length > 2 && txt.length < 200
-                        && txt !== 'Tema' && txt !== 'Temaer') {
-                      out.add(txt);
-                      break;
+                  // Try parent siblings
+                  if (el.parentElement) {
+                    const siblings = Array.from(el.parentElement.children);
+                    const idx = siblings.indexOf(el);
+                    for (let i = idx + 1; i < Math.min(idx + 4, siblings.length); i++) {
+                      const txt = (siblings[i].textContent || '').trim();
+                      if (txt && txt.length > 1
+                          && !labelTexts.includes(txt)
+                          && !KNOWN_LABELS.has(txt)) {
+                        return { element: siblings[i], text: txt };
+                      }
                     }
                   }
+                  return null;
                 }
+              }
+              return null;
+            };
 
-                if (out.size > 0) break;
+            const KNOWN_LABELS = new Set([
+              'Tema', 'Temaer', 'Emneord', 'Mere om', 'Beskrivelse',
+              'Deltagere', 'Arrangører', 'Arrangør', 'Lokation', 'Detaljer',
+              'Sprog', 'Underholdning', 'Livestream', 'Tegnsprogtolkes',
+              'Teleslynge', 'Kørestolstilgængelig', 'Hjemmeside'
+            ]);
+
+            // === THEMES ===
+            const themes = [];
+            const themaResult = findLabelValue(['Tema', 'Temaer', 'Emneord']);
+            if (themaResult && themaResult.text.length < 200) {
+              themes.push(themaResult.text);
+            }
+
+            // === MORE (full description) ===
+            // The "Mere om" section usually contains multi-paragraph rich text.
+            // We want the WHOLE block, not just the first paragraph.
+            let more = "";
+            const allEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b'));
+            for (const el of allEls) {
+              const t = (el.textContent || '').trim();
+              if (t === 'Mere om' || t === 'Beskrivelse') {
+                // Collect text from next siblings until we hit another known label
+                const parts = [];
+                let sib = el.nextElementSibling;
+                let safety = 0;
+                while (sib && safety < 20) {
+                  const sibText = (sib.textContent || '').trim();
+                  if (!sibText) { sib = sib.nextElementSibling; safety++; continue; }
+                  // Stop if we hit another section heading
+                  if (KNOWN_LABELS.has(sibText)) break;
+                  // Stop if this sibling CONTAINS a known label (next section start)
+                  const innerLabels = Array.from(sib.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+                  let hitSection = false;
+                  for (const inner of innerLabels) {
+                    if (KNOWN_LABELS.has((inner.textContent || '').trim())) {
+                      hitSection = true; break;
+                    }
+                  }
+                  if (hitSection) break;
+                  parts.push(sibText);
+                  sib = sib.nextElementSibling;
+                  safety++;
+                }
+                more = parts.join('\n\n').trim();
+                if (more.length > 2000) more = more.slice(0, 2000) + '…';
+                break;
               }
             }
 
-            return [...out].slice(0, 5);
+            // === SPEAKERS ===
+            // The "Deltagere" section lists speakers. Each speaker is typically
+            // "Name, Role, Org" or just "Name" — we collect them as objects.
+            const speakers = [];
+            for (const el of allEls) {
+              const t = (el.textContent || '').trim();
+              if (t === 'Deltagere') {
+                let sib = el.nextElementSibling;
+                let safety = 0;
+                while (sib && safety < 30) {
+                  const sibText = (sib.textContent || '').trim();
+                  if (!sibText) { sib = sib.nextElementSibling; safety++; continue; }
+                  if (KNOWN_LABELS.has(sibText)) break;
+                  const innerLabels = Array.from(sib.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+                  let hitSection = false;
+                  for (const inner of innerLabels) {
+                    if (KNOWN_LABELS.has((inner.textContent || '').trim())) {
+                      hitSection = true; break;
+                    }
+                  }
+                  if (hitSection) break;
+                  // Each speaker may be in own element or comma-separated within one
+                  // Try to split intelligently: name in bold/strong, then role/org follows
+                  // Look for child structure
+                  const strongEls = Array.from(sib.querySelectorAll('strong, b'));
+                  if (strongEls.length > 0) {
+                    // Multiple speakers as <strong>Name</strong>, role, org<br>...
+                    for (const strong of strongEls) {
+                      const name = (strong.textContent || '').trim();
+                      if (!name) continue;
+                      // Get text immediately after this strong, up to next strong or br
+                      let after = "";
+                      let node = strong.nextSibling;
+                      while (node) {
+                        if (node.nodeType === 1 && (node.tagName === 'STRONG' || node.tagName === 'B' || node.tagName === 'BR')) break;
+                        if (node.nodeType === 3) after += node.textContent;
+                        else if (node.nodeType === 1) after += (node.textContent || '');
+                        node = node.nextSibling;
+                      }
+                      // Parse "Name, Role, Org" pattern from raw text
+                      const cleaned = after.replace(/^[\s,;:]+/, '').replace(/[\s,;:]+$/, '').trim();
+                      const sp = { name };
+                      if (cleaned) {
+                        const parts = cleaned.split(/,/).map(p => p.trim()).filter(Boolean);
+                        if (parts.length > 0) sp.role = parts[0];
+                        if (parts.length > 1) sp.org = parts.slice(1).join(', ');
+                      }
+                      speakers.push(sp);
+                    }
+                  } else {
+                    // Fallback: treat each line as one speaker
+                    const lines = sibText.split(/\n+/).map(l => l.trim()).filter(Boolean);
+                    for (const line of lines) {
+                      const parts = line.split(/,/).map(p => p.trim()).filter(Boolean);
+                      if (parts.length === 0) continue;
+                      const sp = { name: parts[0] };
+                      if (parts.length > 1) sp.role = parts[1];
+                      if (parts.length > 2) sp.org = parts.slice(2).join(', ');
+                      speakers.push(sp);
+                    }
+                  }
+                  sib = sib.nextElementSibling;
+                  safety++;
+                }
+                break;
+              }
+            }
+
+            return { themes, more, speakers: speakers.slice(0, 20) };
           });
 
-          ev.themes = themes;
+          ev.themes = details.themes;
+          ev.more = details.more;
+          ev.speakers = details.speakers;
           fetched++;
 
-          // Diagnostic: log first 3 events' DOM snippet to help debug if extraction fails
-          if (diagnostic_logged < 3 && themes.length === 0) {
+          // Diagnostic: log first 3 events' DOM snippet if extraction empty
+          if (diagnostic_logged < 3 && details.themes.length === 0 && !details.more && details.speakers.length === 0) {
             diagnostic_logged++;
             const snippet = await page.evaluate(() => {
-              // Find anything mentioning "Tema" and grab its surroundings
               const html = document.body.innerHTML;
               const idx = html.indexOf('Tema');
               if (idx === -1) return '[no "Tema" found in HTML]';
@@ -338,6 +461,8 @@ async function scrape() {
         } catch (err) {
           errors++;
           ev.themes = [];
+          ev.more = "";
+          ev.speakers = [];
         }
         await page.close();
       }));
@@ -346,12 +471,17 @@ async function scrape() {
     console.log(`  Done: ${fetched} fetched, ${errors} errors`);
   }
 
-  // Apply cached themes
+  // Apply cached details
   for (const ev of allEvents) {
-    if (!ev.themes && themeCache.has(ev.id)) {
-      ev.themes = themeCache.get(ev.id);
+    if (detailCache.has(ev.id)) {
+      const cached = detailCache.get(ev.id);
+      if (!ev.themes || ev.themes.length === 0) ev.themes = cached.themes;
+      if (!ev.more) ev.more = cached.more;
+      if (!ev.speakers || ev.speakers.length === 0) ev.speakers = cached.speakers;
     }
     if (!ev.themes) ev.themes = [];
+    if (!ev.more) ev.more = "";
+    if (!ev.speakers) ev.speakers = [];
   }
 
   // Build official theme catalog: all unique themes across all events
