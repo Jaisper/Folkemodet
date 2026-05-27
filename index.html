@@ -1780,10 +1780,30 @@ function scoreEvent(event, themeKeywords, favoriteTerms) {
   }
   // Favorite term matches: weight 3 (more personal)
   for (const term of favoriteTerms) {
-    if (term.length < 3) continue;
+    if (!isValidTerm(term)) continue;
     if (hay.includes(term)) score += 3;
   }
   return score;
+}
+
+// Acronyms and short terms accepted as 2-char favorites/queries
+const SHORT_TERMS_OK = new Set([
+  "ai", "eu", "us", "fn", "dr", "di", "fh", "lo", "dk", "uk",
+  "co2", "nato", "cia", "fbi", "wto", "imf", "ngo", "kpi", "kbh"
+]);
+
+function isValidTerm(s) {
+  if (!s) return false;
+  const t = String(s).trim();
+  if (t.length >= 3) return true;
+  return SHORT_TERMS_OK.has(t.toLowerCase());
+}
+
+// True if the favorites string contains at least one term we'd actually search on
+function hasValidFavoriteInput(value) {
+  if (!value) return false;
+  const terms = value.toLowerCase().split(/[,;]| og | samt |\s+/).map(s => s.trim());
+  return terms.some(isValidTerm);
 }
 
 // Pre-filter events client-side BEFORE sending to AI.
@@ -1797,7 +1817,7 @@ function preFilterEvents(themes, favorites, maxEvents = 200) {
     .toLowerCase()
     .split(/[,;]| og | samt /)
     .map(s => s.trim())
-    .filter(s => s.length >= 3);
+    .filter(isValidTerm);
 
   // Step 1: filter by official themes (if any selected)
   let pool;
@@ -2112,7 +2132,7 @@ async function generate() {
     showStatus("Indtast og gem din Groq API-nøgle først.", true);
     return;
   }
-  if (programState.selectedThemes.size === 0 && favoritesEl.value.trim().length < 3) {
+  if (programState.selectedThemes.size === 0 && !hasValidFavoriteInput(favoritesEl.value)) {
     showStatus("Vælg mindst ét tema øverst eller skriv noget i 'Personlige interesser'.", true);
     return;
   }
