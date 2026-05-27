@@ -782,6 +782,49 @@
     background: rgba(255,255,255,.25);
     color: white;
   }
+
+  /* COMPACT AI BAR */
+  .ai-bar {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin: 0 0 14px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .ai-favorites {
+    flex: 1;
+    min-height: 38px;
+    max-height: 100px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--ink);
+    resize: vertical;
+    line-height: 1.4;
+  }
+  .ai-favorites:focus {
+    outline: none;
+    border-color: var(--orange);
+    background: white;
+  }
+  .ai-go-btn {
+    flex-shrink: 0;
+    padding: 0 18px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+    background: var(--red);
+  }
+  .ai-go-btn:hover:not(:disabled) {
+    background: var(--red-dark);
+  }
+  @media (max-width: 600px) {
+    .ai-bar { flex-direction: column; }
+    .ai-go-btn { padding: 12px !important; }
+  }
   .program-filters {
     display: flex;
     gap: 8px;
@@ -1238,6 +1281,14 @@
     <div id="programStatus" class="panel-help">Loader…</div>
     <div id="programControls" style="display:none">
       <div class="program-theme-chips" id="programThemeChips"></div>
+
+      <div class="ai-bar">
+        <textarea id="favorites" class="ai-favorites" placeholder="Personlige interesser (valgfrit): politikere, organisationer, specifikke spørgsmål, fagperspektiver…" rows="1"></textarea>
+        <button class="generate-btn ai-go-btn" id="generateBtn" type="button">✨ AI-anbefal</button>
+      </div>
+      <div class="status" id="status"></div>
+      <section id="results"></section>
+
       <div class="program-filters">
         <select id="filterDay"><option value="">Alle dage</option></select>
         <select id="filterVenue"><option value="">Alle venues</option></select>
@@ -1249,27 +1300,6 @@
       <button class="load-more" id="loadMoreBtn" type="button" style="display:none">Vis flere</button>
     </div>
   </section>
-
-  <section class="panel">
-    <div class="panel-title">Temaer (16)</div>
-    <div class="panel-help">Vælg de emner du vil prioritere i debatprogrammet.</div>
-    <div class="chips" id="themeChips"></div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-title">Personlige interesser</div>
-    <div class="panel-help">Fri tekst: politikere, organisationer, specifikke spørgsmål, faglige perspektiver, paneldebattører du følger…</div>
-    <textarea id="favorites" placeholder="F.eks.: Mette Frederiksen, Cepos, Concito, AI-regulering, dansk forsvarsindustri, kommunal velfærd, generationsskifte i landbrug…"></textarea>
-  </section>
-
-  <div class="action-bar">
-    <div class="counter" id="counter"><b>0</b> temaer · <b>0</b> tegn i interesser</div>
-    <button class="generate-btn" id="generateBtn">Find events</button>
-  </div>
-
-  <div class="status" id="status"></div>
-
-  <section id="results"></section>
 
   <section class="panel" style="margin-top:48px">
     <div class="panel-title">AI-model</div>
@@ -1533,13 +1563,11 @@ const state = {
 // DOM
 // ============================================================
 const $ = (s) => document.querySelector(s);
-const chipsEl = $("#themeChips");
 const apiKeyEl = $("#apiKey");
 const saveKeyBtn = $("#saveKey");
 const keyStatusEl = $("#keyStatus");
 const modelSelectEl = $("#modelSelect");
 const favoritesEl = $("#favorites");
-const counterEl = $("#counter");
 const generateBtn = $("#generateBtn");
 const statusEl = $("#status");
 const resultsEl = $("#results");
@@ -1674,16 +1702,6 @@ document.addEventListener("keydown", (e) => {
 // INIT
 // ============================================================
 function init() {
-  // Render chips
-  THEMES.forEach((t) => {
-    const c = document.createElement("div");
-    c.className = "chip";
-    c.textContent = t;
-    c.dataset.theme = t;
-    c.addEventListener("click", () => toggleTheme(t, c));
-    chipsEl.appendChild(c);
-  });
-
   // Load API key
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
@@ -1707,10 +1725,7 @@ function init() {
     });
   }
 
-  favoritesEl.addEventListener("input", updateCounter);
   generateBtn.addEventListener("click", generate);
-
-  updateCounter();
 }
 
 function saveKey() {
@@ -1724,23 +1739,6 @@ function saveKey() {
   state.apiKey = v;
   keyStatusEl.textContent = "✓ Gemt lokalt (" + v.slice(0,7) + "…" + v.slice(-4) + ")";
   keyStatusEl.classList.add("saved");
-}
-
-function toggleTheme(theme, el) {
-  if (state.selectedThemes.has(theme)) {
-    state.selectedThemes.delete(theme);
-    el.classList.remove("active");
-  } else {
-    state.selectedThemes.add(theme);
-    el.classList.add("active");
-  }
-  updateCounter();
-}
-
-function updateCounter() {
-  const n = state.selectedThemes.size;
-  const chars = favoritesEl.value.trim().length;
-  counterEl.innerHTML = `<b>${n}</b> tema${n===1?"":"er"} · <b>${chars}</b> tegn i interesser`;
 }
 
 // ============================================================
@@ -1789,32 +1787,46 @@ function scoreEvent(event, themeKeywords, favoriteTerms) {
 }
 
 // Pre-filter events client-side BEFORE sending to AI.
-// This is critical to stay under TPM limits.
+// PRIMARY: official theme tags from program.json (exact match)
+// SECONDARY: freetext favorites (keyword scoring within theme-matched events)
 function preFilterEvents(themes, favorites, maxEvents = 200) {
   if (!programState.events || programState.events.length === 0) return [];
 
-  // Collect all keywords from selected themes
-  const themeKeywords = [];
-  for (const t of themes) {
-    const kws = THEME_KEYWORDS[t];
-    if (kws) themeKeywords.push(...kws);
-  }
-
-  // Parse favorites: split on commas, "og", and whitespace; lowercase
+  // Parse favorites: split on commas / "og" / semicolons; lowercase
   const favoriteTerms = favorites
     .toLowerCase()
     .split(/[,;]| og | samt /)
     .map(s => s.trim())
     .filter(s => s.length >= 3);
 
-  // Score all events
-  const scored = programState.events
-    .map(e => ({ event: e, score: scoreEvent(e, themeKeywords, favoriteTerms) }))
-    .filter(x => x.score > 0)
-    .sort((a, b) => b.score - a.score);
+  // Step 1: filter by official themes (if any selected)
+  let pool;
+  if (themes.length > 0) {
+    pool = programState.events.filter(e => {
+      const evThemes = e.themes || [];
+      return themes.some(t => evThemes.includes(t));
+    });
+  } else {
+    // No themes — score the entire program by favorites only
+    pool = programState.events;
+  }
 
-  // Dedupe by day + time + normalized title — Folkemødet has many duplicate events
-  // (same talk, different stadenumre) which would otherwise dominate the AI's input.
+  // Step 2: score remaining events by favorite term matches in text
+  const scored = pool.map(e => {
+    const hay = ((e.title || "") + " " + (e.summary || "") + " " +
+                 (e.organizers || "") + " " + (e.venue || "")).toLowerCase();
+    let score = 0;
+    for (const term of favoriteTerms) {
+      if (hay.includes(term)) score += 3;
+    }
+    // Baseline score for theme-matched events with no favorites
+    if (themes.length > 0 && favoriteTerms.length === 0) score = 1;
+    return { event: e, score };
+  })
+  .filter(x => x.score > 0)
+  .sort((a, b) => b.score - a.score);
+
+  // Step 3: dedupe by day+time+title (Folkemødet has many duplicate parallel events)
   const seen = new Set();
   const deduped = [];
   for (const x of scored) {
@@ -2100,12 +2112,12 @@ async function generate() {
     showStatus("Indtast og gem din Groq API-nøgle først.", true);
     return;
   }
-  if (state.selectedThemes.size === 0 && favoritesEl.value.trim().length < 3) {
-    showStatus("Vælg mindst ét tema eller skriv noget i 'Personlige interesser'.", true);
+  if (programState.selectedThemes.size === 0 && favoritesEl.value.trim().length < 3) {
+    showStatus("Vælg mindst ét tema øverst eller skriv noget i 'Personlige interesser'.", true);
     return;
   }
 
-  const themes = [...state.selectedThemes];
+  const themes = [...programState.selectedThemes];
   const favorites = favoritesEl.value;
   const selectedModel = modelSelectEl.value;
 
