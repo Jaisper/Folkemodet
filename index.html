@@ -137,600 +137,6 @@
   }
 
   /* API KEY */
-  .key-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .key-row input {
-    flex: 1;
-    min-width: 200px;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    font-family: 'Source Sans 3', monospace;
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .key-row input:focus {
-    outline: none;
-    border-color: var(--orange);
-    background: white;
-  }
-  /* Custom masking — looks like password field but isn't,
-     so browsers don't trigger their password manager. */
-  .api-key-input {
-    -webkit-text-security: disc;
-    text-security: disc;
-    font-family: 'Source Sans 3', monospace;
-    letter-spacing: 0.1em;
-  }
-  .api-key-input.revealed {
-    -webkit-text-security: none;
-    text-security: none;
-    letter-spacing: normal;
-  }
-  .key-reveal-btn {
-    background: white;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 0 12px;
-    font-size: 16px;
-    cursor: pointer;
-    color: var(--ink-soft);
-    transition: all .12s ease;
-    flex-shrink: 0;
-  }
-  .key-reveal-btn:hover {
-    background: var(--bg);
-    color: var(--ink);
-    border-color: var(--orange);
-  }
-  .key-reveal-btn.active {
-    background: var(--orange-pale);
-    color: var(--ink);
-    border-color: var(--orange);
-  }
-  .key-status {
-    font-size: 12px;
-    color: var(--ink-muted);
-    margin-top: 8px;
-    font-family: 'Source Sans 3', monospace;
-  }
-  .key-status.saved { color: var(--confirmed); }
-
-  /* MODEL */
-  .model-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  select {
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: white;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    cursor: pointer;
-    min-width: 280px;
-  }
-  select:focus { outline: none; border-color: var(--orange); }
-  .model-note {
-    font-size: 12px;
-    color: var(--ink-muted);
-    font-style: italic;
-  }
-
-  /* CHIPS */
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chip {
-    padding: 8px 14px;
-    border: 1.5px solid var(--line);
-    background: white;
-    border-radius: 999px;
-    cursor: pointer;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-soft);
-    transition: all .15s ease;
-    user-select: none;
-  }
-  .chip:hover {
-    border-color: var(--orange);
-    color: var(--ink);
-  }
-  .chip.active {
-    background: var(--orange);
-    border-color: var(--orange);
-    color: white;
-    font-weight: 600;
-  }
-
-  /* FAVORITES */
-  textarea {
-    width: 100%;
-    min-height: 80px;
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--ink);
-    resize: vertical;
-    line-height: 1.5;
-  }
-  textarea:focus {
-    outline: none;
-    border-color: var(--orange);
-    background: white;
-  }
-
-  /* COUNTER + GENERATE */
-  .action-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 18px 22px;
-    background: var(--ink);
-    color: white;
-    border-radius: 4px;
-    margin-bottom: 32px;
-  }
-  .counter {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
-    color: rgba(255,255,255,.85);
-  }
-  .counter b {
-    color: var(--orange-light);
-    font-weight: 600;
-  }
-  .generate-btn {
-    background: var(--red);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 3px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background .15s ease, transform .1s ease;
-  }
-  .generate-btn:hover:not(:disabled) { background: var(--red-dark); }
-  .generate-btn:active:not(:disabled) { transform: translateY(1px); }
-  .generate-btn:disabled {
-    background: var(--ink-muted);
-    cursor: not-allowed;
-  }
-
-  /* STATUS */
-  .status {
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    border-left: 3px solid var(--orange);
-    background: var(--orange-pale);
-    font-size: 14px;
-    color: var(--ink);
-    display: none;
-  }
-  .status.show { display: block; }
-  .status.error {
-    border-left-color: var(--red);
-    background: #FBE5E8;
-  }
-
-  /* RESULTS */
-  .results-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .results-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-  .results-meta {
-    font-size: 12px;
-    color: var(--ink-muted);
-    font-family: 'Source Sans 3', monospace;
-  }
-
-  .event-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .event-card {
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-left: 5px solid var(--orange);
-    border-radius: 3px;
-    padding: 18px 20px;
-    box-shadow: var(--shadow);
-    position: relative;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .event-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(26,26,26,.06), 0 12px 28px rgba(26,26,26,.08);
-  }
-
-  /* Rank-based borders */
-  .event-card.rank-top { border-left-color: var(--red); }
-  .event-card.rank-mid { border-left-color: var(--orange); }
-  .event-card.rank-low { border-left-color: var(--orange-light); }
-
-  .card-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 10px;
-  }
-  .rank-num {
-    font-family: 'Oswald', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--ink-muted);
-    min-width: 36px;
-  }
-  .rank-top .rank-num { color: var(--red); }
-  .rank-mid .rank-num { color: var(--orange); }
-
-  .card-title-block {
-    flex: 1;
-    min-width: 0;
-  }
-  .event-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 19px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-  .event-title-link {
-    color: var(--ink);
-    text-decoration: none;
-    border-bottom: 2px solid transparent;
-    transition: border-color .12s ease, color .12s ease;
-  }
-  .event-title-link:hover {
-    color: var(--orange);
-    border-bottom-color: var(--orange);
-  }
-  .event-summary {
-    font-size: 14px;
-    color: var(--ink-soft);
-    line-height: 1.5;
-    margin: 8px 0 12px 50px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed var(--line-soft);
-  }
-  .event-organizer {
-    font-size: 13px;
-    color: var(--ink-soft);
-    font-weight: 500;
-  }
-
-  .confidence-badge {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    border-radius: 2px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .confidence-badge.confirmed {
-    background: #E3F2E5;
-    color: var(--confirmed);
-    border: 1px solid #B5DDBA;
-  }
-  .confidence-badge.likely {
-    background: #FBF1D9;
-    color: var(--likely);
-    border: 1px solid #ECCF80;
-  }
-  .confidence-badge.speculative {
-    background: #ECE7DE;
-    color: var(--speculative);
-    border: 1px solid #D5CDBC;
-  }
-
-  .meta-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 18px;
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin: 10px 0;
-    padding: 8px 0;
-    border-top: 1px dashed var(--line-soft);
-    border-bottom: 1px dashed var(--line-soft);
-  }
-  .meta-item { display: flex; align-items: center; gap: 6px; }
-  .meta-label {
-    font-weight: 600;
-    color: var(--ink-muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .meta-value { color: var(--ink); }
-
-  .themes-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin: 10px 0;
-  }
-  .theme-tag {
-    background: var(--orange-pale);
-    color: #8B4416;
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .speakers-line {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin: 8px 0;
-    font-style: italic;
-  }
-  .speakers-line strong {
-    font-style: normal;
-    font-weight: 600;
-    color: var(--ink-muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-right: 6px;
-    font-family: 'Source Sans 3', sans-serif;
-  }
-
-  .why-match {
-    font-size: 14px;
-    color: var(--ink);
-    line-height: 1.55;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--line-soft);
-  }
-  .why-match::before {
-    content: "Hvorfor matcher det dig: ";
-    font-weight: 600;
-    color: var(--red);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  /* SPINNER */
-  .spinner {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255,255,255,.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* VIEW TOGGLE */
-  .view-toggle {
-    display: inline-flex;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .view-btn {
-    background: transparent;
-    border: none;
-    padding: 6px 14px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-  .view-btn:hover { color: var(--ink); }
-  .view-btn.active {
-    background: var(--ink);
-    color: white;
-  }
-
-  /* TIMELINE */
-  .timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .tl-day {
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  .tl-day-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 14px 22px;
-    background: var(--ink);
-    color: white;
-    border-bottom: 3px solid var(--orange);
-  }
-  .tl-day-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .tl-day-date {
-    font-size: 13px;
-    color: rgba(255,255,255,.7);
-  }
-  .tl-day-count {
-    margin-left: auto;
-    font-size: 11px;
-    font-family: 'Source Sans 3', monospace;
-    color: var(--orange-light);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .tl-list {
-    display: flex;
-    flex-direction: column;
-  }
-  .tl-row {
-    display: flex;
-    gap: 16px;
-    padding: 12px 22px;
-    border-bottom: 1px solid var(--line-soft);
-    transition: background .12s ease;
-  }
-  .tl-row:last-child { border-bottom: none; }
-  .tl-row:hover { background: var(--bg); }
-  .tl-time {
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--red);
-    min-width: 105px;
-    flex-shrink: 0;
-    padding-top: 2px;
-    letter-spacing: 0.02em;
-  }
-  .tl-body {
-    flex: 1;
-    min-width: 0;
-  }
-  .tl-title-row {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-bottom: 4px;
-  }
-  .tl-title {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink);
-    flex: 1;
-    min-width: 0;
-    line-height: 1.3;
-  }
-  .tl-title-link {
-    color: var(--ink);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color .12s ease, color .12s ease;
-  }
-  .tl-title-link:hover {
-    color: var(--orange);
-    border-bottom-color: var(--orange);
-  }
-  .tl-summary {
-    font-size: 13px;
-    color: var(--ink-soft);
-    line-height: 1.45;
-    margin: 4px 0 0 0;
-  }
-  .tl-why {
-    font-size: 13px;
-    color: var(--ink);
-    line-height: 1.45;
-    margin: 6px 0 0 0;
-    padding: 6px 10px;
-    background: var(--orange-pale);
-    border-left: 3px solid var(--orange);
-    border-radius: 0 3px 3px 0;
-  }
-  .tl-why::before {
-    content: "Match: ";
-    font-weight: 700;
-    color: var(--red);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-right: 4px;
-  }
-  .tl-venue {
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
-  .tl-venue .venue-dot {
-    color: var(--orange);
-    margin-right: 4px;
-  }
-  .tl-venue .tl-org {
-    color: var(--ink-muted);
-    font-style: italic;
-  }
-  .tl-rank-mini {
-    font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--ink-muted);
-    background: var(--line-soft);
-    padding: 1px 6px;
-    border-radius: 2px;
-    margin-right: 6px;
-    letter-spacing: 0.04em;
-  }
-  .tl-overlap {
-    background: #FBE5E8;
-  }
-  .tl-overlap:hover {
-    background: #F8D6DA;
-  }
-  .tl-overlap-flag {
-    color: var(--red);
-    font-size: 13px;
-    margin-left: 4px;
-  }
-
   /* PROGRAM LIST */
   .program-theme-chips {
     display: flex;
@@ -783,48 +189,6 @@
     color: white;
   }
 
-  /* COMPACT AI BAR */
-  .ai-bar {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-    margin: 0 0 14px 0;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--line-soft);
-  }
-  .ai-favorites {
-    flex: 1;
-    min-height: 38px;
-    max-height: 100px;
-    padding: 9px 12px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 13px;
-    background: var(--bg);
-    color: var(--ink);
-    resize: vertical;
-    line-height: 1.4;
-  }
-  .ai-favorites:focus {
-    outline: none;
-    border-color: var(--orange);
-    background: white;
-  }
-  .ai-go-btn {
-    flex-shrink: 0;
-    padding: 0 18px !important;
-    font-size: 13px !important;
-    white-space: nowrap;
-    background: var(--red);
-  }
-  .ai-go-btn:hover:not(:disabled) {
-    background: var(--red-dark);
-  }
-  @media (max-width: 600px) {
-    .ai-bar { flex-direction: column; }
-    .ai-go-btn { padding: 12px !important; }
-  }
   .program-filters {
     display: flex;
     gap: 8px;
@@ -930,6 +294,30 @@
     color: var(--ink-soft);
     line-height: 1.5;
     margin: 0 0 6px 0;
+  }
+  .pg-subtitle {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 2px 0 6px 0;
+    font-style: italic;
+  }
+  .pg-speakers {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin: 6px 0;
+    padding: 4px 0;
+  }
+  .pg-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-right: 8px;
   }
   .pg-meta {
     font-size: 11px;
@@ -1273,7 +661,7 @@
   <header>
     <div class="eyebrow">Allinge · Bornholm · 11.–13. juni 2026</div>
     <h1>Folkemødet <span class="ampersand">·</span> AI</h1>
-    <div class="subtitle"><b>Program & AI-anbefaler.</b> Hele det officielle program + personligt prioriterede anbefalinger.</div>
+    <div class="subtitle"><b>Folkemødets program.</b> Søg, filtrer, find vej til arrangementerne.</div>
   </header>
 
   <section class="panel" id="programPanel">
@@ -1282,17 +670,10 @@
     <div id="programControls" style="display:none">
       <div class="program-theme-chips" id="programThemeChips"></div>
 
-      <div class="ai-bar">
-        <textarea id="favorites" class="ai-favorites" placeholder="Personlige interesser (valgfrit): politikere, organisationer, specifikke spørgsmål, fagperspektiver…" rows="1"></textarea>
-        <button class="generate-btn ai-go-btn" id="generateBtn" type="button">✨ AI-anbefal</button>
-      </div>
-      <div class="status" id="status"></div>
-      <section id="results"></section>
-
       <div class="program-filters">
         <select id="filterDay"><option value="">Alle dage</option></select>
         <select id="filterVenue"><option value="">Alle venues</option></select>
-        <input type="search" id="filterSearch" placeholder="Søg titel/arrangør…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
+        <input type="search" id="filterSearch" placeholder="Søg titel, beskrivelse, arrangør, deltagere…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
         <button class="filter-clear" id="filterClear" type="button">Nulstil</button>
       </div>
       <div class="program-meta" id="programMeta"></div>
@@ -1301,46 +682,9 @@
     </div>
   </section>
 
-  <section class="panel" style="margin-top:48px">
-    <div class="panel-title">AI-model</div>
-    <div class="model-row">
-      <select id="modelSelect">
-        <option value="openai/gpt-oss-120b">GPT-OSS 120B — bedst til detaljerede svar (anbefalet)</option>
-        <option value="llama-3.3-70b-versatile">Llama 3.3 70B — solid alternativ</option>
-        <option value="compound-beta">Compound Beta — Groq's agent-model</option>
-        <option value="llama-3.1-8b-instant">Llama 3.1 8B — hurtig, kompakt prompt</option>
-      </select>
-      <span class="model-note">Auto-fallback til Llama 3.3 70B ved 429/TPM-fejl</span>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-title">Groq API-nøgle</div>
-    <div class="panel-help">Nøglen gemmes lokalt i din browser (localStorage) og sendes kun direkte til Groq. Hentes gratis på <a href="https://console.groq.com" target="_blank" style="color:var(--orange)">console.groq.com</a>.</div>
-    <div class="key-row">
-      <input
-        type="text"
-        id="apiKey"
-        placeholder="gsk_..."
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        data-form-type="other"
-        data-lpignore="true"
-        data-1p-ignore="true"
-        aria-label="Groq API-nøgle"
-        name="groq-api-token-x9z2"
-        class="api-key-input">
-      <button type="button" class="key-reveal-btn" id="revealKey" title="Vis/skjul">👁</button>
-      <button class="generate-btn" id="saveKey" style="background:var(--ink)">Gem</button>
-    </div>
-    <div class="key-status" id="keyStatus"></div>
-  </section>
-
   <footer>
-    <div>Bygget med Groq · Folkemødet 2026 program-data er udgivet løbende — AI'en markerer hvert event med <b>confirmed / likely / speculative</b>.</div>
-    <div style="margin-top:6px">Verificer altid bekræftede tidspunkter på <a href="https://folkemoedet.dk" target="_blank">folkemoedet.dk</a>.</div>
+    <div>Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
+    <div style="margin-top:6px">Bygget af <a href="https://github.com/Jaisper/Folkemodet" target="_blank">@Jaisper</a> — ingen affiliering med Folkemødet.</div>
   </footer>
 
 </div>
@@ -1370,44 +714,11 @@
 // ============================================================
 // DATA
 // ============================================================
-const THEMES = [
-  "Demokrati",
-  "Klima & grøn omstilling",
-  "Sundhed",
-  "Uddannelse",
-  "Økonomi & skat",
-  "Udenrigspolitik",
-  "Forsvar & sikkerhed",
-  "EU",
-  "Teknologi & AI",
-  "Socialpolitik",
-  "Arbejdsmarked",
-  "Ligestilling",
-  "Integration",
-  "Medier & ytringsfrihed",
-  "Velfærd & ældre",
-  "Kultur & dannelse"
-];
-
-const STORAGE_KEY = "folkemodet_groq_key";
-const FALLBACK_MODEL = "llama-3.3-70b-versatile";
-const LOW_TPM_MODELS = new Set(["llama-3.1-8b-instant"]);
-
 const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag"];
 const DAY_DATES = {
   "Torsdag": "11. juni",
   "Fredag": "12. juni",
   "Lørdag": "13. juni"
-};
-const DAY_ISO = {
-  "Torsdag": "2026-06-11",
-  "Fredag": "2026-06-12",
-  "Lørdag": "2026-06-13"
-};
-const ISO_DAY = {
-  "2026-06-11": "Torsdag",
-  "2026-06-12": "Fredag",
-  "2026-06-13": "Lørdag"
 };
 
 // Specific stade coordinates for high-traffic venues.
@@ -1563,14 +874,6 @@ const state = {
 // DOM
 // ============================================================
 const $ = (s) => document.querySelector(s);
-const apiKeyEl = $("#apiKey");
-const saveKeyBtn = $("#saveKey");
-const keyStatusEl = $("#keyStatus");
-const modelSelectEl = $("#modelSelect");
-const favoritesEl = $("#favorites");
-const generateBtn = $("#generateBtn");
-const statusEl = $("#status");
-const resultsEl = $("#results");
 const mapModalEl = $("#mapModal");
 const mapCloseEl = $("#mapClose");
 const mapTitleEl = $("#mapTitle");
@@ -1698,747 +1001,28 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && mapModalEl.classList.contains("show")) closeMap();
 });
 
-// ============================================================
-// INIT
-// ============================================================
-function init() {
-  // Load API key
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    state.apiKey = saved;
-    apiKeyEl.value = saved;
-    keyStatusEl.textContent = "✓ Nøgle gemt lokalt (" + saved.slice(0,7) + "…" + saved.slice(-4) + ")";
-    keyStatusEl.classList.add("saved");
-  }
-
-  // Listeners
-  saveKeyBtn.addEventListener("click", saveKey);
-  apiKeyEl.addEventListener("keydown", (e) => { if (e.key === "Enter") saveKey(); });
-
-  // Reveal/hide API key
-  const revealBtn = document.getElementById("revealKey");
-  if (revealBtn) {
-    revealBtn.addEventListener("click", () => {
-      apiKeyEl.classList.toggle("revealed");
-      revealBtn.classList.toggle("active");
-      revealBtn.textContent = apiKeyEl.classList.contains("revealed") ? "🙈" : "👁";
-    });
-  }
-
-  generateBtn.addEventListener("click", generate);
-}
-
-function saveKey() {
-  const v = apiKeyEl.value.trim();
-  if (!v) {
-    keyStatusEl.textContent = "× Tom nøgle";
-    keyStatusEl.classList.remove("saved");
-    return;
-  }
-  localStorage.setItem(STORAGE_KEY, v);
-  state.apiKey = v;
-  keyStatusEl.textContent = "✓ Gemt lokalt (" + v.slice(0,7) + "…" + v.slice(-4) + ")";
-  keyStatusEl.classList.add("saved");
-}
-
-// ============================================================
-// PROMPTS
-// ============================================================
-// Theme → search keywords mapping (Danish)
-const THEME_KEYWORDS = {
-  "Demokrati": ["demokrati", "folkestyre", "valg", "borgerskab", "deltagelse", "stemme", "politik"],
-  "Klima & grøn omstilling": ["klima", "grøn", "omstilling", "co2", "bæredygtig", "energi", "miljø", "natur", "biodiversitet", "vedvarende"],
-  "Sundhed": ["sundhed", "sygehus", "patient", "læge", "psyk", "kræft", "diabetes", "hjerte", "demens", "trivsel"],
-  "Uddannelse": ["uddannelse", "skole", "elev", "universitet", "studerend", "lærer", "pædagog", "folkeskole", "gymnasi", "efterskole"],
-  "Økonomi & skat": ["økonomi", "skat", "finans", "moms", "vækst", "konkurrence", "investering", "bnp", "inflation"],
-  "Udenrigspolitik": ["udenrigs", "international", "diplomat", "globalt", "udland", "ukraine", "rusland", "kina", "usa", "afrika"],
-  "Forsvar & sikkerhed": ["forsvar", "sikkerhed", "militær", "krig", "nato", "beredskab", "værnepligt", "politi", "cyber"],
-  "EU": ["eu", "europa", "europæisk", "bruxelles", "kommission", "parlament", "union"],
-  "Teknologi & AI": ["teknologi", "ai", "kunstig intelligens", "digital", "tech", "data", "automatis", "robot", "innovation"],
-  "Socialpolitik": ["social", "udsat", "fattig", "ulighed", "hjemløs", "kontanthjælp", "førtidspension", "børn", "familie"],
-  "Arbejdsmarked": ["arbejde", "job", "fagforening", "overenskomst", "ledighed", "iværksætter", "kvalifikation", "kompetence", "rekrutter"],
-  "Ligestilling": ["ligestilling", "køn", "kvinder", "lgbt", "minoritet", "diversitet", "lige løn", "barsel"],
-  "Integration": ["integration", "indvandr", "flygt", "etnisk", "migration", "asyl", "udlænding", "kultur"],
-  "Medier & ytringsfrihed": ["medier", "presse", "journalist", "ytring", "censur", "fake news", "misinformation", "tv", "radio", "avis"],
-  "Velfærd & ældre": ["velfærd", "ældre", "pension", "plejehjem", "omsorg", "demens", "alder", "folkepension"],
-  "Kultur & dannelse": ["kultur", "kunst", "musik", "litteratur", "teater", "film", "dannelse", "højskole", "bibliotek", "museum"]
-};
-
-// Score an event by relevance to themes + favorites (free text)
-function scoreEvent(event, themeKeywords, favoriteTerms) {
-  const hay = (
-    (event.title || "") + " " +
-    (event.summary || "") + " " +
-    (event.organizers || "") + " " +
-    (event.venue || "")
-  ).toLowerCase();
-
-  let score = 0;
-  // Theme matches: weight 2 (each keyword hit)
-  for (const kw of themeKeywords) {
-    if (hay.includes(kw)) score += 2;
-  }
-  // Favorite term matches: weight 3 (more personal)
-  for (const term of favoriteTerms) {
-    if (!isValidTerm(term)) continue;
-    if (hay.includes(term)) score += 3;
-  }
-  return score;
-}
-
-// Acronyms and short terms accepted as 2-char favorites/queries
-const SHORT_TERMS_OK = new Set([
-  "ai", "eu", "us", "fn", "dr", "di", "fh", "lo", "dk", "uk",
-  "co2", "nato", "cia", "fbi", "wto", "imf", "ngo", "kpi", "kbh"
-]);
-
-function isValidTerm(s) {
-  if (!s) return false;
-  const t = String(s).trim();
-  if (t.length >= 3) return true;
-  return SHORT_TERMS_OK.has(t.toLowerCase());
-}
-
-// True if the favorites string contains at least one term we'd actually search on
-function hasValidFavoriteInput(value) {
-  if (!value) return false;
-  const terms = value.toLowerCase().split(/[,;]| og | samt |\s+/).map(s => s.trim());
-  return terms.some(isValidTerm);
-}
-
-// Pre-filter events client-side BEFORE sending to AI.
-// PRIMARY: official theme tags from program.json (exact match)
-// SECONDARY: freetext favorites (keyword scoring within theme-matched events)
-function preFilterEvents(themes, favorites, maxEvents = 200) {
-  if (!programState.events || programState.events.length === 0) return [];
-
-  // Parse favorites: split on commas / "og" / semicolons; lowercase
-  const favoriteTerms = favorites
-    .toLowerCase()
-    .split(/[,;]| og | samt /)
-    .map(s => s.trim())
-    .filter(isValidTerm);
-
-  // Step 1: filter by official themes (if any selected)
-  let pool;
-  if (themes.length > 0) {
-    pool = programState.events.filter(e => {
-      const evThemes = e.themes || [];
-      return themes.some(t => evThemes.includes(t));
-    });
-  } else {
-    // No themes — score the entire program by favorites only
-    pool = programState.events;
-  }
-
-  // Step 2: score remaining events by favorite term matches in text
-  const scored = pool.map(e => {
-    const hay = ((e.title || "") + " " + (e.summary || "") + " " +
-                 (e.organizers || "") + " " + (e.venue || "")).toLowerCase();
-    let score = 0;
-    for (const term of favoriteTerms) {
-      if (hay.includes(term)) score += 3;
-    }
-    // Baseline score for theme-matched events with no favorites
-    if (themes.length > 0 && favoriteTerms.length === 0) score = 1;
-    return { event: e, score };
-  })
-  .filter(x => x.score > 0)
-  .sort((a, b) => b.score - a.score);
-
-  // Step 3: dedupe by day+time+title (Folkemødet has many duplicate parallel events)
-  const seen = new Set();
-  const deduped = [];
-  for (const x of scored) {
-    const e = x.event;
-    const titleKey = (e.title || "").toLowerCase().trim().replace(/\s+/g, " ");
-    const slot = `${e.day}|${e.time}|${titleKey}`;
-    if (seen.has(slot)) continue;
-    seen.add(slot);
-    deduped.push(e);
-    if (deduped.length >= maxEvents) break;
-  }
-  return deduped;
-}
-
-function buildEventCatalog(events, maxChars = 18000) {
-  // Token budget: 12k TPM total, leave room for response (~3k) and prompt overhead (~500).
-  // ~3.5 chars per token → 18000 chars ≈ 5100 tokens, gives total ~8500 incl. response.
-  if (!events || events.length === 0) return null;
-
-  const lines = ["ID|D|TIME|VENUE|ORG|TITLE"];
-  let chars = lines[0].length;
-
-  for (const e of events) {
-    // Compact day: T/F/L
-    const dayShort = (e.day || "")[0] || "?";
-    const line = [
-      e.id,
-      dayShort,
-      e.time || "",
-      (e.venue || "").replace(/\|/g, "/").slice(0, 25),
-      (e.organizers || "").replace(/\|/g, "/").slice(0, 35),
-      (e.title || "").replace(/\|/g, "/").slice(0, 75)
-    ].join("|");
-    if (chars + line.length + 1 > maxChars) break;
-    lines.push(line);
-    chars += line.length + 1;
-  }
-  return { catalog: lines.join("\n"), count: lines.length - 1 };
-}
-
-function buildFullPrompt(themes, favorites) {
-  const themesStr = themes.length ? themes.join(", ") : "(ingen)";
-  const favStr = favorites.trim() || "(ingen)";
-
-  const filtered = preFilterEvents(themes, favorites, 100);
-  const result = buildEventCatalog(filtered, 18000);
-
-  if (result) {
-    return `Folkemødet 2026. Bruger:
-Temaer: ${themesStr}
-Interesser: ${favStr}
-
-Vælg op til 30 events fra programmet (D=Tor/Fre/Lør). Max ~10/dag. Kun ID'er fra listen. Kronologisk pr. dag, ingen tidsoverlap.
-
-${result.catalog}
-
-KUN JSON: {"selections":[{"id":"","why_match":""}]}`;
-  }
-
-  return `Folkemødet 2026 (11.-13. juni). Program ikke tilgængeligt.
-Temaer: ${themesStr}
-Interesser: ${favStr}
-10 events/dag x 3 dage, kronologisk, ingen overlap.
-KUN JSON: {"events":[{"title":"","organizer":"","day":"Torsdag|Fredag|Lørdag","time":"","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
-}
-
-function buildCompactPrompt(themes, favorites) {
-  const themesStr = themes.length ? themes.join(", ") : "ingen";
-  const favStr = favorites.trim() || "ingen";
-
-  // 8B model: even tighter
-  const filtered = preFilterEvents(themes, favorites, 60);
-  const result = buildEventCatalog(filtered, 10000);
-
-  if (result) {
-    return `Folkemødet 2026. Vælg op til 25 events.
-T:${themesStr} I:${favStr}
-D=Tor/Fre/Lør. Kun ID'er fra listen, kronologisk, ingen overlap.
-
-${result.catalog}
-
-KUN JSON: {"selections":[{"id":"","why_match":""}]}`;
-  }
-
-  return `Folkemødet 2026. T:${themesStr} I:${favStr}
-KUN JSON: {"events":[{"title":"","organizer":"","day":"","time":"","venue":"","themes":[],"speakers":[],"why_match":"","confidence":"likely|speculative"}]}`;
-}
-
-// ============================================================
-// GROQ API
-// ============================================================
-async function callGroq(model, prompt) {
-  const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 60000); // 60s timeout
-
-  let resp;
-  try {
-    resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + state.apiKey
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown, aldrig forklarende tekst. Start direkte med { og slut med }." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.6,
-        max_tokens: 3000,
-        response_format: { type: "json_object" }
-      }),
-      signal: ctrl.signal
-    });
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err.name === "AbortError") throw new Error(`Timeout efter 60s (model: ${model})`);
-    throw new Error(`Netværksfejl: ${err.message}`);
-  }
-  clearTimeout(timeoutId);
-
-  if (!resp.ok) {
-    const errText = await resp.text();
-    // Try to parse Groq's error to extract failed_generation
-    let detail = errText;
-    try {
-      const errObj = JSON.parse(errText);
-      if (errObj.error?.failed_generation) {
-        detail = `${errObj.error.message} (tom/ugyldig JSON — output afkortet)`;
-      } else if (errObj.error?.message) {
-        detail = errObj.error.message;
-      }
-    } catch {}
-    const err = new Error(`Groq ${resp.status}: ${detail}`);
-    err.status = resp.status;
-    err.body = errText;
-    throw err;
-  }
-
-  const data = await resp.json();
-  const content = data.choices?.[0]?.message?.content || "";
-  const finishReason = data.choices?.[0]?.finish_reason;
-  if (finishReason === "length") {
-    console.warn("Response truncated at max_tokens");
-  }
-  return content;
-}
-
-// Loose call without response_format constraint — for when json_object mode fails
-async function callGroqLoose(model, prompt) {
-  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + state.apiKey
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [
-        { role: "system", content: "Du svarer KUN med gyldig JSON. Aldrig markdown. Start direkte med { og slut med }." },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.5,
-      max_tokens: 3000
-    })
-  });
-  if (!resp.ok) {
-    const errText = await resp.text();
-    const err = new Error(`Groq ${resp.status}: ${errText}`);
-    err.status = resp.status;
-    err.body = errText;
-    throw err;
-  }
-  const data = await resp.json();
-  return data.choices?.[0]?.message?.content || "";
-}
-
-function parseEvents(content) {
-  if (!content || !content.trim()) {
-    throw new Error("Tomt svar fra modellen");
-  }
-
-  // Strip any markdown fences
-  let clean = content.trim();
-  clean = clean.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
-
-  // Try direct parse first
-  let obj = null;
-  try {
-    obj = JSON.parse(clean);
-  } catch (e) {
-    // Recovery attempt below
-  }
-
-  // Mode 1: selections — AI picked from real program
-  if (obj && Array.isArray(obj.selections)) {
-    return hydrateSelections(obj.selections);
-  }
-
-  // Mode 2: events — AI fabricated events (fallback mode)
-  if (obj && Array.isArray(obj.events)) {
-    return obj.events.slice(0, 40);
-  }
-
-  // Recovery: balanced-brace extraction for truncated JSON
-  const selMatch = clean.match(/"selections"\s*:\s*\[([\s\S]*?)$/);
-  const evMatch = clean.match(/"events"\s*:\s*\[([\s\S]*?)$/);
-  const match = selMatch || evMatch;
-  if (!match) throw new Error("Kunne ikke finde 'selections' eller 'events' i svaret");
-
-  const arrayBody = match[1];
-  const items = [];
-  let depth = 0, start = -1, inString = false, escape = false;
-  for (let i = 0; i < arrayBody.length; i++) {
-    const c = arrayBody[i];
-    if (escape) { escape = false; continue; }
-    if (c === "\\") { escape = true; continue; }
-    if (c === '"') { inString = !inString; continue; }
-    if (inString) continue;
-    if (c === "{") {
-      if (depth === 0) start = i;
-      depth++;
-    } else if (c === "}") {
-      depth--;
-      if (depth === 0 && start !== -1) {
-        try { items.push(JSON.parse(arrayBody.slice(start, i + 1))); } catch {}
-        start = -1;
-      }
-    }
-  }
-  if (items.length === 0) throw new Error("Kunne ikke udtrække events fra svaret");
-
-  // Are these selections or events?
-  if (selMatch) return hydrateSelections(items);
-  return items.slice(0, 40);
-}
-
-// Convert AI selections (just IDs + why_match) into full event objects
-// by looking up the real data from programState.events
-function hydrateSelections(selections) {
-  const byId = new Map(programState.events.map(e => [e.id, e]));
-  const seenIds = new Set();
-  const seenTitleSlots = new Set(); // dedupe by "day|time|title" — catches re-runs of same event
-  const out = [];
-  for (const sel of selections) {
-    const id = String(sel.id || "").trim();
-    if (seenIds.has(id)) continue; // exact duplicate ID
-    const real = byId.get(id);
-    if (!real) continue; // AI returned ID that doesn't exist — skip
-
-    // Dedupe by content fingerprint: same day + time + normalized title
-    // catches when AI picks two different IDs that are actually the same event
-    const titleKey = (real.title || "").toLowerCase().trim().replace(/\s+/g, " ");
-    const slot = `${real.day}|${real.time}|${titleKey}`;
-    if (seenTitleSlots.has(slot)) continue;
-
-    seenIds.add(id);
-    seenTitleSlots.add(slot);
-    out.push({
-      id: real.id,
-      title: real.title,
-      organizer: real.organizers,
-      day: real.day,
-      time: real.time,
-      venue: real.venue,
-      url: real.url,
-      summary: real.summary,
-      themes: [],
-      speakers: [],
-      why_match: sel.why_match || "",
-      confidence: "confirmed"
-    });
-  }
-  return out.slice(0, 40);
-}
-
-// ============================================================
-// GENERATE
-// ============================================================
-async function generate() {
-  if (!state.apiKey) {
-    showStatus("Indtast og gem din Groq API-nøgle først.", true);
-    return;
-  }
-  if (programState.selectedThemes.size === 0 && !hasValidFavoriteInput(favoritesEl.value)) {
-    showStatus("Vælg mindst ét tema øverst eller skriv noget i 'Personlige interesser'.", true);
-    return;
-  }
-
-  const themes = [...programState.selectedThemes];
-  const favorites = favoritesEl.value;
-  const selectedModel = modelSelectEl.value;
-
-  generateBtn.disabled = true;
-  generateBtn.innerHTML = '<span class="spinner"></span>Søger…';
-  resultsEl.innerHTML = "";
-
-  const usingRealData = programState.events && programState.events.length > 0;
-  if (usingRealData) {
-    const preFiltered = preFilterEvents(themes, favorites, 100);
-    if (preFiltered.length === 0) {
-      showStatus("Ingen events i programmet matchede dine temaer eller interesser. Prøv andre temaer eller skriv mere i 'Personlige interesser'.", true);
-      resetButton();
-      return;
-    }
-  }
-
-  // Build prompt FIRST so we can estimate tokens
-  const promptBuilder = LOW_TPM_MODELS.has(selectedModel) ? buildCompactPrompt : buildFullPrompt;
-  const prompt = promptBuilder(themes, favorites);
-  const estInputTokens = Math.ceil(prompt.length / 3.5);
-  const estTotalTokens = estInputTokens + 3000; // + max output
-
-  console.log(`Prompt: ${prompt.length} chars, ~${estInputTokens} input tokens, ~${estTotalTokens} total (incl. response)`);
-
-  // Hard TPM guard for free-tier 70B model (12k limit)
-  const TPM_LIMIT_70B = 12000;
-  if (selectedModel === FALLBACK_MODEL && estTotalTokens > TPM_LIMIT_70B - 500) {
-    showStatus(`Prompt for stor (~${estTotalTokens} tokens, max 12k). Reducer antal valgte temaer eller skift til GPT-OSS 120B.`, true);
-    resetButton();
-    return;
-  }
-
-  if (usingRealData) {
-    showStatus(`Klar med ~${estInputTokens} input-tokens. Kalder ${selectedModel}…`);
-  } else {
-    showStatus(`Program ikke tilgængeligt — AI'en gætter ud fra typiske arrangører…`);
-  }
-
-  let usedModel = selectedModel;
-  let content;
-
-  try {
-    content = await callGroq(selectedModel, prompt);
-  } catch (err) {
-    const is429 = err.status === 429;
-    const isTPM = /rate.?limit|tokens? per|tpm|413/i.test(err.body || err.message || "");
-    const isJsonValidateFailed = /json_validate_failed/i.test(err.body || "");
-    const shouldFallback = (is429 || isTPM || isJsonValidateFailed) && selectedModel !== FALLBACK_MODEL;
-
-    if (shouldFallback) {
-      // Check if compact prompt would even fit
-      const fallbackPrompt = buildCompactPrompt(themes, favorites);
-      const fallbackTokens = Math.ceil(fallbackPrompt.length / 3.5) + 3000;
-      if (fallbackTokens > TPM_LIMIT_70B - 500) {
-        showStatus(`Både primær og fallback prompt er for store (${fallbackTokens} > 12k tokens). Vælg færre temaer eller vent 1 min på TPM reset.`, true);
-        resetButton();
-        return;
-      }
-      try {
-        const reason = isJsonValidateFailed ? "JSON-fejl" : isTPM ? "TPM-overskridelse" : "rate-limit";
-        showStatus(`${selectedModel}: ${reason} — fallback til ${FALLBACK_MODEL} (~${Math.ceil(fallbackPrompt.length/3.5)} tokens)…`);
-        usedModel = FALLBACK_MODEL;
-        content = await callGroq(FALLBACK_MODEL, fallbackPrompt);
-      } catch (err2) {
-        showStatus(`Fejl: ${err2.message}`, true);
-        resetButton();
-        return;
-      }
-    } else {
-      showStatus(`Fejl: ${err.message}`, true);
-      resetButton();
-      return;
-    }
-  }
-
-  // Parse
-  let events;
-  try {
-    events = parseEvents(content);
-  } catch (err) {
-    showStatus(`Kunne ikke parse JSON-svar: ${err.message}`, true);
-    console.error("Raw response:", content);
-    resetButton();
-    return;
-  }
-
-  // Render
-  showStatus(`✓ ${events.length} events fundet via ${usedModel}`);
-  renderEvents(events, usedModel);
-  resetButton();
-}
-
-function resetButton() {
-  generateBtn.disabled = false;
-  generateBtn.textContent = "Find events";
-}
-
-function showStatus(msg, isError = false) {
-  statusEl.textContent = msg;
-  statusEl.classList.add("show");
-  statusEl.classList.toggle("error", isError);
-}
-
-// ============================================================
-// RENDER
-// ============================================================
-function renderEvents(events, model) {
-  state.lastEvents = events;
-  state.lastModel = model;
-
-  const headerHtml = `
-    <div class="results-header">
-      <div class="results-title">Anbefalede events</div>
-      <div class="view-toggle" id="viewToggle">
-        <button class="view-btn ${state.viewMode==='ranked'?'active':''}" data-view="ranked">Rangeret</button>
-        <button class="view-btn ${state.viewMode==='timeline'?'active':''}" data-view="timeline">Tidslinje</button>
-      </div>
-      <div class="results-meta">${events.length} resultater · ${esc(model)}</div>
-    </div>
-  `;
-
-  const bodyHtml = state.viewMode === "timeline"
-    ? renderTimeline(events)
-    : renderRanked(events);
-
-  resultsEl.innerHTML = headerHtml + bodyHtml;
-
-  // Attach view toggle handlers
-  resultsEl.querySelectorAll(".view-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.viewMode = btn.dataset.view;
-      renderEvents(state.lastEvents, state.lastModel);
-    });
-  });
-
-  // Attach map button handlers (event delegation across both views)
-  resultsEl.querySelectorAll("[data-venue]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const venue = btn.getAttribute("data-venue");
-      const title = btn.getAttribute("data-title");
-      openVenueMap(venue, title);
-    });
-  });
-}
-
-function renderRanked(events) {
-  const cards = events.map((ev, i) => {
-    const rank = i + 1;
-    const rankClass = rank <= 10 ? "rank-top" : rank <= 24 ? "rank-mid" : "rank-low";
-    const conf = (ev.confidence || "speculative").toLowerCase();
-    const themesArr = Array.isArray(ev.themes) ? ev.themes : [];
-    const speakersArr = Array.isArray(ev.speakers) ? ev.speakers : [];
-    const officialUrl = ev.url || "";
-    const venueAttr = esc(ev.venue || "");
-    const titleAttr = esc(ev.title || "");
-    const titleHtml = officialUrl
-      ? `<a class="event-title-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(ev.title || "Untitled")}</a>`
-      : esc(ev.title || "Untitled");
-
-    return `
-      <div class="event-card ${rankClass}">
-        <div class="card-head">
-          <div class="rank-num">${String(rank).padStart(2, "0")}</div>
-          <div class="card-title-block">
-            <div class="event-title">${titleHtml}</div>
-            <div class="event-organizer">${esc(ev.organizer || "Ukendt arrangør")}</div>
-          </div>
-          <div class="confidence-badge ${conf}">${conf}</div>
-        </div>
-
-        ${ev.summary ? `<div class="event-summary">${esc(ev.summary)}</div>` : ""}
-
-        <div class="meta-grid">
-          <div class="meta-item"><span class="meta-label">Dag</span><span class="meta-value">${esc(ev.day || "?")}</span></div>
-          <div class="meta-item"><span class="meta-label">Tid</span><span class="meta-value">${esc(ev.time || "?")}</span></div>
-          <div class="meta-item"><span class="meta-label">Sted</span><span class="meta-value">${esc(ev.venue || "?")}</span></div>
-        </div>
-
-        ${themesArr.length ? `<div class="themes-list">${themesArr.map(t => `<span class="theme-tag">${esc(t)}</span>`).join("")}</div>` : ""}
-
-        ${speakersArr.length ? `<div class="speakers-line"><strong>Deltagere:</strong>${esc(speakersArr.join(" · "))}</div>` : ""}
-
-        ${ev.why_match ? `<div class="why-match">${esc(ev.why_match)}</div>` : ""}
-
-        <div class="event-actions">
-          ${officialUrl ? `<a class="action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener"><span class="ico">🔗</span>Officiel side</a>` : `<a class="action-link" href="${buildSearchLink(ev.title, ev.organizer)}" target="_blank" rel="noopener"><span class="ico">🔗</span>Søg event</a>`}
-          <button class="action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button"><span class="ico">📍</span>Vis på kort</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  return `<div class="event-grid">${cards}</div>`;
-}
-
-function parseStartMinutes(time) {
-  if (!time) return 9999;
-  const m = String(time).match(/(\d{1,2}):(\d{2})/);
-  if (!m) return 9999;
-  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-}
-
-function parseEndMinutes(time) {
-  if (!time) return -1;
-  // Match the SECOND HH:MM in the string (after the dash)
-  const matches = [...String(time).matchAll(/(\d{1,2}):(\d{2})/g)];
-  if (matches.length < 2) return -1;
-  const m = matches[1];
-  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
-}
-
-function renderTimeline(events) {
-  // Attach original rank index so we can show it
-  const indexed = events.map((ev, i) => ({ ev, rank: i + 1 }));
-
-  // Group by day
-  const byDay = {};
-  indexed.forEach(item => {
-    const day = item.ev.day || "Andet";
-    if (!byDay[day]) byDay[day] = [];
-    byDay[day].push(item);
-  });
-
-  // Sort each day chronologically by start time
-  Object.values(byDay).forEach(list => {
-    list.sort((a, b) => parseStartMinutes(a.ev.time) - parseStartMinutes(b.ev.time));
-  });
-
-  // Detect overlaps per day (end of prev > start of next)
-  const overlapSet = new Set();
-  Object.values(byDay).forEach(list => {
-    for (let i = 1; i < list.length; i++) {
-      const prevEnd = parseEndMinutes(list[i-1].ev.time);
-      const currStart = parseStartMinutes(list[i].ev.time);
-      if (prevEnd > 0 && currStart < 9999 && prevEnd > currStart) {
-        overlapSet.add(list[i].rank);
-      }
-    }
-  });
-
-  // Day order: defined order first, then any unknowns
-  const days = DAY_ORDER.filter(d => byDay[d]);
-  Object.keys(byDay).forEach(d => { if (!days.includes(d)) days.push(d); });
-
-  const html = days.map(day => {
-    const date = DAY_DATES[day] || "";
-    const count = byDay[day].length;
-    const items = byDay[day].map(({ ev, rank }) => {
-      const conf = (ev.confidence || "speculative").toLowerCase();
-      const overlap = overlapSet.has(rank);
-      const officialUrl = ev.url || "";
-      const venueAttr = esc(ev.venue || "");
-      const titleAttr = esc(ev.title || "");
-      // Title links directly to the official event page when we have a real URL
-      const titleHtml = officialUrl
-        ? `<a class="tl-title-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(ev.title || "")}</a>`
-        : esc(ev.title || "");
-      return `
-        <div class="tl-row${overlap ? " tl-overlap" : ""}">
-          <div class="tl-time">${esc(ev.time || "?")}${overlap ? ' <span class="tl-overlap-flag" title="Overlapper foregående event">⚠</span>' : ""}</div>
-          <div class="tl-body">
-            <div class="tl-title-row">
-              <div class="tl-title"><span class="tl-rank-mini">#${rank}</span>${titleHtml}</div>
-              <span class="confidence-badge ${conf}">${conf}</span>
-            </div>
-            ${ev.summary ? `<div class="tl-summary">${esc(ev.summary)}</div>` : ""}
-            ${ev.why_match ? `<div class="tl-why">${esc(ev.why_match)}</div>` : ""}
-            <div class="tl-venue"><span class="venue-dot">◆</span>${esc(ev.venue || "?")} <span class="tl-org">· ${esc(ev.organizer || "")}</span></div>
-            <div class="tl-actions">
-              ${officialUrl ? `<a class="tl-action" href="${esc(officialUrl)}" target="_blank" rel="noopener">🔗 Officiel side</a>` : `<a class="tl-action" href="${buildSearchLink(ev.title, ev.organizer)}" target="_blank" rel="noopener">🔗 Søg event</a>`}
-              <button class="tl-action" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Kort</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    return `
-      <div class="tl-day">
-        <div class="tl-day-header">
-          <span class="tl-day-name">${esc(day)}</span>
-          <span class="tl-day-date">${esc(date)}</span>
-          <span class="tl-day-count">${count} event${count===1?"":"s"}</span>
-        </div>
-        <div class="tl-list">${items}</div>
-      </div>
-    `;
-  }).join("");
-
-  return `<div class="timeline">${html}</div>`;
-}
-
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
 }
 
+// Format a speakers array (strings or {name, role, org} objects) for display
+function formatSpeakers(speakers) {
+  if (!speakers || !Array.isArray(speakers) || speakers.length === 0) return "";
+  return speakers.map(s => {
+    if (typeof s === 'string') return s.trim();
+    if (s && typeof s === 'object') {
+      const parts = [s.name];
+      if (s.role) parts.push(s.role);
+      if (s.org) parts.push(s.org);
+      return parts.filter(Boolean).join(", ");
+    }
+    return "";
+  }).filter(Boolean).join(" · ");
+}
+
 // GO
-init();
 loadOfficialProgram();
 
 // ============================================================
@@ -2655,37 +1239,22 @@ function applyFilters() {
   const venue = document.getElementById("filterVenue").value;
   const search = document.getElementById("filterSearch").value.trim().toLowerCase();
   const selectedThemes = [...programState.selectedThemes];
-  const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
-
-  // Build keyword list from selected themes (only used if no official themes)
-  let themeKeywords = null;
-  if (!useOfficial && selectedThemes.length > 0) {
-    themeKeywords = [];
-    for (const t of selectedThemes) {
-      const kws = THEME_KEYWORDS[t];
-      if (kws) themeKeywords.push(...kws);
-    }
-  }
 
   programState.filtered = programState.events.filter(e => {
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
     if (search) {
-      const hay = `${e.title} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
+      // Search across title, summary, full description (more), organizers, venue, speakers
+      const hay = [
+        e.title, e.summary, e.more, e.organizers, e.venue,
+        Array.isArray(e.speakers) ? e.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || ''))).join(' ') : ''
+      ].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     if (selectedThemes.length > 0) {
-      if (useOfficial) {
-        // Strict: event's themes array must include at least one selected theme
-        const evThemes = e.themes || [];
-        const matches = selectedThemes.some(t => evThemes.includes(t));
-        if (!matches) return false;
-      } else if (themeKeywords) {
-        // Fallback: keyword match
-        const hay = `${e.title || ""} ${e.summary || ""} ${e.organizers || ""} ${e.venue || ""}`.toLowerCase();
-        const matches = themeKeywords.some(kw => hay.includes(kw));
-        if (!matches) return false;
-      }
+      const evThemes = e.themes || [];
+      const matches = selectedThemes.some(t => evThemes.includes(t));
+      if (!matches) return false;
     }
     return true;
   });
@@ -2746,6 +1315,10 @@ function renderProgram() {
       const venueAttr = esc(e.venue || "");
       const titleAttr = esc(e.title || "");
       const officialUrl = e.url || "";
+      // Format speakers: array of strings OR array of {name, role, org}
+      const speakerStr = formatSpeakers(e.speakers);
+      // Prefer 'more' (full description) over 'summary' (sub-headline)
+      const desc = e.more || e.summary || "";
       return `
       <div class="pg-event">
         <div class="pg-time">${esc(e.time || "?")}</div>
@@ -2753,7 +1326,9 @@ function renderProgram() {
           ${officialUrl
             ? `<a class="pg-title" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(e.title || "")}</a>`
             : `<div class="pg-title">${esc(e.title || "")}</div>`}
-          ${e.summary ? `<div class="pg-summary">${esc(e.summary)}</div>` : ""}
+          ${e.summary && e.summary !== e.more ? `<div class="pg-subtitle">${esc(e.summary)}</div>` : ""}
+          ${desc ? `<div class="pg-summary">${esc(desc)}</div>` : ""}
+          ${speakerStr ? `<div class="pg-speakers"><span class="pg-label">Deltagere</span>${esc(speakerStr)}</div>` : ""}
           <div class="pg-meta">
             <span class="pg-venue">◆ ${esc(e.venue || "?")}</span>
             ${e.organizers ? `<span class="pg-org">${esc(e.organizers)}</span>` : ""}
