@@ -1,7 +1,7 @@
 {
-  "scraped_at": "2026-05-28T04:59:39.937Z",
+  "scraped_at": "2026-05-28T09:45:36.103Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3618,
+  "event_count": 3613,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
@@ -13,7 +13,7 @@
     },
     {
       "name": "Børn, unge og undervisning",
-      "count": 280
+      "count": 279
     },
     {
       "name": "Andet",
@@ -21,7 +21,7 @@
     },
     {
       "name": "Kultur, medier og idræt",
-      "count": 245
+      "count": 244
     },
     {
       "name": "Offentlighed, dialog og diskussion",
@@ -37,7 +37,7 @@
     },
     {
       "name": "EU og udenrigspolitik",
-      "count": 175
+      "count": 173
     },
     {
       "name": "Retspolitik og forvaltning",
@@ -53,7 +53,7 @@
     },
     {
       "name": "Ligestilling, køn og minoriteter",
-      "count": 113
+      "count": 112
     },
     {
       "name": "Socialpolitik og integration",
@@ -4995,7 +4995,7 @@
       "title": "Kommunikatørens skriftestol: dilemmaer fra praksis Et panel af erfarne kommunikatører folder reelle etiske dilemmaer fra fagets praksis ud på scenen.",
       "summary": "",
       "time": "11:00-11:55",
-      "organizers": "POV International",
+      "organizers": "",
       "venue": "J9 - Fremtidens Scene: Magt, medier og tech",
       "url": "https://program.folkemoedet.dk/events/2026/33008/kommunikatoerens-skriftestol-dilemmaer-fra-praksis",
       "day": "Torsdag",
@@ -27418,6 +27418,27 @@
       ]
     },
     {
+      "id": "34867",
+      "title": "Tryghed er fundamentet for trivsel.",
+      "summary": "Har vi glemt det? En samtale om betydningen af tryghed og tilknytning. Og hvordan vi genskaber den for børn og unge.",
+      "time": "09:00-09:45",
+      "organizers": "Socialt Indblik",
+      "venue": "J28 - Socialt Indblik",
+      "url": "https://program.folkemoedet.dk/events/2026/34867/tryghed-er-fundamentet-for-trivsel-har-vi-glemt-det",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "For få pædagoger i vuggestue og børnehave, alt for mange lærerskift i skolen, travlhed i familien og færre voksne med tid til nærvær.\n\nVi har glemt, at de vigtigste byggesten i fundamentet for børn og unges trivsel er tryghed og tilknytning. Det mener speciallæge i børne- og ungdomspsykiatri Pernille Darling. Hun ser manglende tryghed hos børn og unge som en af de væsentligste årsager til mistrivselskrisen.\n\nPå Søstjerneskolen møder Dan Schønewald Rasmussen nogle af de børn, der har været væk fra skolen i årevis. Her starter et detektivarbejde for at finde vejen til at vinde deres tillid og gøre dem trygge ved at vende tilbage til skolen.\n\nLyt til en samtale med Pernille Darling og Dan Schønewald Rasmussen om betydningen af tryghed og tilknytning. Er det en af forklaringerne på mistrivsel og langvarigt skolefravær?\n\nHvad kan vi gøre for at genskabe et samfund, hvor børn og unge vokser op med et stærkt fundament af tryghed og tilknytning?\n\nVær med i debatten.",
+      "speakers": [
+        {
+          "name": "Niels Svanborg",
+          "role": "Redaktør og journalist",
+          "org": "Socialt IndblikModeratorPernille Darling, Speciallæge i børne- og ungespykiatri, Region SjællandModeratorDan Schønewald Rasmussen, Skoleleder, SøstjerneskolenModerator"
+        }
+      ]
+    },
+    {
       "id": "35060",
       "title": "EU’s pengekamp: Hvad skal Europa betale for fremtiden?",
       "summary": "EU’s pengekamp: Hvad skal Europa betale for fremtiden?",
@@ -28359,27 +28380,6 @@
           "name": "Benjamin Haxha",
           "role": "Kommunalbestyrelsesmedlem (V)",
           "org": "HerlevModeratorFlemming Damgaard Larsen, Kommunalbestyrelsesmedlem (V), LejreModeratorSebastian Bærnthsen, Kommunalbestyrelsesmedlem, BornholmModeratorMorten Dahlin, Medlem af Folketinget, VenstreModeratorJens-Kristian Lütken, Sundheds- og Omsorgsborgmester, Københavns KommuneModeratorSophie Løhde, Indenrigs- og Sundhedsminister, VenstreModerator"
-        }
-      ]
-    },
-    {
-      "id": "31586",
-      "title": "Dolphin Familien og det sociale ansvar Dolphin Familien inviterer til samtale om det sociale ansvar, og har inviteret gode venner på scenen",
-      "summary": "",
-      "time": "09:30-10:15",
-      "organizers": "Dolphin Familien",
-      "venue": "F18 - Scenen For Samfundsansvar - ESG",
-      "url": "https://program.folkemoedet.dk/events/2026/31586/dolphin-familien-og-det-sociale-ansvar",
-      "day": "Fredag",
-      "themes": [
-        "Kultur, medier og idræt"
-      ],
-      "more": "Dolphin Familien inviterer til samtale om det sociale ansvar, og har inviteret gode venner på scenen. Mød bl.a. Rikke Nielsen fra Lykke-liga og Frans Hammer, der er næstformand i Danmarks Idræts Forbund.",
-      "speakers": [
-        {
-          "name": "Jan Ørum Vermø",
-          "role": "Direktør",
-          "org": "Dolphin FamilienModeratorRikke Nielsen, Lykkeliga Leder, LykkeligaModeratorFrans Hammer, Næstformand, Danmarks IdrætsforbundModerator"
         }
       ]
     },
@@ -38857,27 +38857,6 @@
           "name": "Martin Krasnik",
           "role": "Journalist og chefredaktør",
           "org": "moderator.dkModeratorKatrine Bjerre, Branchedirektør, byggeri, Dansk ErhvervModeratorAnita Friis Sommer, COO, The Novo Nordisk Foundation CO2 Research Center (CORC)ModeratorDavid Tveit, Direktør, Energi og Klima, Teknologisk InstitutModeratorJohn Bang, Global Head, Sustainable Growth Strategy, LEGOModerator"
-        }
-      ]
-    },
-    {
-      "id": "33561",
-      "title": "Kvinde, kend dine barselsvilkår Barselsvilkår betyder mere end nogensinde, så hvorfor er de hemmelige?",
-      "summary": "",
-      "time": "12:45-13:30",
-      "organizers": "FRIDAY P/S, Momkind",
-      "venue": "K12 - FRIDAY PÅ FABERS",
-      "url": "https://program.folkemoedet.dk/events/2026/33561/kvinde-kend-dine-barselsvilkaar",
-      "day": "Fredag",
-      "themes": [
-        "Ligestilling, køn og minoriteter"
-      ],
-      "more": "93,7 % af danskerne mener, at det er vigtigt for dem, at en arbejdsplads er transparent omkring sine barselsvilkår, alligevel kender de færreste til dem. Barselsvilkår har stor betydning for livsindkomst, pension, karriereudvikling og fordelingen af ansvar i familien. Desværre er barselsvilkår stadig noget, rigtig mange først får indsigt i, eller tør spørge ind til, alt for sent i rekrutteringsprocessen. Denne debat sætter fokus på, hvordan manglende viden om rettigheder fastholder skævheder i arbejdsliv og privatøkonomi, og hvad der skal til for, at flere kan træffe reelle og oplyste valg frem for tilfældige løsninger.",
-      "speakers": [
-        {
-          "name": "Caroline Cecilie Olesen",
-          "role": "Rådgiver",
-          "org": "FRIDAYModeratorNanna Schultz, Founder, MomkindModeratorBenedikte Løje Nielsen, Forperson, KvindeøkonomienModerator"
         }
       ]
     },
@@ -57005,27 +56984,6 @@
       ]
     },
     {
-      "id": "34867",
-      "title": "Tryghed er fundamentet for trivsel.",
-      "summary": "Har vi glemt det? En samtale om betydningen af tryghed og tilknytning. Og hvordan vi genskaber den for børn og unge.",
-      "time": "09:00-09:45",
-      "organizers": "Socialt Indblik",
-      "venue": "J28 - Socialt Indblik",
-      "url": "https://program.folkemoedet.dk/events/2026/34867/tryghed-er-fundamentet-for-trivsel-har-vi-glemt-det",
-      "day": "Lørdag",
-      "themes": [
-        "Børn, unge og undervisning"
-      ],
-      "more": "For få pædagoger i vuggestue og børnehave, alt for mange lærerskift i skolen, travlhed i familien og færre voksne med tid til nærvær.\n\nVi har glemt, at de vigtigste byggesten i fundamentet for børn og unges trivsel er tryghed og tilknytning. Det mener speciallæge i børne- og ungdomspsykiatri Pernille Darling. Hun ser manglende tryghed hos børn og unge som en af de væsentligste årsager til mistrivselskrisen.\n\nPå Søstjerneskolen møder Dan Schønewald Rasmussen nogle af de børn, der har været væk fra skolen i årevis. Her starter et detektivarbejde for at finde vejen til at vinde deres tillid og gøre dem trygge ved at vende tilbage til skolen.\n\nLyt til en samtale med Pernille Darling og Dan Schønewald Rasmussen om betydningen af tryghed og tilknytning. Er det en af forklaringerne på mistrivsel og langvarigt skolefravær?\n\nHvad kan vi gøre for at genskabe et samfund, hvor børn og unge vokser op med et stærkt fundament af tryghed og tilknytning?\n\nVær med i debatten.",
-      "speakers": [
-        {
-          "name": "Niels Svanborg",
-          "role": "Redaktør og journalist",
-          "org": "Socialt IndblikModeratorPernille Darling, Speciallæge i børne- og ungespykiatri, Region SjællandModeratorDan Schønewald Rasmussen, Skoleleder, SøstjerneskolenModerator"
-        }
-      ]
-    },
-    {
       "id": "34993",
       "title": "Traumer, diagnoser – eller bare noget, der fylder?",
       "summary": "Spørg en psykolog – helt uforpligtende fra Landsforeningen for PTSD-ramte og pårørende",
@@ -57421,27 +57379,6 @@
           "name": "Beredskabsstyrelsen",
           "role": "Beredskabsstyrelsen",
           "org": "BeredskabsstyrelsenModeratorVærnepligtige og frivillige, Værnepligtige og frivillige, BeredskabsstyrelsenModerator"
-        }
-      ]
-    },
-    {
-      "id": "33033",
-      "title": "Morgensang med mening: Fællessang og perspektiv Fællessang og samtale med Kira Marie Peter-Hansen (SF) og Morten Løkkegaard (V).",
-      "summary": "",
-      "time": "09:15-09:45",
-      "organizers": "Operate A/S",
-      "venue": "F34 - Operate",
-      "url": "https://program.folkemoedet.dk/events/2026/33033/morgensang-med-mening-faellessang-og-perspektiv",
-      "day": "Lørdag",
-      "themes": [
-        "EU og udenrigspolitik"
-      ],
-      "more": "Vær med til morgensang i Operates telt, når vi inviterer Kira Marie Peter-Hansen (SF) og Morten Løkkegaard (V) til sammen at synge dagen ind med varme og eftertanke.\n\nDe to EU-politikere medbringer hver især én sang, som betyder noget for dem – det kan være alt fra højskoleklassikere til pop, salmer eller protestsange. Vi synger sangene sammen, og de deler kort, hvorfor de har en særlig betydning for dem.\n\nVær med, når vi synger dagen igang med fællessang, før samtalerne og debatterne tager over.\n\nAlle er velkomne – vi glæder os til at se dig!",
-      "speakers": [
-        {
-          "name": "Anders Dybdal",
-          "role": "CEO",
-          "org": "Operate A/SModeratorKira Marie Peter-Hansen, Medlem af Europa-Parlamentet, SFModeratorMorten Løkkegaard, Gruppeformand, Venstre i Europa-ParlamentetModerator"
         }
       ]
     },
@@ -63720,27 +63657,6 @@
           "name": "Carsten Damgaard",
           "role": "Forskningsdirektør",
           "org": "DBIModerator"
-        }
-      ]
-    },
-    {
-      "id": "31986",
-      "title": "Fylking og folkeskolen - dilemmaer og dømmekraft Politikerne stiller spørgsmålene og lærerne svarer.",
-      "summary": "En levende debat hvor rollerne er byttet om",
-      "time": "11:15-12:00",
-      "organizers": "Københavns Lærerforening",
-      "venue": "G26 - Lærernes hus",
-      "url": "https://program.folkemoedet.dk/events/2026/31986/fylking-og-folkeskolen-dilemmaer-og-doemmekraft",
-      "day": "Lørdag",
-      "themes": [
-        "Børn, unge og undervisning"
-      ],
-      "more": "Hvad sker der, når politikerne stiller spørgsmålene – og lærerne svarer? \nPå Folkemødet bytter vi om på rollerne: Politikere fra Børne- og Ungdomsudvalget præsenterer deres dilemmaer og udfordringer i arbejdet med folkeskolen, og et lærerpanel forsøger at løse dem. En levende debat om hverdag, virkelighed og fælles løsninger – med plads til både nysgerrighed, uenighed og input fra publikum.",
-      "speakers": [
-        {
-          "name": "Katrine Fylking",
-          "role": "Formand",
-          "org": "Københavns LærerforeningModerator"
         }
       ]
     },
@@ -73091,12 +73007,12 @@
     },
     {
       "id": "32776",
-      "title": "Sådan skaber vi et sundere samfund!",
-      "summary": "Det skal være lettere at være aktiv – for alle, ikke kun de allerede aktive.",
+      "title": "Fremtidens fitness: Kan teknologi få flere til at træne?",
+      "summary": "Kan gamification og AI få flere til at træne — også dem, der normalt holder sig væk?",
       "time": "15:30-16:00",
       "organizers": "Dansk Erhverv",
       "venue": "G7 - Dansk Erhverv Talk Scenen G7",
-      "url": "https://program.folkemoedet.dk/events/2026/32776/saadan-skaber-vi-et-sundere-samfund",
+      "url": "https://program.folkemoedet.dk/events/2026/32776/fremtidens-fitness-kan-teknologi-faa-flere-til-at-traene",
       "day": "Lørdag",
       "themes": [
         "Sundhed, omsorg og forebyggelse"
@@ -74241,27 +74157,6 @@
           "name": "Peter Mogensen",
           "role": "Politisk kommentator",
           "org": "TV 2 DanmarkModerator"
-        }
-      ]
-    },
-    {
-      "id": "32282",
-      "title": "Quiztid – hvad ved du om vores naboer Tyskland og Sverige?",
-      "summary": "Tip en 13’er. Hvad er dansk, hvad er svensk, hvad er tysk?",
-      "time": "16:00-18:00",
-      "organizers": "Interreg Öresund-Kattegat-Skagerrak, Interreg Deutschland-Danmark",
-      "venue": "G9 - €uro-teltet",
-      "url": "https://program.folkemoedet.dk/events/2026/32282/quiztid-hvad-ved-du-om-vores-naboer-tyskland-og-sverige",
-      "day": "Lørdag",
-      "themes": [
-        "EU og udenrigspolitik"
-      ],
-      "more": "Kom forbi til en quiz samt en snak med os om, hvordan du søger EU-penge til samarbejde med Tyskland, Sverige og Norge\nVi er to EU-programmer, som bevilger penge til samarbejdsprojekter i grænseregioner. Vi arbejder med områder som Innovation, Grøn Omstilling, Uddannelse, Transport & Mobilitet, Arbejdsmarked og meget andet. Vi har sammensat en quiz, hvor du kan teste din viden om nabolandene samt høre mere om, hvad din organisation kan søge penge til.",
-      "speakers": [
-        {
-          "name": "Andreas Zilcken",
-          "role": "Proejktrådgiver",
-          "org": "Interreg Öresund-Kattegat-SkagerrakModeratorGitte Bjørn-Lüthi, Projektrådgiver, Interreg Deutschland-DanmarkModeratorSusanne Damerow, Projektkonsulent, Interreg Deutschland-DanmarkModeratorJane Guldbrand-Hansen, Projektkonsulent, Interreg Deutschland-DanmarkModeratorSofie Håkansson, Projektrådgiver, Interreg Öresund-Kattegat-SkagerrakModeratorLone Hylander, Projektrådgiver, Interreg Öresund-Kattegat-SkagerrakModerator"
         }
       ]
     },
@@ -75527,12 +75422,12 @@
     },
     {
       "id": "35203",
-      "title": "Melodier for frihed Kammerkoncert med ukrainske komponister",
+      "title": "The Sound of Ukraine Kammerkoncert med ukrainske komponister",
       "summary": "",
       "time": "18:00-19:00",
       "organizers": "Europa-Kommissionen",
       "venue": "B4 - Europa-Kommissionen",
-      "url": "https://program.folkemoedet.dk/events/2026/35203/melodier-for-frihed",
+      "url": "https://program.folkemoedet.dk/events/2026/35203/the-sound-of-ukraine",
       "day": "Lørdag",
       "themes": [
         "Andet"
