@@ -231,9 +231,11 @@ async function scrape() {
   } catch {}
   const detailCache = new Map();
   for (const e of prevEvents) {
-    const hasThemes = e.themes && Array.isArray(e.themes) && e.themes.length > 0;
+    // Only treat as cached if we actually captured more/speakers before.
+    // Events with only themes (from earlier runs) should be re-fetched to get more+speakers.
     const hasMore = e.more && e.more.length > 0;
-    if (hasThemes || hasMore) {
+    const hasSpeakers = e.speakers && Array.isArray(e.speakers) && e.speakers.length > 0;
+    if (hasMore || hasSpeakers) {
       detailCache.set(e.id, {
         themes: e.themes || [],
         more: e.more || "",
@@ -248,22 +250,31 @@ async function scrape() {
   const toFetch = allEvents.filter(e => !detailCache.has(e.id));
   console.log(`Need to fetch details for ${toFetch.length} new/uncached events`);
 
-  if (toFetch.length > 0) {
+  try {
+    if (toFetch.length > 0) {
     const browser2 = await chromium.launch({ headless: true });
     const ctx2 = await browser2.newContext({
       userAgent: 'Mozilla/5.0 (compatible; FolkemodetScraper/1.0; github.com/Jaisper/Folkemodet)'
     });
 
-    const CONCURRENCY = 8;
+    const CONCURRENCY = 4;
     let fetched = 0;
     let errors = 0;
     let diagnostic_logged = 0;
+    const SAVE_INTERVAL = 200; // Save partial progress every N events
 
     // Process in batches
     for (let i = 0; i < toFetch.length; i += CONCURRENCY) {
       const batch = toFetch.slice(i, i + CONCURRENCY);
       await Promise.all(batch.map(async (ev) => {
-        const page = await ctx2.newPage();
+        let page;
+        try {
+          page = await ctx2.newPage();
+        } catch (e) {
+          errors++;
+          ev.themes = []; ev.more = ""; ev.speakers = [];
+          return;
+        }
         try {
           await page.goto(ev.url, { waitUntil: 'networkidle', timeout: 30000 });
           // Wait for the "Tema" label to appear in DOM (Nuxt hydration)
@@ -332,110 +343,70 @@ async function scrape() {
             }
 
             // === MORE (full description) ===
-            // The "Mere om" section usually contains multi-paragraph rich text.
-            // We want the WHOLE block, not just the first paragraph.
             let more = "";
-            const allEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b'));
-            for (const el of allEls) {
-              const t = (el.textContent || '').trim();
-              if (t === 'Mere om' || t === 'Beskrivelse') {
-                // Collect text from next siblings until we hit another known label
-                const parts = [];
-                let sib = el.nextElementSibling;
-                let safety = 0;
-                while (sib && safety < 20) {
-                  const sibText = (sib.textContent || '').trim();
-                  if (!sibText) { sib = sib.nextElementSibling; safety++; continue; }
-                  // Stop if we hit another section heading
-                  if (KNOWN_LABELS.has(sibText)) break;
-                  // Stop if this sibling CONTAINS a known label (next section start)
-                  const innerLabels = Array.from(sib.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-                  let hitSection = false;
-                  for (const inner of innerLabels) {
-                    if (KNOWN_LABELS.has((inner.textContent || '').trim())) {
-                      hitSection = true; break;
-                    }
-                  }
-                  if (hitSection) break;
-                  parts.push(sibText);
-                  sib = sib.nextElementSibling;
-                  safety++;
-                }
-                more = parts.join('\n\n').trim();
-                if (more.length > 2000) more = more.slice(0, 2000) + '…';
-                break;
+            // Find ANY element whose own text is exactly "Mere om" / "Beskrivelse"
+            const findLabelEl = (labels) => {
+              const els = Array.from(document.querySelectorAll('*'));
+              for (const el of els) {
+                // Skip large containers — we want the actual label element
+                if (el.children.length > 2) continue;
+                const t = (el.textContent || '').trim();
+                if (labels.includes(t)) return el;
               }
-            }
+              return null;
+            };
+
+            const collectAfter = (labelEl, maxParts) => {
+              if (!labelEl) return "";
+              const parts = [];
+              // Walk up to find the element that has siblings (the label might be wrapped)
+              let anchor = labelEl;
+              // If label's parent only contains the label, step up
+              while (anchor.parentElement &&
+                     anchor.parentElement.children.length === 1 &&
+                     anchor.parentElement.tagName !== 'BODY') {
+                anchor = anchor.parentElement;
+              }
+              let sib = anchor.nextElementSibling;
+              let safety = 0;
+              while (sib && safety < (maxParts || 20)) {
+                const txt = (sib.textContent || '').trim();
+                if (txt) {
+                  if (KNOWN_LABELS.has(txt)) break;
+                  // Stop if sibling starts a new known section
+                  const firstChild = (sib.querySelector('h1,h2,h3,h4,h5,h6')?.textContent || '').trim();
+                  if (KNOWN_LABELS.has(firstChild)) break;
+                  parts.push(txt);
+                }
+                sib = sib.nextElementSibling;
+                safety++;
+              }
+              return parts.join('\n\n').trim();
+            };
+
+            const mereEl = findLabelEl(['Mere om', 'Beskrivelse']);
+            more = collectAfter(mereEl, 15);
+            if (more.length > 2500) more = more.slice(0, 2500) + '…';
 
             // === SPEAKERS ===
-            // The "Deltagere" section lists speakers. Each speaker is typically
-            // "Name, Role, Org" or just "Name" — we collect them as objects.
             const speakers = [];
-            for (const el of allEls) {
-              const t = (el.textContent || '').trim();
-              if (t === 'Deltagere') {
-                let sib = el.nextElementSibling;
-                let safety = 0;
-                while (sib && safety < 30) {
-                  const sibText = (sib.textContent || '').trim();
-                  if (!sibText) { sib = sib.nextElementSibling; safety++; continue; }
-                  if (KNOWN_LABELS.has(sibText)) break;
-                  const innerLabels = Array.from(sib.querySelectorAll('h1,h2,h3,h4,h5,h6'));
-                  let hitSection = false;
-                  for (const inner of innerLabels) {
-                    if (KNOWN_LABELS.has((inner.textContent || '').trim())) {
-                      hitSection = true; break;
-                    }
-                  }
-                  if (hitSection) break;
-                  // Each speaker may be in own element or comma-separated within one
-                  // Try to split intelligently: name in bold/strong, then role/org follows
-                  // Look for child structure
-                  const strongEls = Array.from(sib.querySelectorAll('strong, b'));
-                  if (strongEls.length > 0) {
-                    // Multiple speakers as <strong>Name</strong>, role, org<br>...
-                    for (const strong of strongEls) {
-                      const name = (strong.textContent || '').trim();
-                      if (!name) continue;
-                      // Get text immediately after this strong, up to next strong or br
-                      let after = "";
-                      let node = strong.nextSibling;
-                      while (node) {
-                        if (node.nodeType === 1 && (node.tagName === 'STRONG' || node.tagName === 'B' || node.tagName === 'BR')) break;
-                        if (node.nodeType === 3) after += node.textContent;
-                        else if (node.nodeType === 1) after += (node.textContent || '');
-                        node = node.nextSibling;
-                      }
-                      // Parse "Name, Role, Org" pattern from raw text
-                      const cleaned = after.replace(/^[\s,;:]+/, '').replace(/[\s,;:]+$/, '').trim();
-                      const sp = { name };
-                      if (cleaned) {
-                        const parts = cleaned.split(/,/).map(p => p.trim()).filter(Boolean);
-                        if (parts.length > 0) sp.role = parts[0];
-                        if (parts.length > 1) sp.org = parts.slice(1).join(', ');
-                      }
-                      speakers.push(sp);
-                    }
-                  } else {
-                    // Fallback: treat each line as one speaker
-                    const lines = sibText.split(/\n+/).map(l => l.trim()).filter(Boolean);
-                    for (const line of lines) {
-                      const parts = line.split(/,/).map(p => p.trim()).filter(Boolean);
-                      if (parts.length === 0) continue;
-                      const sp = { name: parts[0] };
-                      if (parts.length > 1) sp.role = parts[1];
-                      if (parts.length > 2) sp.org = parts.slice(2).join(', ');
-                      speakers.push(sp);
-                    }
-                  }
-                  sib = sib.nextElementSibling;
-                  safety++;
-                }
-                break;
+            const deltEl = findLabelEl(['Deltagere']);
+            const speakerText = collectAfter(deltEl, 30);
+            if (speakerText) {
+              // Speakers separated by newlines (one per line: "Name, Role, Org")
+              const lines = speakerText.split(/\n+/).map(l => l.trim()).filter(Boolean);
+              for (const line of lines) {
+                if (KNOWN_LABELS.has(line)) continue;
+                const parts = line.split(/,/).map(p => p.trim()).filter(Boolean);
+                if (parts.length === 0) continue;
+                const sp = { name: parts[0] };
+                if (parts.length > 1) sp.role = parts[1];
+                if (parts.length > 2) sp.org = parts.slice(2).join(', ');
+                speakers.push(sp);
               }
             }
 
-            return { themes, more, speakers: speakers.slice(0, 20) };
+            return { themes, more, speakers: speakers.slice(0, 25) };
           });
 
           ev.themes = details.themes;
@@ -443,18 +414,36 @@ async function scrape() {
           ev.speakers = details.speakers;
           fetched++;
 
-          // Diagnostic: log first 3 events' DOM snippet if extraction empty
-          if (diagnostic_logged < 3 && details.themes.length === 0 && !details.more && details.speakers.length === 0) {
+          // Diagnostic: log first 3 events' DOM structure around the labels we're missing
+          if (diagnostic_logged < 3 && (!details.more || details.speakers.length === 0)) {
             diagnostic_logged++;
-            const snippet = await page.evaluate(() => {
-              const html = document.body.innerHTML;
-              const idx = html.indexOf('Tema');
-              if (idx === -1) return '[no "Tema" found in HTML]';
-              return html.substring(Math.max(0, idx - 50), Math.min(html.length, idx + 800));
+            const diag = await page.evaluate(() => {
+              const findAround = (label) => {
+                // Find ANY element whose trimmed text starts with the label
+                const els = Array.from(document.querySelectorAll('*'));
+                for (const el of els) {
+                  const t = (el.textContent || '').trim();
+                  // Element whose OWN direct text (not children) is the label
+                  const ownText = Array.from(el.childNodes)
+                    .filter(n => n.nodeType === 3)
+                    .map(n => n.textContent.trim()).join('');
+                  if (ownText === label || t === label) {
+                    return `TAG=${el.tagName} CLASS="${el.className}" PARENT=${el.parentElement?.tagName} | nextSib=${el.nextElementSibling?.tagName}:"${(el.nextElementSibling?.textContent||'').trim().slice(0,80)}"`;
+                  }
+                }
+                return '[label not found as standalone element]';
+              };
+              return {
+                mereOm: findAround('Mere om'),
+                deltagere: findAround('Deltagere'),
+                tema: findAround('Tema')
+              };
             });
-            console.log(`\n--- DIAGNOSTIC (${ev.url}) ---`);
-            console.log(snippet.replace(/\s+/g, ' ').slice(0, 600));
-            console.log(`--- end diagnostic ---\n`);
+            console.log(`\n--- DIAG (${ev.url}) ---`);
+            console.log(`  Mere om:   ${diag.mereOm}`);
+            console.log(`  Deltagere: ${diag.deltagere}`);
+            console.log(`  Tema:      ${diag.tema}`);
+            console.log(`--- end ---\n`);
           }
 
           if (fetched % 50 === 0) console.log(`  ${fetched}/${toFetch.length} fetched (${errors} errors)`);
@@ -463,12 +452,35 @@ async function scrape() {
           ev.themes = [];
           ev.more = "";
           ev.speakers = [];
+          if (errors < 5) console.log(`  Error on ${ev.url}: ${err.message}`);
         }
-        await page.close();
+        try { await page.close(); } catch {}
       }));
+
+      // Periodic save so we don't lose work if the run gets killed
+      if ((i + CONCURRENCY) % SAVE_INTERVAL < CONCURRENCY && i > 0) {
+        try {
+          // Apply themes/more/speakers from in-progress data to allEvents
+          // (they are already mutated in place since toFetch points to same objects)
+          fs.writeFileSync(OUT_FILE + '.partial', JSON.stringify({
+            partial: true,
+            progress: `${fetched}/${toFetch.length}`,
+            events: allEvents
+          }, null, 2));
+          console.log(`  💾 Saved partial progress at ${fetched} events`);
+        } catch (e) {
+          console.log(`  Could not save partial: ${e.message}`);
+        }
+      }
     }
     await browser2.close();
     console.log(`  Done: ${fetched} fetched, ${errors} errors`);
+    // Clean up partial file if final save will happen
+    try { fs.unlinkSync(OUT_FILE + '.partial'); } catch {}
+    }
+  } catch (phaseErr) {
+    console.error(`\n⚠ Phase 2 hit a fatal error: ${phaseErr.message}`);
+    console.error('Proceeding to write whatever data was collected so far.');
   }
 
   // Apply cached details
