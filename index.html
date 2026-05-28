@@ -289,12 +289,6 @@
     color: var(--orange);
     border-bottom-color: var(--orange);
   }
-  .pg-summary {
-    font-size: 13.5px;
-    color: var(--ink-soft);
-    line-height: 1.5;
-    margin: 0 0 6px 0;
-  }
   .pg-subtitle {
     font-size: 13px;
     color: var(--ink);
@@ -303,12 +297,67 @@
     margin: 2px 0 6px 0;
     font-style: italic;
   }
+  .pg-details {
+    margin: 6px 0;
+  }
+  .pg-details-toggle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+    padding: 2px 0;
+  }
+  .pg-details-toggle::-webkit-details-marker { display: none; }
+  .pg-details-toggle::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform .15s ease;
+    font-size: 10px;
+  }
+  .pg-details[open] .pg-details-toggle::before {
+    transform: rotate(90deg);
+  }
+  .pg-details[open] .pg-details-toggle {
+    margin-bottom: 6px;
+  }
+  .pg-details-toggle:hover { color: var(--red); }
+  .pg-details-body {
+    padding: 8px 12px;
+    background: var(--bg);
+    border-left: 3px solid var(--line);
+    border-radius: 0 3px 3px 0;
+  }
+  .pg-fulldesc {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin: 0 0 8px 0;
+    white-space: pre-line;
+  }
+  .pg-fulldesc:last-child { margin-bottom: 0; }
   .pg-speakers {
     font-size: 12.5px;
     color: var(--ink-soft);
-    line-height: 1.45;
-    margin: 6px 0;
-    padding: 4px 0;
+    line-height: 1.5;
+    margin: 8px 0 0 0;
+  }
+  .pg-speaker {
+    margin: 3px 0;
+    line-height: 1.4;
+  }
+  .pg-speaker-name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .pg-speaker-role {
+    color: var(--ink-muted);
+    font-size: 12px;
   }
   .pg-label {
     font-family: 'Oswald', sans-serif;
@@ -318,6 +367,8 @@
     text-transform: uppercase;
     color: var(--ink-muted);
     margin-right: 8px;
+    display: block;
+    margin-bottom: 2px;
   }
   .pg-meta {
     font-size: 11px;
@@ -1011,15 +1062,60 @@ function esc(s) {
 function formatSpeakers(speakers) {
   if (!speakers || !Array.isArray(speakers) || speakers.length === 0) return "";
   return speakers.map(s => {
-    if (typeof s === 'string') return s.trim();
-    if (s && typeof s === 'object') {
-      const parts = [s.name];
-      if (s.role) parts.push(s.role);
-      if (s.org) parts.push(s.org);
-      return parts.filter(Boolean).join(", ");
+    let name = "", role = "", org = "";
+    if (typeof s === 'string') {
+      name = s.trim();
+    } else if (s && typeof s === 'object') {
+      name = (s.name || "").trim();
+      role = (s.role || "").trim();
+      org = (s.org || "").trim();
     }
-    return "";
-  }).filter(Boolean).join(" · ");
+    if (!name) return "";
+
+    // Fix run-on "NavnMODERATOR" or "NavnModerator" — split where a lowercase
+    // letter meets an uppercase one near the end (the role got glued onto the name)
+    if (!role) {
+      const m = name.match(/^(.+?[a-zæøå])([A-ZÆØÅ][a-zæøå]+)$/);
+      if (m && m[2].length >= 4) {
+        // Only split if second part looks like a role word (Moderator, Ordstyrer, Vært…)
+        const roleWords = /^(Moderator|Ordstyrer|Vært|Oplægsholder|Paneldeltager|Facilitator|Interviewer)$/i;
+        if (roleWords.test(m[2])) {
+          name = m[1].trim();
+          role = m[2].trim();
+        }
+      }
+    }
+
+    // Build: "Name (role, org)"
+    const detail = [role, org].filter(Boolean).join(", ");
+    return detail ? `${name} (${detail})` : name;
+  }).filter(Boolean).join("  ·  ");
+}
+
+// Render speakers as individual lines (name bold, role/org in parens)
+function formatSpeakersHTML(speakers) {
+  if (!speakers || !Array.isArray(speakers) || speakers.length === 0) return "";
+  const items = speakers.map(s => {
+    let name = "", role = "", org = "";
+    if (typeof s === 'string') {
+      name = s.trim();
+    } else if (s && typeof s === 'object') {
+      name = (s.name || "").trim();
+      role = (s.role || "").trim();
+      org = (s.org || "").trim();
+    }
+    if (!name) return "";
+    if (!role) {
+      const m = name.match(/^(.+?[a-zæøå])([A-ZÆØÅ][a-zæøå]+)$/);
+      if (m && m[2].length >= 4) {
+        const roleWords = /^(Moderator|Ordstyrer|Vært|Oplægsholder|Paneldeltager|Facilitator|Interviewer)$/i;
+        if (roleWords.test(m[2])) { name = m[1].trim(); role = m[2].trim(); }
+      }
+    }
+    const detail = [role, org].filter(Boolean).join(", ");
+    return `<div class="pg-speaker"><span class="pg-speaker-name">${esc(name)}</span>${detail ? ` <span class="pg-speaker-role">(${esc(detail)})</span>` : ""}</div>`;
+  }).filter(Boolean).join("");
+  return items;
 }
 
 // GO
@@ -1315,10 +1411,14 @@ function renderProgram() {
       const venueAttr = esc(e.venue || "");
       const titleAttr = esc(e.title || "");
       const officialUrl = e.url || "";
-      // Format speakers: array of strings OR array of {name, role, org}
       const speakerStr = formatSpeakers(e.speakers);
-      // Prefer 'more' (full description) over 'summary' (sub-headline)
-      const desc = e.more || e.summary || "";
+      const speakerHTML = formatSpeakersHTML(e.speakers);
+      // summary = short sub-headline (always shown); more = full description (collapsible)
+      const subtitle = e.summary || "";
+      const fullDesc = e.more || "";
+      // Only show expand toggle if there's extra content beyond the subtitle
+      const hasExtra = (fullDesc && fullDesc !== subtitle) || speakerStr;
+
       return `
       <div class="pg-event">
         <div class="pg-time">${esc(e.time || "?")}</div>
@@ -1326,13 +1426,19 @@ function renderProgram() {
           ${officialUrl
             ? `<a class="pg-title" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(e.title || "")}</a>`
             : `<div class="pg-title">${esc(e.title || "")}</div>`}
-          ${e.summary && e.summary !== e.more ? `<div class="pg-subtitle">${esc(e.summary)}</div>` : ""}
-          ${desc ? `<div class="pg-summary">${esc(desc)}</div>` : ""}
-          ${speakerStr ? `<div class="pg-speakers"><span class="pg-label">Deltagere</span>${esc(speakerStr)}</div>` : ""}
+          ${subtitle ? `<div class="pg-subtitle">${esc(subtitle)}</div>` : ""}
           <div class="pg-meta">
             <span class="pg-venue">◆ ${esc(e.venue || "?")}</span>
             ${e.organizers ? `<span class="pg-org">${esc(e.organizers)}</span>` : ""}
           </div>
+          ${hasExtra ? `
+          <details class="pg-details">
+            <summary class="pg-details-toggle">Vis detaljer</summary>
+            <div class="pg-details-body">
+              ${fullDesc && fullDesc !== subtitle ? `<div class="pg-fulldesc">${esc(fullDesc)}</div>` : ""}
+              ${speakerHTML ? `<div class="pg-speakers"><span class="pg-label">Deltagere</span>${speakerHTML}</div>` : ""}
+            </div>
+          </details>` : ""}
           <div class="pg-actions">
             ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">🔗 Officiel side</a>` : ""}
             <button class="pg-action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Vis på kort</button>
