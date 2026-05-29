@@ -190,6 +190,31 @@
     color: white;
   }
 
+  /* Favorites chip — distinct styling so it stands out */
+  .pg-chip.favorites-chip {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .pg-chip.favorites-chip:hover {
+    background: #fdeef0;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .pg-chip.favorites-chip.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+  .pg-chip.favorites-chip.active .favorites-heart {
+    color: white;
+  }
+  .favorites-heart {
+    color: var(--red);
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 2px;
+  }
+
   .program-filters {
     display: flex;
     gap: 8px;
@@ -261,13 +286,47 @@
   }
   .pg-event:hover { background: var(--bg); }
   .pg-event:last-child { border-bottom: none; }
+  .pg-time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    gap: 8px;
+  }
   .pg-time {
     font-family: 'Oswald', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: var(--red);
     letter-spacing: 0.04em;
-    margin-bottom: 3px;
+  }
+  .pg-fav-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    margin: -4px;
+    cursor: pointer;
+    color: var(--line);
+    transition: color .15s ease, transform .12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pg-fav-btn svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    transition: fill .15s ease, stroke .15s ease;
+  }
+  .pg-fav-btn:hover { color: var(--red); }
+  .pg-fav-btn:hover svg { stroke: var(--red); }
+  .pg-fav-btn:active { transform: scale(0.85); }
+  .pg-fav-btn.favorited { color: var(--red); }
+  .pg-fav-btn.favorited svg {
+    fill: var(--red);
+    stroke: var(--red);
   }
   .pg-body { width: 100%; min-width: 0; }
   .pg-title {
@@ -1152,8 +1211,75 @@ const programState = {
   pageSize: 50,
   scrapedAt: null,
   selectedThemes: new Set(),
-  officialThemes: []  // [{name, count}, ...] from program.json
+  officialThemes: [],  // [{name, count}, ...] from program.json
+  favorites: new Set(),     // event IDs the user has hearted
+  showFavoritesOnly: false  // true when "Egne favoritter" theme chip is active
 };
+
+// === FAVORITES (saved to localStorage) ===
+const FAV_STORAGE_KEY = "folkemodet2026_favorites_v1";
+
+function extractEventId(url) {
+  // URL like: https://program.folkemoedet.dk/events/2026/32550/morgenyoga-med-grundtvig
+  // Return the numeric ID (e.g. "32550") as a stable unique key.
+  if (!url) return null;
+  const m = String(url).match(/\/events\/\d+\/(\d+)/);
+  return m ? m[1] : null;
+}
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAV_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        programState.favorites = new Set(arr.map(String));
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load favorites:", e);
+  }
+}
+
+function saveFavorites() {
+  try {
+    localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify([...programState.favorites]));
+  } catch (e) {
+    console.warn("Could not save favorites:", e);
+  }
+}
+
+function toggleFavorite(eventId, btnEl) {
+  if (!eventId) return;
+  if (programState.favorites.has(eventId)) {
+    programState.favorites.delete(eventId);
+    btnEl.classList.remove("favorited");
+    btnEl.setAttribute("aria-pressed", "false");
+    btnEl.setAttribute("title", "Tilføj til favoritter");
+  } else {
+    programState.favorites.add(eventId);
+    btnEl.classList.add("favorited");
+    btnEl.setAttribute("aria-pressed", "true");
+    btnEl.setAttribute("title", "Fjern fra favoritter");
+  }
+  saveFavorites();
+  // Update the favorites chip badge count
+  updateFavoritesChip();
+  // If we're viewing favorites and an item is removed, re-filter
+  if (programState.showFavoritesOnly) {
+    applyFilters();
+  }
+}
+
+function updateFavoritesChip() {
+  const chip = document.getElementById("favoritesChip");
+  if (!chip) return;
+  const count = programState.favorites.size;
+  const countEl = chip.querySelector(".pg-chip-count");
+  if (countEl) countEl.textContent = count;
+  chip.style.opacity = count === 0 ? "0.6" : "1";
+}
+
 
 // Fix scrape artifacts: detect run-on title+summary like "TitlenHer kommer beskrivelsen…"
 // where heading and description got concatenated with no separator.
@@ -1299,6 +1425,9 @@ async function loadOfficialProgram() {
   const statusEl = document.getElementById("programStatus");
   const controlsEl = document.getElementById("programControls");
 
+  // Load saved favorites first
+  loadFavorites();
+
   try {
     const resp = await fetch("./program.json?t=" + Date.now());
     if (!resp.ok) throw new Error("Not found");
@@ -1367,11 +1496,36 @@ function populateFilters() {
   allChip.textContent = "Alle temaer";
   allChip.addEventListener("click", () => {
     programState.selectedThemes.clear();
+    programState.showFavoritesOnly = false;
     chipsEl.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
     allChip.classList.add("active");
     applyFilters();
   });
   chipsEl.appendChild(allChip);
+
+  // "Egne favoritter" chip — special chip that filters to only hearted events
+  const favChip = document.createElement("div");
+  favChip.className = "pg-chip favorites-chip";
+  favChip.id = "favoritesChip";
+  favChip.innerHTML = `<span class="favorites-heart">♥</span> Egne favoritter <span class="pg-chip-count">${programState.favorites.size}</span>`;
+  favChip.title = "Vis kun arrangementer du har hjertet";
+  favChip.addEventListener("click", () => {
+    if (programState.showFavoritesOnly) {
+      // Toggling off: go back to "all themes"
+      programState.showFavoritesOnly = false;
+      favChip.classList.remove("active");
+      allChip.classList.add("active");
+    } else {
+      // Toggle on: clear theme selections, activate only favorites
+      programState.selectedThemes.clear();
+      programState.showFavoritesOnly = true;
+      chipsEl.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
+      favChip.classList.add("active");
+    }
+    applyFilters();
+  });
+  chipsEl.appendChild(favChip);
+  updateFavoritesChip();
 
   // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
   const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
@@ -1401,6 +1555,12 @@ function populateFilters() {
     }
     chip.dataset.theme = theme;
     chip.addEventListener("click", () => {
+      // If favorites was active, deactivate it
+      if (programState.showFavoritesOnly) {
+        programState.showFavoritesOnly = false;
+        const favChipEl = document.getElementById("favoritesChip");
+        if (favChipEl) favChipEl.classList.remove("active");
+      }
       if (programState.selectedThemes.has(theme)) {
         programState.selectedThemes.delete(theme);
         chip.classList.remove("active");
@@ -1439,6 +1599,11 @@ function applyFilters() {
   const selectedThemes = [...programState.selectedThemes];
 
   programState.filtered = programState.events.filter(e => {
+    // Favorites filter (mutually exclusive with theme filters)
+    if (programState.showFavoritesOnly) {
+      const eventId = extractEventId(e.url);
+      if (!eventId || !programState.favorites.has(eventId)) return false;
+    }
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
     if (search) {
@@ -1465,6 +1630,7 @@ function clearFilters() {
   document.getElementById("filterVenue").value = "";
   document.getElementById("filterSearch").value = "";
   programState.selectedThemes.clear();
+  programState.showFavoritesOnly = false;
   const chips = document.getElementById("programThemeChips");
   if (chips) {
     chips.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
@@ -1520,11 +1686,20 @@ function renderProgram() {
       const fullDesc = e.more || "";
       // Only show expand toggle if there's extra content beyond the subtitle
       const hasExtra = (fullDesc && fullDesc !== subtitle) || speakerStr;
+      const eventId = extractEventId(e.url);
+      const isFav = eventId && programState.favorites.has(eventId);
 
       return `
       <div class="pg-event">
         <div class="pg-body">
-          <div class="pg-time">${esc(e.time || "?")}</div>
+          <div class="pg-time-row">
+            <div class="pg-time">${esc(e.time || "?")}</div>
+            ${eventId ? `<button class="pg-fav-btn ${isFav ? 'favorited' : ''}" data-fav-id="${esc(eventId)}" type="button" aria-pressed="${isFav ? 'true' : 'false'}" title="${isFav ? 'Fjern fra favoritter' : 'Tilføj til favoritter'}" aria-label="Favorit">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path d="M12 21s-7-4.5-9.5-9.1C.9 8.5 2.5 5 6 5c2 0 3.5 1.2 4 2.5C10.5 6.2 12 5 14 5c3.5 0 5.1 3.5 3.5 6.9C19 16.5 12 21 12 21z"/>
+              </svg>
+            </button>` : ""}
+          </div>
           ${officialUrl
             ? `<a class="pg-title" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(e.title || "")}</a>`
             : `<div class="pg-title">${esc(e.title || "")}</div>`}
@@ -1560,6 +1735,15 @@ function renderProgram() {
       ev.preventDefault();
       ev.stopPropagation();
       openVenueMap(btn.getAttribute("data-venue"), btn.getAttribute("data-title"));
+    });
+  });
+
+  // Attach favorite-button handlers
+  out.querySelectorAll("[data-fav-id]").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      toggleFavorite(btn.getAttribute("data-fav-id"), btn);
     });
   });
 
