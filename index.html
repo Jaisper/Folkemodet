@@ -7,7 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<!-- No external map library — we use the official Folkemødet map as a zoomable image -->
+<!-- Leaflet for interactive map with precise venue positions -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
   :root {
     --orange: #E87722;
@@ -34,6 +36,1532 @@
     background: var(--bg);
     color: var(--ink);
     font-family: 'Source Sans 3', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 800px 400px at 50% -100px, rgba(232,119,34,.08), transparent),
+      radial-gradient(ellipse 600px 300px at 90% 30%, rgba(200,16,46,.04), transparent);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -7px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--red) 50%, var(--orange) 50%, var(--orange) 100%);
+  }
+  .eyebrow {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  h1 .ampersand { color: var(--orange); }
+  .subtitle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 17px;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    font-weight: 400;
+  }
+  .subtitle b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 28px;
+  }
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .panel-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-title::before {
+    content: "";
+    width: 14px;
+    height: 2px;
+    background: var(--orange);
+    display: inline-block;
+  }
+  .panel-help {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+
+  /* API KEY */
+  /* PROGRAM LIST */
+  .program-theme-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .pg-chip {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all .12s ease;
+    user-select: none;
+  }
+  .pg-chip:hover {
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .pg-chip.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+    font-weight: 600;
+  }
+  .pg-chip.all-chip.active {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .pg-chip-count {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    background: var(--bg);
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .pg-chip.active .pg-chip-count {
+    background: rgba(255,255,255,.25);
+    color: white;
+  }
+
+  .program-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .program-filters select,
+  .program-filters input {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    background: white;
+    color: var(--ink);
+    flex: 1;
+    min-width: 130px;
+  }
+  .program-filters select:focus,
+  .program-filters input:focus {
+    outline: none;
+    border-color: var(--orange);
+  }
+  .filter-clear {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .filter-clear:hover {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .program-meta {
+    font-size: 12px;
+    font-family: 'Source Sans 3', monospace;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .program-results {
+    display: flex;
+    flex-direction: column;
+  }
+  .pg-day-header {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: white;
+    background: var(--ink);
+    padding: 8px 12px;
+    border-left: 4px solid var(--orange);
+    margin: 16px 0 0 0;
+  }
+  .pg-day-header:first-child { margin-top: 0; }
+  .pg-event {
+    display: block;
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    color: inherit;
+    transition: background .12s ease;
+  }
+  .pg-event:hover { background: var(--bg); }
+  .pg-event:last-child { border-bottom: none; }
+  .pg-time {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+  }
+  .pg-body { width: 100%; min-width: 0; }
+  .pg-title {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+    text-decoration: none;
+    margin-bottom: 4px;
+  }
+  a.pg-title {
+    border-bottom: 1px solid transparent;
+    transition: border-color .12s ease, color .12s ease;
+  }
+  a.pg-title:hover {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+  .pg-subtitle {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    line-height: 1.4;
+    margin: 2px 0 6px 0;
+  }
+  .pg-details {
+    margin: 6px 0;
+  }
+  .pg-details-toggle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+    padding: 2px 0;
+  }
+  .pg-details-toggle::-webkit-details-marker { display: none; }
+  .pg-details-toggle::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform .15s ease;
+    font-size: 10px;
+  }
+  .pg-details[open] .pg-details-toggle::before {
+    transform: rotate(90deg);
+  }
+  .pg-details[open] .pg-details-toggle {
+    margin-bottom: 6px;
+  }
+  .pg-details-toggle:hover { color: var(--red); }
+  .pg-details-body {
+    padding: 8px 12px;
+    background: var(--bg);
+    border-left: 3px solid var(--line);
+    border-radius: 0 3px 3px 0;
+  }
+  .pg-fulldesc {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin: 0 0 8px 0;
+    white-space: pre-line;
+  }
+  .pg-fulldesc:last-child { margin-bottom: 0; }
+  .pg-speakers {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 8px 0 0 0;
+  }
+  .pg-speaker {
+    margin: 3px 0;
+    line-height: 1.4;
+  }
+  .pg-speaker-name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .pg-speaker-role {
+    color: var(--ink-muted);
+    font-size: 12px;
+  }
+  .pg-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-right: 8px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .pg-meta {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .pg-venue {
+    color: var(--orange);
+    font-weight: 600;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.04em;
+    font-size: 12px;
+  }
+  .pg-org {
+    font-style: italic;
+  }
+  .pg-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .pg-action-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+  }
+  .pg-action-link:hover { color: var(--red); }
+  .load-more {
+    margin: 16px auto 0;
+    display: block;
+    padding: 10px 24px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .load-more:hover {
+    background: var(--orange-pale);
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .program-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+
+  /* EVENT LINKS */
+  .event-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .12s ease;
+  }
+  .action-link:hover {
+    background: var(--orange-pale);
+    border-color: var(--orange);
+    color: var(--ink);
+  }
+  .action-link .ico {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .tl-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .tl-action {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--orange);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+  }
+  .tl-action:hover { color: var(--red); }
+
+  /* MAP MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,.6);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 14px 18px;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 3px solid var(--orange);
+  }
+  .modal-title-block { flex: 1; min-width: 0; }
+  .modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .modal-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.75);
+    margin-top: 2px;
+  }
+  .modal-close {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.3);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.15); }
+
+  /* MAP INFO + PDF CTA */
+  .map-info {
+    padding: 14px 18px;
+    background: var(--orange-pale);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .map-find-hint {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .map-find-hint b {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.04em;
+    color: var(--red);
+  }
+  #leafletMap {
+    width: 100%;
+    height: 55vh;
+    max-height: 500px;
+    background: #d9e6e0;
+  }
+  .leaflet-container { font-family: inherit; }
+  .venue-marker {
+    background: var(--red);
+    border: 3px solid white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.3), 0 2px 6px rgba(0,0,0,0.3);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.3), 0 2px 6px rgba(0,0,0,0.3); }
+    50% { box-shadow: 0 0 0 12px rgba(200, 16, 46, 0), 0 2px 6px rgba(0,0,0,0.3); }
+  }
+  .map-overview-link {
+    display: block;
+    padding: 8px 18px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--orange);
+    text-decoration: none;
+    background: var(--bg);
+    border-top: 1px solid var(--line-soft);
+  }
+  .map-overview-link:hover { text-decoration: underline; }
+
+  .modal-footer {
+    padding: 10px 18px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .modal-footer a { color: var(--orange); }
+  .modal-footer.warn {
+    background: #FBF1D9;
+    color: #7A5410;
+  }
+
+  /* MAP NAVIGATION ACTIONS */
+  .map-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    background: white;
+  }
+  .map-nav-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--red);
+    color: white;
+    border-radius: 3px;
+    transition: background .12s ease, transform .08s ease;
+  }
+  .map-nav-btn:hover {
+    background: #a30d23;
+  }
+  .map-nav-btn:active {
+    transform: scale(0.98);
+  }
+  .map-nav-secondary {
+    flex: 0 0 auto;
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .map-nav-secondary:hover {
+    background: var(--bg);
+    border-color: var(--ink);
+  }
+  @media (max-width: 480px) {
+    .map-actions { flex-direction: column; }
+    .map-nav-secondary { flex: 1; }
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+  footer a { color: var(--orange); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 60px; }
+    .panel { padding: 16px; }
+    .action-bar { padding: 14px 16px; }
+    .event-card { padding: 14px 16px; }
+    .rank-num { font-size: 22px; min-width: 28px; }
+    .event-title { font-size: 17px; }
+    .tl-row { flex-direction: column; gap: 4px; padding: 12px 14px; }
+    .tl-time { min-width: 0; }
+    .tl-day-header { padding: 12px 14px; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Allinge · Bornholm · 11.–13. juni 2026</div>
+    <h1>Folkemødet <span class="ampersand">2026</span></h1>
+    <div class="subtitle"><b>Folkemødets program.</b> Søg, filtrer, find vej til arrangementerne.</div>
+  </header>
+
+  <section class="panel" id="programPanel">
+    <div class="panel-title">Officielt program</div>
+    <div id="programStatus" class="panel-help">Loader…</div>
+    <div id="programControls" style="display:none">
+      <div class="program-theme-chips" id="programThemeChips"></div>
+
+      <div class="program-filters">
+        <select id="filterDay"><option value="">Alle dage</option></select>
+        <select id="filterVenue"><option value="">Alle venues</option></select>
+        <input type="search" id="filterSearch" placeholder="Søg titel, beskrivelse, arrangør, deltagere…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
+        <button class="filter-clear" id="filterClear" type="button">Nulstil</button>
+      </div>
+      <div class="program-meta" id="programMeta"></div>
+      <div id="programResults" class="program-results"></div>
+      <button class="load-more" id="loadMoreBtn" type="button" style="display:none">Vis flere</button>
+    </div>
+  </section>
+
+  <footer>
+    <div>Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
+    <div style="margin-top:6px">Bygget af <a href="https://github.com/Jaisper/Folkemodet" target="_blank">@Jaisper</a> — ingen affiliering med Folkemødet.</div>
+  </footer>
+
+</div>
+
+<!-- MAP MODAL -->
+<div class="modal-overlay" id="mapModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title" id="mapTitle">Lokation</div>
+        <div class="modal-sub" id="mapSub"></div>
+      </div>
+      <button class="modal-close" id="mapClose" aria-label="Luk">×</button>
+    </div>
+    <div class="map-info" id="mapInfo"></div>
+    <div id="leafletMap"></div>
+    <div class="map-actions" id="mapActions">
+      <a class="map-nav-btn" id="navGoogle" href="#" target="_blank" rel="noopener">
+        🚶 Naviger med Google Maps
+      </a>
+      <a class="map-nav-btn map-nav-secondary" id="openMapPdf" href="#" target="_blank" rel="noopener">
+        📄 Officielt PDF-kort
+      </a>
+    </div>
+    <a class="map-overview-link" id="openMapOverview" href="#" target="_blank" rel="noopener">Se alle officielle teknikkort →</a>
+    <div class="modal-footer" id="mapFooter">Allinge, Bornholm</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag"];
+const DAY_DATES = {
+  "Torsdag": "11. juni",
+  "Fredag": "12. juni",
+  "Lørdag": "13. juni"
+};
+
+// ============================================================
+// MAP MODAL — links to the official Folkemødet PDF maps (vector,
+// infinitely zoomable). Folkemødet publishes three "Teknikkort" PDFs
+// covering different zones; we pick the right one based on stade letter.
+// ============================================================
+
+// Stade GPS coordinates extracted from Folkemødet's official 2026 teknikkort PDFs.
+// Calibrated using scale bar (79.23 PDF px = 50 m) and Hovedscenen anchor (C18 = 55.2808°N, 14.7954°E).
+// 368 stades extracted from three vector PDFs covering all zones A-N.
+const VENUE_COORDS = {
+  // === A ===
+  "A1": [55.281112, 14.792303], "A3": [55.281089, 14.792675], "A4": [55.281348, 14.79246],
+  "A5": [55.281449, 14.792312], "A6": [55.281512, 14.792294], "A7": [55.281596, 14.79221],
+  "A8": [55.28168, 14.792117], "A9": [55.281743, 14.792037], "A10": [55.281922, 14.79205],
+  "A11": [55.282124, 14.791708], "A12": [55.282193, 14.791651], "A15": [55.282461, 14.791433],
+  "A18": [55.281307, 14.792823], "A19": [55.281607, 14.792497], "A20": [55.281606, 14.792719],
+  "A21": [55.281755, 14.792896], "A23": [55.281769, 14.793189], "A24": [55.281535, 14.793297],
+  "A25": [55.281783, 14.79362], "A26": [55.281941, 14.793284], "A27": [55.281895, 14.792834],
+  "A28": [55.281944, 14.792981], "A29": [55.282139, 14.792578], "A30": [55.282096, 14.792413],
+  "A31": [55.282034, 14.792222], "A32": [55.281252, 14.794198], "A33": [55.282234, 14.792843],
+  "A34": [55.282345, 14.792669], "A35": [55.28252, 14.79265], "A38": [55.282625, 14.792061],
+  "A39": [55.282812, 14.792713], "A40": [55.282681, 14.792763], "A41": [55.282788, 14.792941],
+  "A70": [55.282702, 14.79107], "A71": [55.282819, 14.791046], "A76": [55.281427, 14.792676],
+  "A77": [55.281781, 14.791793], "A78": [55.282748, 14.793086], "A79": [55.282905, 14.792813],
+  "A80": [55.282916, 14.792675], "A83": [55.283032, 14.790373], "A84": [55.282953, 14.791021],
+  "A85": [55.282781, 14.791151], "A86": [55.282647, 14.791678], "A87": [55.282074, 14.792006],
+  "A88": [55.281006, 14.792517], "A89": [55.282113, 14.792819], "A90": [55.282391, 14.793107],
+  "A91": [55.282586, 14.793459], "A92": [55.282859, 14.793046], "A93": [55.28176, 14.791622],
+  "A94": [55.28273, 14.791442], "A95": [55.282848, 14.793215], "A99": [55.281348, 14.792032],
+  // === B ===
+  "B1": [55.279368, 14.794251], "B2": [55.279674, 14.794374], "B3": [55.27983, 14.794175],
+  "B4": [55.279925, 14.793933], "B5": [55.280033, 14.793635], "B6": [55.280184, 14.793416],
+  "B7": [55.280326, 14.793193], "B8": [55.280292, 14.792916], "B9": [55.280423, 14.793164],
+  "B10": [55.280404, 14.793021], "B11": [55.280554, 14.792736], "B12": [55.280766, 14.792516],
+  "B13": [55.280587, 14.792476], "B14": [55.280525, 14.79243], "B15": [55.280439, 14.792391],
+  "B16": [55.280366, 14.792344], "B17": [55.280282, 14.792293], "B71": [55.279136, 14.793948],
+  "B73": [55.279455, 14.793331], "B74": [55.279727, 14.792916], "B75": [55.279677, 14.793521],
+  "B76": [55.279836, 14.793237], "B77": [55.279495, 14.792851], "B78": [55.280549, 14.792132],
+  "B79": [55.279384, 14.793768], "B80": [55.279918, 14.791984], "B81": [55.279857, 14.792194],
+  "B82": [55.279177, 14.793035], "B85": [55.279885, 14.792648], "B86": [55.279185, 14.79363],
+  "B87": [55.279979, 14.794036], "B88": [55.280244, 14.793566], "B98": [55.279073, 14.793812],
+  "B99": [55.280538, 14.79314],
+  // === C ===
+  "C1": [55.28043, 14.795808], "C2": [55.280119, 14.794731], "C3": [55.280198, 14.794866],
+  "C4": [55.280278, 14.795002], "C5": [55.280444, 14.794308], "C7": [55.280335, 14.794173],
+  "C8": [55.280272, 14.794074], "C9": [55.280201, 14.793901], "C11": [55.280194, 14.795325],
+  "C12": [55.280475, 14.795173], "C13": [55.279788, 14.794704], "C14": [55.280257, 14.795684],
+  "C15": [55.2804, 14.79589], "C16": [55.280428, 14.795825], "C18": [55.2808, 14.7954],
+  "C19": [55.280906, 14.795199], "C22": [55.280844, 14.794286], "C23": [55.280792, 14.794373],
+  "C25": [55.280409, 14.793715], "C26": [55.280595, 14.793406], "C28": [55.280789, 14.793858],
+  "C29": [55.280684, 14.794155], "C30": [55.280986, 14.793494], "C31": [55.281145, 14.793409],
+  "C32": [55.281054, 14.793076], "C34": [55.280944, 14.792884], "C35": [55.28079, 14.793022],
+  "C36": [55.280666, 14.792988], "C37": [55.280947, 14.793234], "C73": [55.279937, 14.795645],
+  "C74": [55.280059, 14.795332], "C75": [55.280413, 14.794681], "C76": [55.280191, 14.795941],
+  "C77": [55.281194, 14.795042], "C78": [55.280719, 14.794617], "C79": [55.281176, 14.79518],
+  "C80": [55.281101, 14.795334], "C81": [55.281028, 14.795519], "C82": [55.280531, 14.795637],
+  "C83": [55.280998, 14.794642], "C84": [55.279929, 14.794918], "C99": [55.280549, 14.794887],
+  // === D ===
+  "D1": [55.279308, 14.79456], "D4": [55.279503, 14.794825], "D5": [55.279288, 14.794987],
+  "D6": [55.27905, 14.795663], "D9": [55.27705, 14.796698], "D10": [55.278096, 14.796457],
+  "D12": [55.279434, 14.795267], "D13": [55.279588, 14.795214], "D70": [55.27757, 14.796726],
+  "D71": [55.279072, 14.794428], "D72": [55.278636, 14.796212],
+  // === E ===
+  "E1": [55.279859, 14.796065], "E3": [55.27975, 14.796627], "E4": [55.279938, 14.797001],
+  "E5": [55.279726, 14.797092], "E6": [55.27969, 14.797271], "E8": [55.279541, 14.797484],
+  "E9": [55.279506, 14.797636], "E10": [55.27944, 14.797784], "E11": [55.279388, 14.798114],
+  "E12": [55.279451, 14.798025], "E13": [55.279471, 14.798297], "E14": [55.279479, 14.798484],
+  "E16": [55.279206, 14.798636], "E70": [55.280131, 14.797178], "E71": [55.279687, 14.797875],
+  "E72": [55.279771, 14.795782], "E73": [55.2797, 14.795808], "E74": [55.279738, 14.795922],
+  "E75": [55.279927, 14.798266], "E76": [55.279698, 14.795655], "E77": [55.279672, 14.796],
+  // === F ===
+  "F1": [55.278233, 14.800787], "F3": [55.278014, 14.800709], "F4": [55.278125, 14.800689],
+  "F5": [55.278189, 14.800611], "F6": [55.278297, 14.80048], "F7": [55.278465, 14.800802],
+  "F8": [55.278578, 14.800722], "F9": [55.278695, 14.800588], "F10": [55.278857, 14.800472],
+  "F11": [55.279233, 14.800103], "F12": [55.27933, 14.799041], "F13": [55.278944, 14.799592],
+  "F14": [55.278935, 14.800111], "F15": [55.279124, 14.799268], "F16": [55.278791, 14.80033],
+  "F17": [55.278679, 14.800421], "F18": [55.278512, 14.80054], "F20": [55.278092, 14.800133],
+  "F21": [55.277934, 14.800346], "F22": [55.278046, 14.800011], "F23": [55.278082, 14.799924],
+  "F24": [55.278079, 14.79944], "F27": [55.278247, 14.799292], "F28": [55.27861, 14.799303],
+  "F30": [55.277938, 14.799093], "F31": [55.278206, 14.798717], "F32": [55.278158, 14.798195],
+  "F34": [55.278254, 14.797495], "F50": [55.278856, 14.799827], "F70": [55.277984, 14.800587],
+  "F73": [55.278266, 14.799592], "F74": [55.279143, 14.800105], "F75": [55.277873, 14.797967],
+  "F76": [55.278476, 14.799659], "F77": [55.27805, 14.79977], "F78": [55.277923, 14.797734],
+  "F79": [55.278402, 14.800379], "F80": [55.278654, 14.799636], "F98": [55.279215, 14.799207],
+  // === G ===
+  "G1": [55.277448, 14.800805], "G3": [55.277231, 14.800977], "G4": [55.277154, 14.801053],
+  "G6": [55.277404, 14.801053], "G7": [55.277314, 14.801227], "G8": [55.27762, 14.801057],
+  "G9": [55.277576, 14.801153], "G10": [55.277474, 14.801304], "G11": [55.277308, 14.801528],
+  "G12": [55.277198, 14.801817], "G13": [55.277099, 14.802066], "G14": [55.277007, 14.802257],
+  "G15": [55.276831, 14.80267], "G16": [55.276745, 14.802884], "G17": [55.276669, 14.803078],
+  "G18": [55.27658, 14.803285], "G20": [55.277201, 14.80145], "G22": [55.27695, 14.801498],
+  "G23": [55.276867, 14.801551], "G26": [55.276977, 14.800744], "G28": [55.275626, 14.801711],
+  "G29": [55.275146, 14.802588], "G30": [55.275939, 14.80194], "G32": [55.275265, 14.803298],
+  "G33": [55.275354, 14.803623], "G35": [55.275491, 14.803345], "G36": [55.275725, 14.803126],
+  "G38": [55.275964, 14.802973], "G39": [55.276178, 14.802832], "G71": [55.276892, 14.802438],
+  "G72": [55.276079, 14.802357],
+  // === H ===
+  "H1": [55.275728, 14.802105], "H2": [55.276677, 14.802846], "H4": [55.276969, 14.802118],
+  "H5": [55.276712, 14.801711], "H6": [55.276439, 14.801677], "H9": [55.275944, 14.802148],
+  "H13": [55.275323, 14.803045], "H14": [55.275496, 14.803182], "H15": [55.275872, 14.802806],
+  "H99": [55.276117, 14.802115],
+  // === J ===
+  "J2": [55.275249, 14.803934], "J3": [55.275275, 14.804076], "J4": [55.275355, 14.804332],
+  "J5": [55.275417, 14.804575], "J6": [55.275481, 14.804805], "J7": [55.275533, 14.805103],
+  "J8": [55.274323, 14.805685], "J9": [55.275152, 14.804089], "J10": [55.275226, 14.804311],
+  "J12": [55.275207, 14.804784], "J13": [55.275305, 14.804732], "J14": [55.275357, 14.804845],
+  "J15": [55.275361, 14.80504], "J16": [55.275267, 14.805232], "J18": [55.275092, 14.804997],
+  "J19": [55.275022, 14.805088], "J20": [55.274955, 14.805268], "J21": [55.274882, 14.805397],
+  "J22": [55.27483, 14.805634], "J23": [55.274757, 14.805763], "J24": [55.274671, 14.805883],
+  "J25": [55.275489, 14.805277], "J26": [55.275262, 14.80546], "J27": [55.275143, 14.805562],
+  "J32": [55.27458, 14.806308], "J33": [55.27442, 14.80684], "J34": [55.274298, 14.807006],
+  "J35": [55.274221, 14.80707], "J36": [55.2741, 14.807217], "J37": [55.273959, 14.80704],
+  "J38": [55.273879, 14.806837], "J39": [55.273989, 14.806463], "J40": [55.274065, 14.806418],
+  "J41": [55.274168, 14.806284], "J42": [55.274266, 14.806198], "J43": [55.274245, 14.806668],
+  "J44": [55.274178, 14.80681], "J45": [55.274098, 14.806831], "J46": [55.273997, 14.80677],
+  "J47": [55.274091, 14.806662], "J48": [55.274195, 14.80657], "J49": [55.274426, 14.805966],
+  "J50": [55.275061, 14.803738], "J51": [55.275002, 14.803836], "J52": [55.274948, 14.803933],
+  "J53": [55.274889, 14.804021], "J54": [55.274809, 14.804419], "J59": [55.273912, 14.806565],
+  "J60": [55.27418, 14.804634], "J61": [55.274267, 14.804843], "J71": [55.275157, 14.80474],
+  "J76": [55.275071, 14.804275], "J77": [55.274642, 14.806349], "J78": [55.27391, 14.807653],
+  "J79": [55.273532, 14.80674], "J80": [55.273996, 14.806164], "J81": [55.273777, 14.807603],
+  "J82": [55.273798, 14.806964], "J83": [55.273088, 14.806066], "J84": [55.27437, 14.805801],
+  "J87": [55.274465, 14.805635], "J89": [55.275151, 14.805124], "J90": [55.27354, 14.807643],
+  "J91": [55.27452, 14.805926], "J92": [55.273258, 14.806945], "J94": [55.273507, 14.806482],
+  "J95": [55.274279, 14.805146], "J99": [55.274442, 14.806688],
+  // === K ===
+  "K1": [55.274509, 14.803257], "K3": [55.274406, 14.803637], "K4": [55.274222, 14.803941],
+  "K6": [55.27391, 14.804179], "K7": [55.273701, 14.804519], "K10": [55.272687, 14.805479],
+  "K12": [55.272463, 14.804426], "K14": [55.273083, 14.804008], "K16": [55.273315, 14.804082],
+  "K17": [55.273793, 14.803323], "K18": [55.27305, 14.803518], "K19": [55.27301, 14.803374],
+  "K20": [55.272956, 14.80332], "K21": [55.272681, 14.803044], "K24": [55.272156, 14.80312],
+  "K25": [55.271957, 14.802702], "K27": [55.272818, 14.801641], "K28": [55.273451, 14.801931],
+  "K29": [55.273674, 14.802166], "K30": [55.273904, 14.802162], "K72": [55.274419, 14.803364],
+  "K73": [55.273606, 14.800951], "K74": [55.273541, 14.800858], "K75": [55.273484, 14.800695],
+  "K76": [55.273618, 14.800734], "K78": [55.27272, 14.803589], "K79": [55.27244, 14.804021],
+  "K80": [55.272117, 14.803419], "K81": [55.27256, 14.802396], "K82": [55.274, 14.802076],
+  "K83": [55.272406, 14.801632],
+  // === M ===
+  "M70": [55.281383, 14.790751],
+  // === N ===
+  "N1": [55.274651, 14.802877], "N2": [55.27455, 14.802701], "N3": [55.274625, 14.802523],
+  "N4": [55.274172, 14.801768], "N5": [55.274531, 14.801928], "N6": [55.274623, 14.801612],
+  "N7": [55.27486, 14.801954], "N8": [55.275079, 14.801906], "N9": [55.275181, 14.801523],
+  "N10": [55.274971, 14.801486], "N11": [55.275002, 14.801739], "N12": [55.274531, 14.801011],
+  "N13": [55.276375, 14.798142], "N14": [55.276263, 14.798228], "N15": [55.276261, 14.797953],
+  "N16": [55.276447, 14.797762], "N17": [55.276752, 14.797843], "N18": [55.276848, 14.797777],
+  "N19": [55.276895, 14.798178], "N20": [55.276735, 14.798048], "N22": [55.277109, 14.800015],
+  "N72": [55.276675, 14.798137], "N73": [55.275293, 14.800249], "N74": [55.276406, 14.799844],
+  "N75": [55.276185, 14.798832], "N76": [55.275562, 14.800308]
+};
+
+function parseVenueCode(venue) {
+  if (!venue) return null;
+  const m = String(venue).match(/^([A-Z])\s*-?\s*(\d+)/i);
+  if (!m) return null;
+  return { letter: m[1].toUpperCase(), code: m[1].toUpperCase() + m[2] };
+}
+
+const ZONE_NAMES = {
+  "A": "Danchells Anlæg",
+  "B": "Nordlandspladsen",
+  "C": "Cirkuspladsen",
+  "D": "Ved Brandstationen",
+  "E": "Kampeløkke Havn",
+  "F": "Ved Folkemødehuset",
+  "G": "Yder-/Indermolen",
+  "H": "Allinge Havn",
+  "J": "Kæmpestranden",
+  "K": "Kirkepladsen",
+  "L": "Damgårdshave",
+  "M": "Havnetorvet",
+  "N": "Nørregade"
+};
+
+const ZONE_TO_PDF = {
+  "A": "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf",
+  "B": "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf",
+  "C": "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf",
+  "D": "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf",
+  "E": "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf",
+  "F": "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf",
+  "G": "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf",
+  "H": "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf",
+  "J": "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf",
+  "K": "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf",
+  "N": "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf"
+};
+
+const MAP_OVERVIEW_URL = "https://folkemoedet.dk/praktisk/kort-over-pladsen";
+const ALLINGE_DEFAULT = [55.28080, 14.79540]; // Cirkuspladsen
+
+const mapModalEl = document.getElementById("mapModal");
+const mapTitleEl = document.getElementById("mapTitle");
+const mapSubEl = document.getElementById("mapSub");
+const mapCloseEl = document.getElementById("mapClose");
+const mapFooterEl = document.getElementById("mapFooter");
+
+let leafletMap = null;
+let leafletMarker = null;
+
+function openVenueMap(venue, eventTitle) {
+  const parsed = parseVenueCode(venue);
+  const code = parsed?.code || (venue || "").trim();
+  const letter = parsed?.letter;
+  const zoneName = letter ? ZONE_NAMES[letter] : null;
+  const pdfUrl = letter ? ZONE_TO_PDF[letter] : null;
+
+  // Find precise coordinates
+  let coords = null;
+  let precision = "none";
+  if (code && VENUE_COORDS[code]) {
+    coords = VENUE_COORDS[code];
+    precision = "exact";
+  }
+  if (!coords) {
+    coords = ALLINGE_DEFAULT;
+    precision = "fallback";
+  }
+
+  mapTitleEl.textContent = code || "Lokation";
+  mapSubEl.textContent = eventTitle || "";
+
+  const infoEl = document.getElementById("mapInfo");
+  if (precision === "exact" && zoneName) {
+    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> i ${esc(zoneName)} · præcis position fra officielt teknikkort</div>`;
+  } else if (zoneName) {
+    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> ligger i ${esc(zoneName)} · viser zone</div>`;
+  } else {
+    infoEl.innerHTML = `<div class="map-find-hint">Viser Allinge centrum</div>`;
+  }
+
+  // Set up navigation buttons
+  document.getElementById("navGoogle").href = 
+    `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}&travelmode=walking`;
+  const openPdfBtn = document.getElementById("openMapPdf");
+  if (pdfUrl) {
+    openPdfBtn.href = pdfUrl;
+    openPdfBtn.style.display = "";
+  } else {
+    openPdfBtn.style.display = "none";
+  }
+  document.getElementById("openMapOverview").href = MAP_OVERVIEW_URL;
+
+  mapFooterEl.innerHTML = `Stade-position udtrukket fra Folkemødets officielle teknikkort. Officielt PDF-kort: <a href="${MAP_OVERVIEW_URL}" target="_blank" rel="noopener">folkemoedet.dk</a>`;
+  mapFooterEl.className = "modal-footer";
+
+  mapModalEl.classList.add("show");
+  document.body.style.overflow = "hidden";
+
+  // Init or update Leaflet map
+  setTimeout(() => {
+    if (!leafletMap) {
+      leafletMap = L.map("leafletMap", {
+        center: coords,
+        zoom: 18,
+        zoomControl: true,
+        attributionControl: true
+      });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(leafletMap);
+    } else {
+      leafletMap.setView(coords, 18);
+    }
+    if (leafletMarker) {
+      leafletMap.removeLayer(leafletMarker);
+    }
+    const icon = L.divIcon({ className: 'venue-marker', iconSize: [18, 18] });
+    leafletMarker = L.marker(coords, { icon }).addTo(leafletMap);
+    leafletMap.invalidateSize();
+  }, 100);
+}
+
+function closeVenueMap() {
+  mapModalEl.classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+mapCloseEl.addEventListener("click", closeVenueMap);
+mapModalEl.addEventListener("click", (e) => {
+  if (e.target === mapModalEl) closeVenueMap();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && mapModalEl.classList.contains("show")) {
+    mapModalEl.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+});
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+// Format a speakers array (strings or {name, role, org} objects) for display
+function formatSpeakers(speakers) {
+  if (!speakers || !Array.isArray(speakers) || speakers.length === 0) return "";
+  return speakers.map(s => {
+    let name = "", role = "", org = "";
+    if (typeof s === 'string') {
+      name = s.trim();
+    } else if (s && typeof s === 'object') {
+      name = (s.name || "").trim();
+      role = (s.role || "").trim();
+      org = (s.org || "").trim();
+    }
+    if (!name) return "";
+
+    // Fix run-on "NavnMODERATOR" or "NavnModerator" — split where a lowercase
+    // letter meets an uppercase one near the end (the role got glued onto the name)
+    if (!role) {
+      const m = name.match(/^(.+?[a-zæøå])([A-ZÆØÅ][a-zæøå]+)$/);
+      if (m && m[2].length >= 4) {
+        // Only split if second part looks like a role word (Moderator, Ordstyrer, Vært…)
+        const roleWords = /^(Moderator|Ordstyrer|Vært|Oplægsholder|Paneldeltager|Facilitator|Interviewer)$/i;
+        if (roleWords.test(m[2])) {
+          name = m[1].trim();
+          role = m[2].trim();
+        }
+      }
+    }
+
+    // Build: "Name (role, org)"
+    const detail = [role, org].filter(Boolean).join(", ");
+    return detail ? `${name} (${detail})` : name;
+  }).filter(Boolean).join("  ·  ");
+}
+
+// Render speakers as individual lines (name bold, role/org in parens)
+function formatSpeakersHTML(speakers) {
+  if (!speakers || !Array.isArray(speakers) || speakers.length === 0) return "";
+
+  // First, repair glued speaker data. Old scrapes concatenated all speakers into
+  // few entries where role words ("Moderator", "Direktør"…) got fused to the next
+  // person's name, e.g. "...Digitalt AnsvarModeratorAsk Hesby Holm".
+  const roleWords = "Moderator|Ordstyrer|Vært|Oplægsholder|Paneldeltager|Facilitator|Interviewer|Direktør|Chefkonsulent|Konsulent|Formand|Projektleder|Sekretariatschef|Generalsekretær|Forfatter|Journalist|Professor|Lektor|Analytiker|Seniorrådgiver|Pressekonsulent|SSP-konsulent";
+
+  // Flatten everything to one big string, then re-split intelligently
+  const flatParts = [];
+  for (const s of speakers) {
+    if (typeof s === 'string') flatParts.push(s);
+    else if (s && typeof s === 'object') {
+      flatParts.push([s.name, s.role, s.org].filter(Boolean).join(", "));
+    }
+  }
+  let flat = flatParts.join(", ");
+
+  // Insert a separator (and drop the role word) before a capital-letter name
+  // that immediately follows a role word. The role word on Folkemødet pages is
+  // just a position marker, not part of the org name.
+  const re = new RegExp(`(${roleWords})([A-ZÆØÅ][a-zæøå])`, 'g');
+  flat = flat.replace(re, '\u0001$2');
+  // Strip a trailing role word at the very end
+  flat = flat.replace(new RegExp(`(${roleWords})\\s*$`), '');
+
+  const entries = flat.split('\u0001').map(e => e.trim()).filter(Boolean);
+
+  const items = entries.map(entry => {
+    const parts = entry.split(/,/).map(p => p.trim()).filter(Boolean);
+    if (parts.length === 0) return "";
+    let name = parts[0];
+    let detail = parts.slice(1).join(", ");
+    // Remove any leftover trailing role word from detail
+    detail = detail.replace(new RegExp(`(${roleWords})\\s*$`), '').replace(/[\s,]+$/, '').trim();
+    return `<div class="pg-speaker"><span class="pg-speaker-name">${esc(name)}</span>${detail ? ` <span class="pg-speaker-role">(${esc(detail)})</span>` : ""}</div>`;
+  }).filter(Boolean).join("");
+
+  return items;
+}
+
+// GO
+loadOfficialProgram();
+
+// ============================================================
+// OFFICIAL PROGRAM
+// ============================================================
+const programState = {
+  events: [],
+  filtered: [],
+  shown: 0,
+  pageSize: 50,
+  scrapedAt: null,
+  selectedThemes: new Set(),
+  officialThemes: []  // [{name, count}, ...] from program.json
+};
+
+// Fix scrape artifacts: detect run-on title+summary like "TitlenHer kommer beskrivelsen…"
+// where heading and description got concatenated with no separator.
+// Heuristic: split at first transition from a lowercase letter directly into an uppercase
+// letter (or a Danish capital ÆØÅ) — but only if the resulting title looks sensible.
+function normalizeEvent(ev) {
+  const out = { ...ev };
+  let title = (out.title || "").trim();
+  let summary = (out.summary || "").trim();
+
+  // BEST STRATEGY: use the URL slug to find where the real title ends.
+  // URL: .../events/2026/32550/morgenyoga-med-grundtvig
+  // Slug "morgenyoga-med-grundtvig" → expected title length ≈ word count.
+  // We match the slug's words against the start of the title to find the cut point.
+  const slug = extractSlug(out.url);
+  if (slug && title.length > 0) {
+    const cut = matchSlugToTitle(slug, title);
+    if (cut > 0 && cut < title.length) {
+      const realTitle = title.slice(0, cut).trim();
+      const rest = title.slice(cut).trim();
+      if (realTitle.length >= 3 && rest.length >= 3) {
+        title = realTitle;
+        summary = rest + (summary && !rest.includes(summary) ? " " + summary : "");
+        summary = summary.trim();
+      }
+    }
+  }
+
+  // Fallback Case 1: run-on with NO space (lowercase→uppercase glued)
+  if (title.length > 20 && (!slug || matchSlugToTitle(slug, title) <= 0)) {
+    const splitPoint = findRunonSplit(title);
+    if (splitPoint !== -1) {
+      const realTitle = title.slice(0, splitPoint).trim();
+      const extracted = title.slice(splitPoint).trim();
+      if (realTitle.length >= 5 && extracted.length >= 5) {
+        title = realTitle;
+        summary = summary ? extracted + " " + summary : extracted;
+      }
+    }
+  }
+
+  // Case 2: Summary starts by repeating the title
+  if (summary && title && summary.toLowerCase().startsWith(title.toLowerCase())) {
+    summary = summary.slice(title.length).trim().replace(/^[\s.,;:!?-]+/, '');
+  }
+
+  // Dedupe: if title still contains the summary text appended, trim it
+  out.title = title;
+  out.summary = summary;
+  return out;
+}
+
+// Extract the slug portion from an event URL
+function extractSlug(url) {
+  if (!url) return "";
+  const m = String(url).match(/\/events\/\d+\/\d+\/([^/?#]+)/);
+  return m ? m[1] : "";
+}
+
+// Given a slug like "morgenyoga-med-grundtvig" and a title that may have
+// the description glued on, return the character index where the title ends.
+function matchSlugToTitle(slug, title) {
+  // Normalize slug words: hyphens→spaces, restore Danish chars approximately
+  const slugWords = slug
+    .replace(/-/g, ' ')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (slugWords.length === 0) return -1;
+
+  // Normalize title for comparison: lowercase, fold æøå and accents to slug form
+  const fold = (s) => s.toLowerCase()
+    .replace(/æ/g, 'ae').replace(/ø/g, 'oe').replace(/å/g, 'aa')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+
+  const foldedTitle = fold(title);
+  const titleWords = foldedTitle.split(/\s+/);
+
+  // The slug typically also folds æøå the same way (Folkemødet does aa/ae/oe).
+  // Walk title words, consuming as many as match the slug sequence.
+  // Slug may have fewer words than title (truncated) — match what we can.
+  let matchedTitleWords = 0;
+  let slugIdx = 0;
+  for (let i = 0; i < titleWords.length && slugIdx < slugWords.length; i++) {
+    const tw = titleWords[i];
+    const sw = slugWords[slugIdx];
+    // Loose match: slug word is prefix of title word or vice versa
+    if (tw === sw || tw.startsWith(sw) || sw.startsWith(tw)) {
+      matchedTitleWords = i + 1;
+      slugIdx++;
+    } else if (slugIdx > 0) {
+      // Sequence broke after matching some — title likely ended here
+      break;
+    }
+  }
+
+  // Only trust the cut if we matched most of the slug (avoids false cuts)
+  if (slugIdx < Math.min(slugWords.length, 3)) return -1;
+  if (matchedTitleWords === 0 || matchedTitleWords >= titleWords.length) return -1;
+
+  // Map matched word count back to a character index in the ORIGINAL title
+  // by counting words in the original title string
+  const origWords = title.split(/(\s+)/); // keep separators
+  let wordCount = 0;
+  let charIdx = 0;
+  for (let i = 0; i < origWords.length; i++) {
+    if (/\S/.test(origWords[i])) {
+      wordCount++;
+      charIdx += origWords[i].length;
+      if (wordCount === matchedTitleWords) {
+        return charIdx;
+      }
+    } else {
+      charIdx += origWords[i].length;
+    }
+  }
+  return -1;
+}
+
+// Find the index where a run-on title transitions to its description.
+// Looks for a lowercase letter immediately followed by an uppercase one,
+// where the lowercase letter is at least 5 chars in (to avoid breaking after "I" or "På").
+function findRunonSplit(text) {
+  // Pattern: [a-zæøå][A-ZÆØÅ] — boundary between joined sentences
+  // We want the FIRST such boundary that doesn't break a known compound or acronym.
+  const re = /([a-zæøå])([A-ZÆØÅ])/g;
+  let match;
+  const candidates = [];
+  while ((match = re.exec(text)) !== null) {
+    const idx = match.index + 1; // split between the two letters
+    if (idx < 5) continue; // too early — probably "iPhone" or similar
+    // Skip if previous word is an acronym-like all-caps preceded by space (e.g. "DK Ungdom")
+    const before = text.slice(Math.max(0, idx - 4), idx);
+    if (/[A-ZÆØÅ]{2,}$/.test(before)) continue;
+    candidates.push(idx);
+  }
+  // Return the FIRST plausible boundary — that's where title ends
+  return candidates.length > 0 ? candidates[0] : -1;
+}
+
+async function loadOfficialProgram() {
+  const statusEl = document.getElementById("programStatus");
+  const controlsEl = document.getElementById("programControls");
+
+  try {
+    const resp = await fetch("./program.json?t=" + Date.now());
+    if (!resp.ok) throw new Error("Not found");
+    const data = await resp.json();
+    programState.events = (data.events || []).map(normalizeEvent);
+    programState.scrapedAt = data.scraped_at;
+    programState.officialThemes = data.themes || [];
+
+    if (programState.events.length === 0) {
+      statusEl.innerHTML = "Programmet er tomt. Kør GitHub Action <b>Scrape Folkemødet Program</b> for at populere.";
+      return;
+    }
+
+    statusEl.style.display = "none";
+    controlsEl.style.display = "block";
+
+    populateFilters();
+    applyFilters();
+
+    // Wire up filter events
+    document.getElementById("filterDay").addEventListener("change", applyFilters);
+    document.getElementById("filterVenue").addEventListener("change", applyFilters);
+    document.getElementById("filterSearch").addEventListener("input", debounce(applyFilters, 200));
+    document.getElementById("filterSearch").addEventListener("change", applyFilters);
+    document.getElementById("filterSearch").addEventListener("search", applyFilters);
+    document.getElementById("filterSearch").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.target.blur(); // close mobile keyboard
+        applyFilters();
+      }
+    });
+    document.getElementById("filterClear").addEventListener("click", clearFilters);
+    document.getElementById("loadMoreBtn").addEventListener("click", () => {
+      programState.shown += programState.pageSize;
+      renderProgram();
+    });
+  } catch (err) {
+    statusEl.innerHTML = `<b>Programmet er ikke scraped endnu.</b><br>
+      Gå til repo'ets <b>Actions</b>-fane på GitHub og kør <b>Scrape Folkemødet Program</b> manuelt første gang.
+      Derefter kører den automatisk hver morgen og opdaterer <code>program.json</code>.<br>
+      <span style="color:var(--ink-muted);font-size:12px">(${esc(err.message)})</span>`;
+  }
+}
+
+function populateFilters() {
+  const days = [...new Set(programState.events.map(e => e.day).filter(Boolean))];
+  const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+  days.sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
+  const daySel = document.getElementById("filterDay");
+  days.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d; opt.textContent = d;
+    daySel.appendChild(opt);
+  });
+
+  // Render theme chips — use OFFICIAL themes from program.json if available,
+  // falling back to our 16 hardcoded categories
+  const chipsEl = document.getElementById("programThemeChips");
+  chipsEl.innerHTML = "";
+
+  // "Alle" chip
+  const allChip = document.createElement("div");
+  allChip.className = "pg-chip all-chip active";
+  allChip.textContent = "Alle temaer";
+  allChip.addEventListener("click", () => {
+    programState.selectedThemes.clear();
+    chipsEl.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
+    allChip.classList.add("active");
+    applyFilters();
+  });
+  chipsEl.appendChild(allChip);
+
+  // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
+  const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
+  let themeList;
+  if (useOfficial) {
+    themeList = [...programState.officialThemes]
+      .sort((a, b) => a.name.localeCompare(b.name, "da"))
+      .map(t => t.name);
+  } else {
+    themeList = [...THEMES].sort((a, b) => a.localeCompare(b, "da"));
+  }
+
+  // Capitalize first letter for display
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+  themeList.forEach(theme => {
+    const chip = document.createElement("div");
+    chip.className = "pg-chip";
+    const displayName = capitalize(theme);
+    // Show count badge for official themes
+    if (useOfficial) {
+      const themeObj = programState.officialThemes.find(t => t.name === theme);
+      const count = themeObj ? themeObj.count : 0;
+      chip.innerHTML = `${esc(displayName)} <span class="pg-chip-count">${count}</span>`;
+    } else {
+      chip.textContent = displayName;
+    }
+    chip.dataset.theme = theme;
+    chip.addEventListener("click", () => {
+      if (programState.selectedThemes.has(theme)) {
+        programState.selectedThemes.delete(theme);
+        chip.classList.remove("active");
+      } else {
+        programState.selectedThemes.add(theme);
+        chip.classList.add("active");
+        allChip.classList.remove("active");
+      }
+      if (programState.selectedThemes.size === 0) {
+        allChip.classList.add("active");
+      }
+      applyFilters();
+    });
+    chipsEl.appendChild(chip);
+  });
+
+  // Venues: extract unique venue names (strip code prefix like "B4 - ")
+  const venues = new Set();
+  programState.events.forEach(e => {
+    if (!e.venue) return;
+    venues.add(e.venue.trim());
+  });
+  const venueArr = [...venues].sort((a, b) => a.localeCompare(b, "da"));
+  const venueSel = document.getElementById("filterVenue");
+  venueArr.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v.length > 50 ? v.slice(0, 47) + "…" : v;
+    venueSel.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const day = document.getElementById("filterDay").value;
+  const venue = document.getElementById("filterVenue").value;
+  const search = document.getElementById("filterSearch").value.trim().toLowerCase();
+  const selectedThemes = [...programState.selectedThemes];
+
+  programState.filtered = programState.events.filter(e => {
+    if (day && e.day !== day) return false;
+    if (venue && e.venue !== venue) return false;
+    if (search) {
+      // Search across title, summary, full description (more), organizers, venue, speakers
+      const hay = [
+        e.title, e.summary, e.more, e.organizers, e.venue,
+        Array.isArray(e.speakers) ? e.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || ''))).join(' ') : ''
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    if (selectedThemes.length > 0) {
+      const evThemes = e.themes || [];
+      const matches = selectedThemes.some(t => evThemes.includes(t));
+      if (!matches) return false;
+    }
+    return true;
+  });
+  programState.shown = programState.pageSize;
+  renderProgram();
+}
+
+function clearFilters() {
+  document.getElementById("filterDay").value = "";
+  document.getElementById("filterVenue").value = "";
+  document.getElementById("filterSearch").value = "";
+  programState.selectedThemes.clear();
+  const chips = document.getElementById("programThemeChips");
+  if (chips) {
+    chips.querySelectorAll(".pg-chip").forEach(c => c.classList.remove("active"));
+    const allChip = chips.querySelector(".all-chip");
+    if (allChip) allChip.classList.add("active");
+  }
+  applyFilters();
+}
+
+function renderProgram() {
+  const out = document.getElementById("programResults");
+  const meta = document.getElementById("programMeta");
+  const loadBtn = document.getElementById("loadMoreBtn");
+
+  const total = programState.filtered.length;
+  const visible = Math.min(programState.shown, total);
+
+  const scrapedStr = programState.scrapedAt
+    ? new Date(programState.scrapedAt).toLocaleString("da-DK", { dateStyle: "short", timeStyle: "short" })
+    : "ukendt";
+  meta.innerHTML = `Viser <b>${visible}</b> af <b>${total}</b> events · Programmet senest opdateret: ${esc(scrapedStr)} · Kilde: <a href="https://program.folkemoedet.dk/2026" target="_blank" style="color:var(--orange)">program.folkemoedet.dk</a>`;
+
+  if (total === 0) {
+    out.innerHTML = `<div class="program-empty">Ingen events matcher dine filtre.</div>`;
+    loadBtn.style.display = "none";
+    return;
+  }
+
+  // Group by day
+  const slice = programState.filtered.slice(0, visible);
+  const byDay = {};
+  slice.forEach(e => {
+    const d = e.day || "Andet";
+    if (!byDay[d]) byDay[d] = [];
+    byDay[d].push(e);
+  });
+
+  const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
+  const DAY_DATES = { "Torsdag": "11. juni", "Fredag": "12. juni", "Lørdag": "13. juni", "Søndag": "14. juni" };
+  const days = Object.keys(byDay).sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
+  const html = days.map(d => {
+    const events = byDay[d];
+    const date = DAY_DATES[d] || "";
+    const rows = events.map(e => {
+      const venueAttr = esc(e.venue || "");
+      const titleAttr = esc(e.title || "");
+      const officialUrl = e.url || "";
+      const speakerStr = formatSpeakers(e.speakers);
+      const speakerHTML = formatSpeakersHTML(e.speakers);
+      // summary = short sub-headline (always shown); more = full description (collapsible)
+      const subtitle = e.summary || "";
+      const fullDesc = e.more || "";
+      // Only show expand toggle if there's extra content beyond the subtitle
+      const hasExtra = (fullDesc && fullDesc !== subtitle) || speakerStr;
+
+      return `
+      <div class="pg-event">
+        <div class="pg-body">
+          <div class="pg-time">${esc(e.time || "?")}</div>
+          ${officialUrl
+            ? `<a class="pg-title" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(e.title || "")}</a>`
+            : `<div class="pg-title">${esc(e.title || "")}</div>`}
+          ${subtitle ? `<div class="pg-subtitle">${esc(subtitle)}</div>` : ""}
+          <div class="pg-meta">
+            <span class="pg-venue">◆ ${esc(e.venue || "?")}</span>
+            ${e.organizers ? `<span class="pg-org">${esc(e.organizers)}</span>` : ""}
+          </div>
+          ${hasExtra ? `
+          <details class="pg-details">
+            <summary class="pg-details-toggle">Vis detaljer</summary>
+            <div class="pg-details-body">
+              ${fullDesc && fullDesc !== subtitle ? `<div class="pg-fulldesc">${esc(fullDesc)}</div>` : ""}
+              ${speakerHTML ? `<div class="pg-speakers"><span class="pg-label">Deltagere</span>${speakerHTML}</div>` : ""}
+            </div>
+          </details>` : ""}
+          <div class="pg-actions">
+            ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">🔗 Officiel side</a>` : ""}
+            <button class="pg-action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Vis på kort</button>
+          </div>
+        </div>
+      </div>
+    `;
+    }).join("");
+    return `<div class="pg-day-header">${esc(d)} ${esc(date)} · ${events.length}</div>${rows}`;
+  }).join("");
+
+  out.innerHTML = html;
+
+  // Attach map button handlers (any element with data-venue)
+  out.querySelectorAll("[data-venue]").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openVenueMap(btn.getAttribute("data-venue"), btn.getAttribute("data-title"));
+    });
+  });
+
+  loadBtn.style.display = visible < total ? "block" : "none";
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+</script>
+</body>
+</html>
     font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
