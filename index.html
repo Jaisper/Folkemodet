@@ -7,8 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- No external map library — we use the official Folkemødet map as a zoomable image -->
 <style>
   :root {
     --orange: #E87722;
@@ -546,125 +545,56 @@
     flex-shrink: 0;
   }
   .modal-close:hover { background: rgba(255,255,255,.15); }
-  #mapContainer {
-    width: 100%;
-    height: 380px;
-    background: var(--bg);
-  }
 
-  /* BLINKING DOT */
-  .blink-dot-wrap {
-    position: relative;
-    width: 22px;
-    height: 22px;
+  /* MAP INFO + PDF CTA */
+  .map-info {
+    padding: 14px 18px;
+    background: var(--orange-pale);
+    border-bottom: 1px solid var(--line-soft);
   }
-  .blink-dot {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 18px;
-    height: 18px;
-    background: var(--red);
-    border: 3px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 2px 6px rgba(0,0,0,.3);
-    z-index: 2;
+  .map-find-hint {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
   }
-  .blink-dot::before {
-    content: "";
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 14px;
-    height: 14px;
-    background: var(--red);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: blinkPulse 1.4s ease-out infinite;
-    z-index: 1;
-  }
-  @keyframes blinkPulse {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
-  }
-  .blink-marker {
-    background: transparent !important;
-    border: none !important;
-  }
-
-  /* MAP CONTROLS */
-  .map-controls {
-    padding: 10px 16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .precision-badge {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
-  }
-  .precision-exact {
-    background: #E3F2E5;
-    color: var(--confirmed);
-  }
-  .precision-zone {
-    background: #FBF1D9;
-    color: var(--likely);
-  }
-  .precision-none {
-    background: #FBE5E8;
+  .map-find-hint b {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.04em;
     color: var(--red);
   }
-  .map-controls a {
-    color: var(--orange);
-    text-decoration: none;
-    font-weight: 600;
-    margin-left: auto;
-  }
-  .map-controls a:hover { text-decoration: underline; }
-
-  /* MAP STYLE TOGGLE */
-  .map-style-toggle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 500;
-    display: flex;
-    background: white;
-    border: 2px solid rgba(0,0,0,.2);
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0,0,0,.15);
-  }
-  .map-style-btn {
-    background: white;
-    border: none;
-    padding: 6px 12px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    cursor: pointer;
-    transition: all .12s ease;
-  }
-  .map-style-btn:hover {
+  .map-pdf-cta {
+    padding: 24px 18px;
+    text-align: center;
     background: var(--bg);
-    color: var(--ink);
   }
-  .map-style-btn.active {
-    background: var(--ink);
+  .map-pdf-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--red);
     color: white;
+    border-radius: 3px;
+    transition: background .12s ease, transform .08s ease;
   }
-  #mapContainer { position: relative; }
+  .map-pdf-btn b {
+    background: rgba(255,255,255,0.25);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .map-pdf-btn:hover { background: #a30d23; }
+  .map-pdf-btn:active { transform: scale(0.98); }
+  .map-pdf-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
   .modal-footer {
     padding: 10px 18px;
     font-size: 12px;
@@ -672,6 +602,7 @@
     border-top: 1px solid var(--line);
     background: var(--bg);
   }
+  .modal-footer a { color: var(--orange); }
   .modal-footer.warn {
     background: #FBF1D9;
     color: #7A5410;
@@ -794,19 +725,19 @@
       </div>
       <button class="modal-close" id="mapClose" aria-label="Luk">×</button>
     </div>
-    <div class="map-controls" id="mapControls"></div>
-    <div id="mapContainer">
-      <div class="map-style-toggle">
-        <button class="map-style-btn active" id="btnMapStreet" type="button">Kort</button>
-        <button class="map-style-btn" id="btnMapSat" type="button">Satellit</button>
-      </div>
+    <div class="map-info" id="mapInfo"></div>
+    <div class="map-pdf-cta">
+      <a class="map-pdf-btn" id="openMapPdf" href="#" target="_blank" rel="noopener">
+        📍 Åbn officielt kort
+      </a>
+      <div class="map-pdf-note">PDF åbnes i ny fane · zoom uden tab</div>
     </div>
     <div class="map-actions" id="mapActions">
       <a class="map-nav-btn" id="navGoogle" href="#" target="_blank" rel="noopener">
-        🚶 Naviger med Google Maps
+        🚶 Find vej til Allinge
       </a>
-      <a class="map-nav-btn map-nav-secondary" id="navApple" href="#" target="_blank" rel="noopener">
-        🍎 Apple Maps
+      <a class="map-nav-btn map-nav-secondary" id="openMapOverview" href="#" target="_blank" rel="noopener">
+        🗺️ Alle kort
       </a>
     </div>
     <div class="modal-footer" id="mapFooter">Allinge, Bornholm</div>
@@ -824,331 +755,115 @@ const DAY_DATES = {
   "Lørdag": "13. juni"
 };
 
-// Stade coordinates calibrated against TWO verified anchors:
-// - Cirkuspladsen = 55.2808, 14.7954 (KultuNaut)
-// - Kæmpestranden = 55.2758, 14.8051 (Krak)
-// Each stade ±20-30m from its zone centroid. APPROXIMATE — use official map for exact tent.
-const VENUE_COORDS = {
+// ============================================================
+// MAP MODAL — links to the official Folkemødet PDF maps (vector,
+// infinitely zoomable). Folkemødet publishes three "Teknikkort" PDFs
+// covering different zones; we pick the right one based on stade letter.
+// ============================================================
 
-  // === A — Danchells Anlæg ===
-  "A3": [55.28163, 14.79348], "A4": [55.28142, 14.79367], "A5": [55.28169, 14.79413],
-  "A6": [55.28179, 14.79354], "A8": [55.28150, 14.79348], "A9": [55.28138, 14.79396],
-  "A11": [55.28127, 14.79365], "A12": [55.28164, 14.79399], "A15": [55.28138, 14.79404],
-  "A19": [55.28174, 14.79346], "A20": [55.28173, 14.79415], "A21": [55.28145, 14.79361],
-  "A24": [55.28182, 14.79379], "A25": [55.28131, 14.79355], "A27": [55.28176, 14.79405],
-  "A29": [55.28173, 14.79418], "A31": [55.28157, 14.79442], "A32": [55.28148, 14.79400],
-  "A33": [55.28175, 14.79407], "A35": [55.28177, 14.79403], "A36": [55.28167, 14.79350],
-  "A38": [55.28139, 14.79374], "A40": [55.28130, 14.79368], "A50": [55.28131, 14.79373],
-  "A99": [55.28163, 14.79381],
-
-  // === B — Nordlandspladsen ===
-  "B1": [55.27931, 14.79499], "B2": [55.27925, 14.79572], "B3": [55.27948, 14.79539],
-  "B4": [55.27919, 14.79551], "B5": [55.27919, 14.79516], "B6": [55.27968, 14.79542],
-  "B7": [55.27942, 14.79546], "B8": [55.27960, 14.79556], "B10": [55.27923, 14.79481],
-  "B11": [55.27928, 14.79505], "B12": [55.27922, 14.79572], "B13": [55.27962, 14.79509],
-  "B14": [55.27948, 14.79518], "B15": [55.27964, 14.79524], "B16": [55.27925, 14.79503],
-  "B17": [55.27943, 14.79504], "B98": [55.27944, 14.79568], "B99": [55.27933, 14.79500],
-
-  // === C — Cirkuspladsen ===
-  "C1": [55.28110, 14.79541], "C2": [55.28055, 14.79495], "C3": [55.28057, 14.79553],
-  "C4": [55.28098, 14.79532], "C5": [55.28054, 14.79528], "C6": [55.28110, 14.79543],
-  "C8": [55.28108, 14.79576], "C10": [55.28051, 14.79562], "C13": [55.28091, 14.79544],
-  "C14": [55.28066, 14.79554], "C18": [55.28057, 14.79533], "C22": [55.28077, 14.79585],
-  "C23": [55.28103, 14.79516], "C25": [55.28080, 14.79508], "C26": [55.28105, 14.79577],
-  "C28": [55.28068, 14.79554], "C29": [55.28087, 14.79505], "C30": [55.28096, 14.79544],
-  "C31": [55.28097, 14.79543], "C32": [55.28050, 14.79522], "C34": [55.28051, 14.79583],
-  "C35": [55.28103, 14.79573], "C99": [55.28068, 14.79496],
-
-  // === D — Ved Brandstationen ===
-  "D1": [55.27941, 14.79686], "D5": [55.27893, 14.79640], "D6": [55.27892, 14.79667],
-  "D7": [55.27934, 14.79604], "D8": [55.27917, 14.79646], "D9": [55.27904, 14.79678],
-  "D10": [55.27913, 14.79612], "D11": [55.27920, 14.79664], "D13": [55.27900, 14.79622],
-  "D71": [55.27948, 14.79656],
-
-  // === E — Kampeløkke Havn ===
-  "E1": [55.27951, 14.79784],
-
-  // === F — Ved Folkemødehuset ===
-  "F1": [55.27857, 14.79900], "F2": [55.27870, 14.79937], "F3": [55.27864, 14.79900],
-  "F4": [55.27854, 14.79941], "F5": [55.27864, 14.79969], "F6": [55.27902, 14.79885],
-  "F7": [55.27864, 14.79945], "F8": [55.27863, 14.79891], "F9": [55.27906, 14.79935],
-  "F10": [55.27878, 14.79956], "F11": [55.27898, 14.79897], "F12": [55.27856, 14.79921],
-  "F13": [55.27875, 14.79925], "F14": [55.27894, 14.79945], "F15": [55.27909, 14.79888],
-  "F16": [55.27874, 14.79912], "F17": [55.27902, 14.79903], "F18": [55.27861, 14.79923],
-  "F19": [55.27875, 14.79906], "F20": [55.27865, 14.79970], "F21": [55.27877, 14.79964],
-  "F22": [55.27883, 14.79883], "F23": [55.27910, 14.79962], "F24": [55.27908, 14.79971],
-  "F25": [55.27901, 14.79895], "F26": [55.27879, 14.79899], "F27": [55.27874, 14.79884],
-  "F28": [55.27873, 14.79977], "F29": [55.27866, 14.79956], "F30": [55.27877, 14.79920],
-  "F31": [55.27907, 14.79978], "F32": [55.27883, 14.79950], "F33": [55.27859, 14.79908],
-  "F34": [55.27908, 14.79936], "F35": [55.27883, 14.79953], "F36": [55.27853, 14.79936],
-  "F37": [55.27880, 14.79963], "F38": [55.27859, 14.79974], "F39": [55.27855, 14.79897],
-  "F40": [55.27886, 14.79946], "F41": [55.27864, 14.79890], "F50": [55.27903, 14.79903],
-  "F71": [55.27886, 14.79940], "F98": [55.27875, 14.79936],
-
-  // === G — Yder-/Indermolen ===
-  "G1": [55.27806, 14.80116], "G2": [55.27787, 14.80095], "G3": [55.27789, 14.80063],
-  "G4": [55.27815, 14.80053], "G5": [55.27794, 14.80098], "G6": [55.27779, 14.80069],
-  "G7": [55.27835, 14.80123], "G8": [55.27779, 14.80044], "G9": [55.27791, 14.80116],
-  "G10": [55.27828, 14.80111], "G11": [55.27797, 14.80039], "G12": [55.27825, 14.80093],
-  "G13": [55.27812, 14.80122], "G14": [55.27814, 14.80024], "G15": [55.27824, 14.80053],
-  "G16": [55.27815, 14.80117], "G17": [55.27783, 14.80035], "G18": [55.27781, 14.80078],
-  "G19": [55.27791, 14.80083], "G20": [55.27818, 14.80043], "G21": [55.27813, 14.80049],
-  "G22": [55.27804, 14.80114], "G23": [55.27826, 14.80032], "G24": [55.27800, 14.80051],
-  "G25": [55.27775, 14.80100], "G26": [55.27813, 14.80049], "G27": [55.27819, 14.80078],
-  "G28": [55.27801, 14.80024], "G29": [55.27780, 14.80111], "G30": [55.27829, 14.80078],
-  "G31": [55.27825, 14.80081], "G32": [55.27784, 14.80036], "G33": [55.27793, 14.80113],
-  "G34": [55.27823, 14.80109], "G35": [55.27829, 14.80044], "G36": [55.27790, 14.80033],
-  "G37": [55.27822, 14.80111], "G38": [55.27799, 14.80085], "G39": [55.27784, 14.80116],
-
-  // === H — Allinge Havn ===
-  "H1": [55.27752, 14.80267], "H2": [55.27749, 14.80257], "H3": [55.27701, 14.80243],
-  "H4": [55.27720, 14.80262], "H5": [55.27748, 14.80255], "H6": [55.27749, 14.80196],
-  "H7": [55.27747, 14.80180], "H8": [55.27752, 14.80255], "H9": [55.27713, 14.80251],
-  "H10": [55.27728, 14.80200], "H11": [55.27748, 14.80192], "H12": [55.27701, 14.80188],
-  "H13": [55.27720, 14.80255], "H14": [55.27758, 14.80197], "H15": [55.27738, 14.80209],
-  "H16": [55.27759, 14.80223], "H50": [55.27756, 14.80181], "H99": [55.27758, 14.80187],
-
-  // === J — Kæmpestranden ===
-  "J3": [55.27608, 14.80487], "J4": [55.27557, 14.80503], "J5": [55.27594, 14.80491],
-  "J6": [55.27586, 14.80511], "J7": [55.27573, 14.80518], "J8": [55.27565, 14.80531],
-  "J9": [55.27550, 14.80553], "J10": [55.27582, 14.80532], "J11": [55.27595, 14.80527],
-  "J12": [55.27572, 14.80467], "J13": [55.27590, 14.80493], "J14": [55.27569, 14.80545],
-  "J15": [55.27593, 14.80490], "J16": [55.27569, 14.80501], "J17": [55.27574, 14.80490],
-  "J18": [55.27558, 14.80502], "J19": [55.27606, 14.80528], "J20": [55.27604, 14.80522],
-  "J21": [55.27568, 14.80515], "J22": [55.27550, 14.80489], "J23": [55.27576, 14.80518],
-  "J24": [55.27589, 14.80506], "J25": [55.27577, 14.80481], "J26": [55.27578, 14.80550],
-  "J27": [55.27598, 14.80477], "J28": [55.27555, 14.80512], "J29": [55.27588, 14.80494],
-  "J30": [55.27599, 14.80535], "J31": [55.27590, 14.80482], "J32": [55.27562, 14.80462],
-  "J33": [55.27565, 14.80508], "J34": [55.27601, 14.80467], "J35": [55.27575, 14.80523],
-  "J36": [55.27562, 14.80530], "J37": [55.27580, 14.80484], "J38": [55.27589, 14.80461],
-  "J39": [55.27595, 14.80537], "J40": [55.27556, 14.80503], "J41": [55.27561, 14.80556],
-  "J42": [55.27581, 14.80465], "J43": [55.27565, 14.80545], "J44": [55.27577, 14.80540],
-  "J45": [55.27590, 14.80559], "J46": [55.27586, 14.80555], "J47": [55.27603, 14.80521],
-  "J48": [55.27593, 14.80510], "J49": [55.27600, 14.80515], "J59": [55.27604, 14.80534],
-  "J60": [55.27578, 14.80486],
-
-  // === K — Kirkepladsen (i Allinge by) ===
-  "K1": [55.27436, 14.80273], "K3": [55.27467, 14.80261], "K4": [55.27459, 14.80236],
-  "K6": [55.27426, 14.80238], "K7": [55.27437, 14.80241], "K8": [55.27453, 14.80223],
-  "K10": [55.27435, 14.80278], "K12": [55.27463, 14.80215], "K14": [55.27445, 14.80263],
-  "K15": [55.27446, 14.80230], "K16": [55.27446, 14.80299], "K17": [55.27456, 14.80279],
-  "K18": [55.27472, 14.80286], "K21": [55.27444, 14.80210], "K24": [55.27442, 14.80284],
-  "K27": [55.27472, 14.80304], "K28": [55.27446, 14.80284], "K54": [55.27454, 14.80269],
-
-  // === N — Nørregade (i byen) ===
-  "N1": [55.27484, 14.80134], "N2": [55.27497, 14.80115], "N3": [55.27491, 14.80180],
-  "N4": [55.27495, 14.80129], "N5": [55.27499, 14.80125], "N6": [55.27508, 14.80115],
-  "N7": [55.27495, 14.80168], "N8": [55.27473, 14.80176], "N9": [55.27479, 14.80158],
-  "N10": [55.27474, 14.80150], "N11": [55.27484, 14.80145], "N13": [55.27517, 14.80150],
-  "N17": [55.27516, 14.80195]
-};
-
-// Zone fallback centroids — same calibration.
-const VENUE_ZONES = {
-  "A": { coords: [55.28155, 14.79395], name: "Danchells Anlæg" },
-  "B": { coords: [55.27939, 14.79528], name: "Nordlandspladsen" },
-  "C": { coords: [55.28080, 14.79540], name: "Cirkuspladsen" },
-  "D": { coords: [55.27918, 14.79641], name: "Ved Brandstationen" },
-  "E": { coords: [55.27955, 14.79782], name: "Kampeløkke Havn" },
-  "F": { coords: [55.27880, 14.79928], name: "Ved Folkemødehuset" },
-  "G": { coords: [55.27805, 14.80073], name: "Yder-/Indermolen" },
-  "H": { coords: [55.27730, 14.80219], name: "Allinge Havn" },
-  "J": { coords: [55.27580, 14.80510], name: "Kæmpestranden" },
-  "K": { coords: [55.27451, 14.80259], name: "Kirkepladsen" },
-  "L": { coords: [55.27380, 14.80200], name: "Damgårdshave" },
-  "M": { coords: [55.27500, 14.80200], name: "Havnetorvet" },
-  "N": { coords: [55.27501, 14.80162], name: "Nørregade" }
-};
-
-const ALLINGE_DEFAULT = [55.28080, 14.79540];
 function parseVenueCode(venue) {
   if (!venue) return null;
-  const m = String(venue).match(/^([A-ZÆØÅ])(\d{1,3})\b/);
+  const m = String(venue).match(/^([A-Z])\s*-?\s*(\d+)/i);
   if (!m) return null;
-  return { letter: m[1], number: parseInt(m[2], 10), code: m[1] + m[2] };
+  return { letter: m[1].toUpperCase(), code: m[1].toUpperCase() + m[2] };
 }
 
-function findVenueCoords(venue) {
-  const parsed = parseVenueCode(venue);
-  if (!parsed) {
-    return { coords: ALLINGE_DEFAULT, precision: "none", zoneName: "Allinge centrum", code: null };
-  }
-  // Try exact stade match first
-  if (VENUE_COORDS[parsed.code]) {
-    const zoneName = VENUE_ZONES[parsed.letter]?.name || "Allinge";
-    return {
-      coords: VENUE_COORDS[parsed.code],
-      precision: "exact",
-      zoneName,
-      code: parsed.code
-    };
-  }
-  // Fall back to zone
-  if (VENUE_ZONES[parsed.letter]) {
-    return {
-      coords: VENUE_ZONES[parsed.letter].coords,
-      precision: "zone",
-      zoneName: VENUE_ZONES[parsed.letter].name,
-      code: parsed.code
-    };
-  }
-  return { coords: ALLINGE_DEFAULT, precision: "none", zoneName: "Allinge centrum", code: parsed.code };
-}
-
-function buildSearchLink(title, organizer) {
-  const q = `${title || ""} ${organizer || ""} folkemoedet 2026`.trim();
-  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-}
-
-// ============================================================
-// STATE
-// ============================================================
-const state = {
-  selectedThemes: new Set(),
-  apiKey: "",
-  lastEvents: null,
-  lastModel: null,
-  viewMode: "timeline"  // "ranked" | "timeline"
+const ZONE_NAMES = {
+  "A": "Danchells Anlæg",
+  "B": "Nordlandspladsen",
+  "C": "Cirkuspladsen",
+  "D": "Ved Brandstationen",
+  "E": "Kampeløkke Havn",
+  "F": "Ved Folkemødehuset",
+  "G": "Yder-/Indermolen",
+  "H": "Allinge Havn",
+  "J": "Kæmpestranden",
+  "K": "Kirkepladsen",
+  "L": "Damgårdshave",
+  "M": "Havnetorvet",
+  "N": "Nørregade"
 };
 
-// ============================================================
-// DOM
-// ============================================================
-const $ = (s) => document.querySelector(s);
-const mapModalEl = $("#mapModal");
-const mapCloseEl = $("#mapClose");
-const mapTitleEl = $("#mapTitle");
-const mapSubEl = $("#mapSub");
-const mapFooterEl = $("#mapFooter");
-
-// ============================================================
-// MAP MODAL
-// ============================================================
-let leafletMap = null;
-let mapLayers = { street: null, satellite: null };
-let mapStyle = "street"; // or "satellite"
-
-const TILE_PROVIDERS = {
-  street: {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: "© OpenStreetMap",
-    maxZoom: 19
-  },
-  satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles © Esri",
-    maxZoom: 19
-  }
+// Official Folkemødet 2026 PDF maps. Each covers specific zone letters.
+// Source: https://folkemoedet.dk/praktisk/kort-over-pladsen
+const ZONE_TO_PDF = {
+  "A": { url: "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf", label: "Teknikkort 1 (A, B, C, D, E)" },
+  "B": { url: "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf", label: "Teknikkort 1 (A, B, C, D, E)" },
+  "C": { url: "https://cms.folkemoedet.dk/assets/a9abdebb-f9ab-45a4-b9bb-b0bc71a7e7b8/2026-56-Teknikkort01_officielt.pdf", label: "Teknikkort 1 (A, B, C, D, E)" },
+  "D": { url: "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf", label: "Teknikkort 2 (D, E, F, G, H, N)" },
+  "E": { url: "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf", label: "Teknikkort 2 (D, E, F, G, H, N)" },
+  "F": { url: "https://cms.folkemoedet.dk/assets/1e5d3e12-a3b1-43cf-bf02-0cbf2da1d75f/2026-56-Teknikkort02_officielt.pdf", label: "Teknikkort 2 (D, E, F, G, H, N)" },
+  "G": { url: "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf", label: "Teknikkort 3 (G, H, J, K, N)" },
+  "H": { url: "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf", label: "Teknikkort 3 (G, H, J, K, N)" },
+  "J": { url: "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf", label: "Teknikkort 3 (G, H, J, K, N)" },
+  "K": { url: "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf", label: "Teknikkort 3 (G, H, J, K, N)" },
+  "N": { url: "https://cms.folkemoedet.dk/assets/93865d57-8fe0-41b2-8470-0d7b816c0b38/2026-56-Teknikkort03_officielt.pdf", label: "Teknikkort 3 (G, H, J, K, N)" }
 };
 
-function setMapStyle(style) {
-  if (!leafletMap || mapStyle === style) return;
-  // Remove current layer
-  if (mapLayers[mapStyle]) leafletMap.removeLayer(mapLayers[mapStyle]);
-  mapStyle = style;
-  // Add new layer (create if needed)
-  if (!mapLayers[style]) {
-    const provider = TILE_PROVIDERS[style];
-    mapLayers[style] = L.tileLayer(provider.url, {
-      maxZoom: provider.maxZoom,
-      attribution: provider.attribution
-    });
-  }
-  mapLayers[style].addTo(leafletMap);
-  // Update toggle button states
-  document.getElementById("btnMapStreet").classList.toggle("active", style === "street");
-  document.getElementById("btnMapSat").classList.toggle("active", style === "satellite");
-}
+const MAP_OVERVIEW_URL = "https://folkemoedet.dk/praktisk/kort-over-pladsen";
+const ALLINGE_COORDS = [55.27778, 14.80139];
 
 function openVenueMap(venue, eventTitle) {
-  const { coords, precision, zoneName, code } = findVenueCoords(venue);
+  const parsed = parseVenueCode(venue);
+  const code = parsed?.code || (venue || "").trim();
+  const letter = parsed?.letter;
+  const zoneName = letter ? ZONE_NAMES[letter] : null;
+  const pdf = letter ? ZONE_TO_PDF[letter] : null;
 
-  mapTitleEl.textContent = venue || "Lokation";
+  mapTitleEl.textContent = code || "Lokation";
   mapSubEl.textContent = eventTitle || "";
 
-  // Precision banner — exact stade has approx coords (~30m accuracy);
-  // unknown stade falls back to zone centroid.
-  const controlsEl = document.getElementById("mapControls");
-  let badge = "";
-  let info = "";
-  if (precision === "exact") {
-    badge = `<span class="precision-badge precision-zone">Cirka</span>`;
-    info = `<span>Stade <b>${esc(code)}</b> i ${esc(zoneName)} · omtrentlig position ±30m</span>`;
-  } else if (precision === "zone") {
-    badge = `<span class="precision-badge precision-zone">Område</span>`;
-    info = `<span><b>${esc(code)}</b> ligger i ${esc(zoneName)}</span>`;
+  const infoEl = document.getElementById("mapInfo");
+  if (zoneName && pdf) {
+    infoEl.innerHTML = `
+      <div class="map-find-hint">
+        <b>${esc(code)}</b> ligger i området <b>${esc(zoneName)}</b>.
+        Åbn det officielle Folkemødet-kort for at finde præcis placering.
+      </div>
+    `;
   } else {
-    badge = `<span class="precision-badge precision-none">Ukendt</span>`;
-    info = `<span>Venue-kode ikke genkendt — viser Cirkuspladsen</span>`;
+    infoEl.innerHTML = `<div class="map-find-hint">Åbn det officielle Folkemødet-kort for at finde præcis placering.</div>`;
   }
-  controlsEl.innerHTML = `${badge}${info}<a href="https://folkemoedet.dk/praktisk/kort-over-folkemodet/" target="_blank" rel="noopener">Officielt kort ↗</a>`;
 
-  mapFooterEl.innerHTML = `Positionen er omtrentlig. For præcis stadeplacering, åbn <b>det officielle kort</b> og søg efter <b>${esc(code || venue || "")}</b>.`;
+  // Set up the action buttons
+  const openPdfBtn = document.getElementById("openMapPdf");
+  const openOverviewBtn = document.getElementById("openMapOverview");
+  if (pdf) {
+    openPdfBtn.href = pdf.url;
+    openPdfBtn.innerHTML = `📍 Åbn officielt kort for <b>${esc(letter)}</b>`;
+    openPdfBtn.style.display = "";
+  } else {
+    openPdfBtn.style.display = "none";
+  }
+  openOverviewBtn.href = MAP_OVERVIEW_URL;
+
+  // Navigation: Google Maps walking directions to Allinge centrum
+  const navGoogle = document.getElementById("navGoogle");
+  navGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=${ALLINGE_COORDS[0]},${ALLINGE_COORDS[1]}&destination_place_id=Allinge&travelmode=walking`;
+
+  mapFooterEl.innerHTML = `Kortene er vektor-PDF'er fra Folkemødet — uendeligt skarpe når du zoomer ind på et stadenummer.`;
   mapFooterEl.className = "modal-footer";
 
-  // Set navigation URLs
-  // Google Maps: dir/?api=1 with destination as lat,lng and travelmode=walking
-  // On mobile this opens the native Google Maps app if installed; otherwise web.
-  const destLabel = encodeURIComponent(venue || "Folkemødet, Allinge");
-  const navGoogle = document.getElementById("navGoogle");
-  const navApple = document.getElementById("navApple");
-  navGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}&destination_place_id=&travelmode=walking`;
-  // Apple Maps URL scheme: maps://?daddr=lat,lng&dirflg=w (walking)
-  navApple.href = `https://maps.apple.com/?daddr=${coords[0]},${coords[1]}&dirflg=w&q=${destLabel}`;
-
   mapModalEl.classList.add("show");
-
-  // Init or reuse Leaflet map
-  setTimeout(() => {
-    if (!leafletMap) {
-      leafletMap = L.map("mapContainer", {
-        zoomControl: true,
-        attributionControl: true
-      }).setView(coords, 18);
-
-      // Initial layer
-      const provider = TILE_PROVIDERS[mapStyle];
-      mapLayers[mapStyle] = L.tileLayer(provider.url, {
-        maxZoom: provider.maxZoom,
-        attribution: provider.attribution
-      }).addTo(leafletMap);
-
-      // Wire toggle buttons (only once)
-      document.getElementById("btnMapStreet").addEventListener("click", () => setMapStyle("street"));
-      document.getElementById("btnMapSat").addEventListener("click", () => setMapStyle("satellite"));
-    } else {
-      leafletMap.setView(coords, 18);
-      // Remove old markers
-      leafletMap.eachLayer((layer) => {
-        if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
-      });
-    }
-
-    // Add blinking red dot marker
-    const blinkIcon = L.divIcon({
-      className: "blink-marker",
-      html: '<div class="blink-dot-wrap"><div class="blink-dot"></div></div>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    });
-    L.marker(coords, { icon: blinkIcon })
-      .addTo(leafletMap)
-      .bindPopup(`<b>${esc(venue || "")}</b>${eventTitle ? "<br>" + esc(eventTitle) : ""}`);
-
-    leafletMap.invalidateSize();
-  }, 50);
+  document.body.style.overflow = "hidden";
 }
 
-function closeMap() {
+mapCloseEl.addEventListener("click", () => {
   mapModalEl.classList.remove("show");
-}
-
-mapCloseEl.addEventListener("click", closeMap);
-mapModalEl.addEventListener("click", (e) => {
-  if (e.target === mapModalEl) closeMap();
+  document.body.style.overflow = "";
 });
+mapModalEl.addEventListener("click", (e) => {
+  if (e.target === mapModalEl) {
+    mapModalEl.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && mapModalEl.classList.contains("show")) closeMap();
+  if (e.key === "Escape" && mapModalEl.classList.contains("show")) {
+    mapModalEl.classList.remove("show");
+    document.body.style.overflow = "";
+  }
 });
 
 function esc(s) {
