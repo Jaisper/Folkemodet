@@ -1,11 +1,11 @@
 {
-  "scraped_at": "2026-05-28T09:45:36.103Z",
+  "scraped_at": "2026-05-29T09:35:52.829Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3613,
+  "event_count": 3629,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
-      "count": 609
+      "count": 612
     },
     {
       "name": "Klima, miljø, natur og energi",
@@ -13,19 +13,19 @@
     },
     {
       "name": "Børn, unge og undervisning",
-      "count": 279
+      "count": 281
     },
     {
       "name": "Andet",
-      "count": 261
+      "count": 262
     },
     {
       "name": "Kultur, medier og idræt",
-      "count": 244
+      "count": 247
     },
     {
       "name": "Offentlighed, dialog og diskussion",
-      "count": 244
+      "count": 247
     },
     {
       "name": "Vækst, erhverv og beskæftigelse",
@@ -37,23 +37,23 @@
     },
     {
       "name": "EU og udenrigspolitik",
-      "count": 173
+      "count": 175
     },
     {
       "name": "Retspolitik og forvaltning",
       "count": 166
     },
     {
+      "name": "Uddannelse og forskning",
+      "count": 148
+    },
+    {
       "name": "Fødevarer og madkultur",
       "count": 148
     },
     {
-      "name": "Uddannelse og forskning",
-      "count": 147
-    },
-    {
       "name": "Ligestilling, køn og minoriteter",
-      "count": 112
+      "count": 113
     },
     {
       "name": "Socialpolitik og integration",
@@ -1758,12 +1758,12 @@
     },
     {
       "id": "33507",
-      "title": "Kan styrketræning forebygge hjertesygdom?",
-      "summary": "Kan styrketræning forebygge hjertesygdomme? Hvad siger forskningen og hvor lidt skal der til?",
+      "title": "Stærk hele livet – muskler er nøglen til en sund aldring!",
+      "summary": "Stærk hele livet - hvorfor muskler er nøglen til en sund aldring",
       "time": "10:00-10:45",
       "organizers": "Outdoorgym",
       "venue": "J59 - Outdoorgym",
-      "url": "https://program.folkemoedet.dk/events/2026/33507/kan-styrketraening-forebygge-hjertesygdom",
+      "url": "https://program.folkemoedet.dk/events/2026/33507/staerk-hele-livet-muskler-er-noeglen-til-en-sund-aldring",
       "day": "Torsdag",
       "themes": [
         "Sundhed, omsorg og forebyggelse"
@@ -4995,7 +4995,7 @@
       "title": "Kommunikatørens skriftestol: dilemmaer fra praksis Et panel af erfarne kommunikatører folder reelle etiske dilemmaer fra fagets praksis ud på scenen.",
       "summary": "",
       "time": "11:00-11:55",
-      "organizers": "",
+      "organizers": "DM, Kommunikationsforeningen, POV International",
       "venue": "J9 - Fremtidens Scene: Magt, medier og tech",
       "url": "https://program.folkemoedet.dk/events/2026/33008/kommunikatoerens-skriftestol-dilemmaer-fra-praksis",
       "day": "Torsdag",
@@ -5809,27 +5809,6 @@
       ]
     },
     {
-      "id": "34979",
-      "title": "Når feedet former fremtiden: Hvem beskytter børnene online?",
-      "summary": "Når feedet former fremtiden: Hvem beskytter børnene online?",
-      "time": "11:15-12:00",
-      "organizers": "Europa-Kommissionen",
-      "venue": "B4 - Europa-Kommissionen",
-      "url": "https://program.folkemoedet.dk/events/2026/34979/naar-feedet-former-fremtiden-hvem-beskytter-boernene-online",
-      "day": "Torsdag",
-      "themes": [
-        "Teknologi og digitalisering"
-      ],
-      "more": "Algoritmer er blevet en usynlig del af barndommen. Fra korte videoer til anbefalede fællesskaber og skjult reklame bevæger børn sig i digitale universer, der i stigende grad er styret af platforme som TikTok og Meta Platforms. Men hvem har egentlig ansvaret, når algoritmerne påvirker adfærd, selvbillede og verdenssyn?\n\nDenne debat sætter fokus på det svære krydsfelt mellem beskyttelse og frihed: Hvordan sikrer vi børn mod digitale kaninhuller som manosphere og looksmaxxing – uden at overvåge eller begrænse dem unødigt? Hvor går grænsen mellem platformenes ansvar, EU’s regulering og forældrenes rolle?\nVi dykker ned i, hvad der reelt virker: stærkere håndhævelse af EU-regler, bedre designkrav til techplatforme – eller digital dannelse i hjem og skole. Og vigtigst af alt: Hvordan balancerer vi børns sikkerhed med deres rettigheder i en digital verden, der aldrig står stille?",
-      "speakers": [
-        {
-          "name": "Berdien van der Donk",
-          "role": "DSA Officer",
-          "org": "Europa-KommissionenModerator"
-        }
-      ]
-    },
-    {
       "id": "33733",
       "title": "Test ny sundhedsteknologi – viden, der kan mærkes Hands-on introduktion til sundhedsteknologi: apps og kliniske træningsmodeller.",
       "summary": "",
@@ -6125,7 +6104,7 @@
     },
     {
       "id": "31392",
-      "title": "Når døden rammer – en samtale om sorg Marie Brixtofte og Preben Engelbrekt taler om sorg, tab og livet videre.",
+      "title": "Når døden rammer – en samtale om sorg Marie Brixtofte, Maria Yde og Preben Engelbrekt taler om sorg, tab og livet videre.",
       "summary": "",
       "time": "11:30-12:15",
       "organizers": "Venstre",
@@ -6204,6 +6183,27 @@
           "name": "Kristoffer Brandenburg",
           "role": "Presse- og kommunikationskonsulent",
           "org": "Danmarks FængslerModeratorLinette Skov Lintrup, Fodlænkemedarbejder, Danmarks FængslerModeratorGoran Kreso, Fg. vicekredsdirektør, Fængselskreds Øst, Danmarks FængslerModerator"
+        }
+      ]
+    },
+    {
+      "id": "34979",
+      "title": "Når feedet former fremtiden: Hvem beskytter børnene online?",
+      "summary": "Når feedet former fremtiden: Hvem beskytter børnene online?",
+      "time": "11:30-12:15",
+      "organizers": "Europa-Kommissionen",
+      "venue": "B4 - Europa-Kommissionen",
+      "url": "https://program.folkemoedet.dk/events/2026/34979/naar-feedet-former-fremtiden-hvem-beskytter-boernene-online",
+      "day": "Torsdag",
+      "themes": [
+        "Teknologi og digitalisering"
+      ],
+      "more": "Algoritmer er blevet en usynlig del af barndommen. Fra korte videoer til anbefalede fællesskaber og skjult reklame bevæger børn sig i digitale universer, der i stigende grad er styret af platforme som TikTok og Meta Platforms. Men hvem har egentlig ansvaret, når algoritmerne påvirker adfærd, selvbillede og verdenssyn?\n\nDenne debat sætter fokus på det svære krydsfelt mellem beskyttelse og frihed: Hvordan sikrer vi børn mod digitale kaninhuller som manosphere og looksmaxxing – uden at overvåge eller begrænse dem unødigt? Hvor går grænsen mellem platformenes ansvar, EU’s regulering og forældrenes rolle?\nVi dykker ned i, hvad der reelt virker: stærkere håndhævelse af EU-regler, bedre designkrav til techplatforme – eller digital dannelse i hjem og skole. Og vigtigst af alt: Hvordan balancerer vi børns sikkerhed med deres rettigheder i en digital verden, der aldrig står stille?",
+      "speakers": [
+        {
+          "name": "Berdien van der Donk",
+          "role": "DSA Officer",
+          "org": "Europa-KommissionenModerator"
         }
       ]
     },
@@ -7674,6 +7674,27 @@
           "name": "Mollie Mahncke Sandhøj",
           "role": "Programleder",
           "org": "Vejen VidereModeratorMads Hardahl-Haugaard, Formand, SSP-SamrådetModeratorAnne-Julie Boesen Pedersen, Sekretariatschef, Det Kriminalpræventive Råd (DKR)ModeratorTorben Tranæs, Forskningsdirektør, VIVE - Det Nationale Forsknings- og Analysecenter for VelfærdModeratorJørgen Schou Berg, Politidirektør, Midt- og Vestsjællands PolitiModeratorLea Bryld, Fungerende Fængselskredsdirektør i Fængselskreds Øst, Danmarks FængslerModerator"
+        }
+      ]
+    },
+    {
+      "id": "34452",
+      "title": "Fra Praktikchok til praktiknærhed Praktikken er kerneelementet for professionsuddannelserne, men hvordan sikrer vi tryghed og læring?",
+      "summary": "",
+      "time": "12:00-12:45",
+      "organizers": "Organisation for Professionshøjskolestuderende",
+      "venue": "J31 - Folkets Debattelt",
+      "url": "https://program.folkemoedet.dk/events/2026/34452/fra-praktikchok-til-praktiknaerhed",
+      "day": "Torsdag",
+      "themes": [
+        "Uddannelse og forskning"
+      ],
+      "more": "Lørdag sætter OPS punkt på årets Folkemødet ved at sætte fokus på de professionsstuderendes vilkår",
+      "speakers": [
+        {
+          "name": "Line Kjær Christensen",
+          "role": "Forperson",
+          "org": "Organisation for ProfessionshøjskolestuderendeModerator"
         }
       ]
     },
@@ -9988,6 +10009,27 @@
       ]
     },
     {
+      "id": "31863",
+      "title": "\"Pissedårligt arbejdsmiljø\" eller for skrøbelige unge?",
+      "summary": "Flere unge falder ud af arbejdslivet - syge af stress. Hvorfor og hvad skal vi gøre?",
+      "time": "13:00-13:45",
+      "organizers": "AkademikerPension",
+      "venue": "F34 - Operate",
+      "url": "https://program.folkemoedet.dk/events/2026/31863/pissedaarligt-arbejdsmiljoe-eller-for-skroebelige-unge",
+      "day": "Torsdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Flere nyuddannede falder ud. De falder helt ud af arbejdslivet og ofte er det unge kvinder. Med stress og psykisk nedslidning. Vi tøver ikke med at kalde det et fælles samfundsproblem. Det er nyt og vi ved ikke altid hvorfor! \n\nHuxi Bach udfordrer fagbevægelsen, arbejdsgivere, de unge selv og repræsentanter fra regering og folketing. For hvorfor sker det og hvor kan vi se fælles veje frem?",
+      "speakers": [
+        {
+          "name": "Huxi Bach",
+          "role": "Moderator",
+          "org": "SelvstændigModeratorTobias Bornakke, Forstander, Grundtvigs HøjskolenModeratorAnders Frikke, Formand, Gymnasieskolernes LærerforeningModeratorDea Seidenfaden, Forperson, Dansk Psykolog ForeningModeratorJane Gleerup, Arbejdslivsforsker, RUCModeratorJane Alrø Sørensen, Generalsekretær, Bedre PsykiatriModerator"
+        }
+      ]
+    },
+    {
       "id": "31897",
       "title": "Hvor kommer modstanden fra?",
       "summary": "En samtale om de historiske og psykologiske aspekter bag modstand mod personer der bryder med normer",
@@ -11034,27 +11076,6 @@
           "name": "Kasper Jessing",
           "role": "Kommunikationschef",
           "org": "Raw Power GamesModeratorCecilie Mosfeldt, Strateg og arkitekt, Raw Power GamesModeratorChristina Egelund, Uddannelses- og forskningsminister, ModeraterneModerator"
-        }
-      ]
-    },
-    {
-      "id": "31863",
-      "title": "\"Pissedårligt arbejdsmiljø\" eller for skrøbelige unge?",
-      "summary": "Flere unge falder ud af arbejdslivet - syge af stress. Hvorfor og hvad skal vi gøre?",
-      "time": "13:00-13:55",
-      "organizers": "AkademikerPension",
-      "venue": "F34 - Operate",
-      "url": "https://program.folkemoedet.dk/events/2026/31863/pissedaarligt-arbejdsmiljoe-eller-for-skroebelige-unge",
-      "day": "Torsdag",
-      "themes": [
-        "Sundhed, omsorg og forebyggelse"
-      ],
-      "more": "Flere nyuddannede falder ud. De falder helt ud af arbejdslivet og ofte er det unge kvinder. Med stress og psykisk nedslidning. Vi tøver ikke med at kalde det et fælles samfundsproblem. Det er nyt og vi ved ikke altid hvorfor! \n\nHuxi Bach udfordrer fagbevægelsen, arbejdsgivere, de unge selv og repræsentanter fra regering og folketing. For hvorfor sker det og hvor kan vi se fælles veje frem?",
-      "speakers": [
-        {
-          "name": "Huxi Bach",
-          "role": "Moderator",
-          "org": "SelvstændigModeratorTobias Bornakke, Forstander, Grundtvigs HøjskolenModeratorAnders Frikke, Formand, Gymnasieskolernes LærerforeningModeratorDea Seidenfaden, Forperson, Dansk Psykolog ForeningModeratorJane Gleerup, Arbejdslivsforsker, RUCModeratorJane Alrø Sørensen, Generalsekretær, Bedre PsykiatriModerator"
         }
       ]
     },
@@ -16961,12 +16982,12 @@
     },
     {
       "id": "33638",
-      "title": "Når verdensordenen vakler: hvad gør danske virksomheder nu?",
+      "title": "Verden vakler: hvad gør danske virksomheder nu?",
       "summary": "Hvordan skal Danmark og danske virksomheder navigere i en ny, usikker verdensorden?",
       "time": "15:00-15:45",
       "organizers": "Alm. Brand Group",
       "venue": "F34 - Operate",
-      "url": "https://program.folkemoedet.dk/events/2026/33638/naar-verdensordenen-vakler-hvad-goer-danske-virksomheder-nu",
+      "url": "https://program.folkemoedet.dk/events/2026/33638/verden-vakler-hvad-goer-danske-virksomheder-nu",
       "day": "Torsdag",
       "themes": [
         "EU og udenrigspolitik"
@@ -18367,6 +18388,27 @@
       ]
     },
     {
+      "id": "34562",
+      "title": "Hit med sangen – Om livslang læring - Med Amin Jensen Musikquiz møder arbejdslivsdebat.",
+      "summary": "Hvem har ansvaret for din læring – og kender du melodien?",
+      "time": "15:15-16:15",
+      "organizers": "Tænketanken DEA",
+      "venue": "H11 - Primetime",
+      "url": "https://program.folkemoedet.dk/events/2026/34562/hit-med-sangen-om-livslang-laering-med-amin-jensen",
+      "day": "Torsdag",
+      "themes": [
+        "Uddannelse og forskning"
+      ],
+      "more": "Hvad har musik med livslang læring at gøre? Mere end du tror. I dette debatformat møder det velkendte tv-koncept Hit med sangen arbejdslivets store spørgsmål: hvem har ansvaret for din kompetenceudvikling – du selv, din arbejdsgiver eller uddannelsessystemet? To hold med repræsentanter fra uddannelsesverdenen, det private arbejdsmarked og politik dyster i at genkende musikklip, der hver især åbner for debat om efteruddannelse, jobskifte, teknologiske forandringer og livslang læring. Publikum er ikke tilskuere – de gætter med, synger med og stiller spørgsmål. Hvert musiknummer kobles til konkrete muligheder og barrierer: økonomi, familieliv, sektorforskelle og ansvar. Formatet er legende og genkendeligt – men spørgsmålene er alvorlige. Fordi mulighederne for læring ikke er lige fordelt. Og fordi både du, din chef og Christiansborg har en del af svaret.",
+      "speakers": [
+        {
+          "name": "Amin Jensen",
+          "role": "Moderator",
+          "org": "Amin JensenModeratorPernille Knudsen, Direktør, Dansk ErhvervModeratorKristian Cedervall Lauta, Prorektor for Uddannelse, KUModeratorPernille Erichsen, Vicedirektør, LederneModeratorStina Vrang Elias, Adm. direktør, Tænketanken DEAModerator"
+        }
+      ]
+    },
+    {
       "id": "33839",
       "title": "Mads og A-holdet, Vores livskvalitet edition Hvordan er vi de bedste naboer?",
       "summary": "Og hvorfor skal vi sige HEJ til alle dem vi møder på vores vej?",
@@ -18747,7 +18789,7 @@
     {
       "id": "33676",
       "title": "Kan styrketræning forebygge hjertesygdomme?",
-      "summary": "Kan styrketræning forebygge hjertesygdomme og hvor lidt skal der til?",
+      "summary": "Kan styrketræning forebygge hjertesygdomme? og hvor lidt skal der til?",
       "time": "15:30-16:15",
       "organizers": "Outdoorgym",
       "venue": "J59 - Outdoorgym",
@@ -22971,7 +23013,7 @@
       "summary": "",
       "time": "17:00-17:45",
       "organizers": "AFRY",
-      "venue": "A38 - Danchells Telt",
+      "venue": "B12 - Strandvejens Debattelt",
       "url": "https://program.folkemoedet.dk/events/2026/35401/afry-et-staerkere-forsvar-i-en-forandret-verden",
       "day": "Torsdag",
       "themes": [
@@ -23277,6 +23319,27 @@
           "name": "Stine Bjerre Herdel",
           "role": "Ledelsesrådgiver",
           "org": "DjøfModeratorMikkel Jørnvil, Marketingchef, ForsvaretModeratorAnne Bach Waagstein, Formand, Djøf PrivatModeratorKarina Tewes, Chief People & Culture Officer, Milestone SystemsModeratorJens Lunn, Executive Director, AS3 ExecutiveModeratorJohanne Nordmann, Formand, Djøf OffentligModerator"
+        }
+      ]
+    },
+    {
+      "id": "33387",
+      "title": "Er skolen blevet pissedårlig til at opdrage?",
+      "summary": "Merete Riisager (LA) og lektor Kirsten M. Andersen mødes til en samtale om skolens opdragelse",
+      "time": "17:00-18:00",
+      "organizers": "Grundtvigsk Forum",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/33387/er-skolen-blevet-pissedaarlig-til-at-opdrage",
+      "day": "Torsdag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "I dag diskuteres skolen ofte, som om den udelukkende består af relationer mellem individer – og ikke som en institution med normer, rammer, sprog og ansvar. Når institutionen forsvinder ud af vores tænkning, individualiseres ansvaret. Så bliver det den enkelte lærer, den enkelte elev eller den enkelte forælder, der står med aben. Og magtesløsheden vokser. Tiden er kommet til et fokus på hvad skolekultur og fællesskab bidrager til i opdragelsen.\n\nVær med når Kirsten M. Andersen, lektor UC SYD og formand for Grundtvigsk Forum og Merete Riisager, seniorkonsulent, forfatter og fhv. undervisningsminister (LA) tager den svære samtale om skolens opdragelsesopgave.",
+      "speakers": [
+        {
+          "name": "Merete Riisager",
+          "role": "Tidligere undervisningsminister",
+          "org": "LAModeratorKirsten M. Andersen, Lektor, UC Syd og formand, Grundtvigsk ForumModerator"
         }
       ]
     },
@@ -25108,6 +25171,27 @@
       ]
     },
     {
+      "id": "31679",
+      "title": "Fællessang og Fyraftensbar Vi synger os varme af fællessang på Folkemødets første aften!",
+      "summary": "",
+      "time": "18:00-19:30",
+      "organizers": "Grundtvigsk Forum",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/31679/faellessang-og-fyraftensbar",
+      "day": "Torsdag",
+      "themes": [
+        "Andet"
+      ],
+      "more": "Kom med, når Grundtvigsk Forum omdanner succesen Håndbajere og højskolehits til Fællessang og fyraftensbar på skibet Lilla Dan i Allinge Havn. Sangbaren er åben og vores pianist spiller for - du skal blot ønske dine hits fra Højskolesangbogen, så vi alle kan synge med.",
+      "speakers": [
+        {
+          "name": "Sofia Spacciante",
+          "role": "Sangvært",
+          "org": "Grundtvigsk  ForumModerator"
+        }
+      ]
+    },
+    {
       "id": "31216",
       "title": "Lounge & Leisure Lad op til ”aftenens strabadser” efter en lang og inspirerende dag.",
       "summary": "",
@@ -25902,6 +25986,27 @@
           "name": "Bette",
           "role": "Artist",
           "org": "musiker, SelvstændigModerator"
+        }
+      ]
+    },
+    {
+      "id": "31689",
+      "title": "KOMPAS live med Bertel Haarder Kom til solnedgangssamtale mellem Bertel Haarder og Sigge Winther – og oplev podcasten KOMPAS live!",
+      "summary": "",
+      "time": "20:00-21:00",
+      "organizers": "Grundtvigsk Forum, Tænketanken INVI",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/31689/kompas-live-med-bertel-haarder",
+      "day": "Torsdag",
+      "themes": [
+        "Offentlighed, dialog og diskussion"
+      ],
+      "more": "Grundtvigsk Forum inviterer sammen med tænketanken INVI ombord til en solnedgangssamtale mellem Bertel Haarder, Sigge Winther og Silas Moody, når de fra Fællesskibet Lilla Dans bonede gulve liveoptager en episode af podcasten KOMPAS.\n\nKOMPAS går på opdagelse i historien bag gæster, der har skabt store forandringer i samfundet for at finde forandringens formel. Hvordan driver man helt konkret store visioner frem? Lyt med og bliv inspireret til, hvordan du kan realisere store samfundsforandringer. \n\nBertel Haarder er dannet af det Grundtvigske frihedssyn og er initiativtager til Folkemødet på Bornholm. Sigge og Silas har sat ham i stævne til en snak om Bertels vision for det demokratiske fællesskab - og den samfundsforandring, fællesskab kan drive. \n\nStil også dit eget forandringsspørgsmål og få svar fra Bertel og Sigge.",
+      "speakers": [
+        {
+          "name": "Silas Moody",
+          "role": "Kommunikationsrådgiver",
+          "org": "Tænketanken INVIModeratorSigge Winther, Direktør og tidl. vært på DR2 Deadline, Tænketanken INVIModeratorBertel Haarder, Fhv. MF og minister, VenstreModerator"
         }
       ]
     },
@@ -28384,6 +28489,27 @@
       ]
     },
     {
+      "id": "31586",
+      "title": "Dolphin Familien og det sociale ansvar Dolphin Familien inviterer til samtale om det sociale ansvar, og har inviteret gode venner på scenen",
+      "summary": "",
+      "time": "09:30-10:15",
+      "organizers": "Dolphin Familien",
+      "venue": "F18 - Scenen For Samfundsansvar - ESG",
+      "url": "https://program.folkemoedet.dk/events/2026/31586/dolphin-familien-og-det-sociale-ansvar",
+      "day": "Fredag",
+      "themes": [
+        "Kultur, medier og idræt"
+      ],
+      "more": "Dolphin Familien inviterer til samtale om det sociale ansvar, og har inviteret gode venner på scenen. Mød bl.a. Rikke Nielsen fra Lykke-liga og Frans Hammer, der er næstformand i Danmarks Idræts Forbund.",
+      "speakers": [
+        {
+          "name": "Jan Ørum Vermø",
+          "role": "Direktør",
+          "org": "Dolphin FamilienModeratorRikke Nielsen, Lykkeliga Leder, LykkeligaModeratorFrans Hammer, Næstformand, Danmarks IdrætsforbundModerator"
+        }
+      ]
+    },
+    {
       "id": "32055",
       "title": "Nyhedsjournalistikken under lup Mød nyhedsgeneralerne fra TV 2 DK og NO, DR og Ritzau til en debat om nyhedsmediernes troværdighed.",
       "summary": "",
@@ -28426,23 +28552,23 @@
       ]
     },
     {
-      "id": "33396",
-      "title": "Hjernen i en digital hverdag – derfor er søvn så vigtig!",
-      "summary": "Vores hjerner er konstant på arbejde, og det gælder både børn, unge og voksne.",
+      "id": "33672",
+      "title": "Når belønning bliver til afhængighed Hvad sker der i hjernen ved afhængighed – og hvad har snus, lattergas og opioider med det at gøre?",
+      "summary": "",
       "time": "09:30-10:15",
       "organizers": "Lundbeckfonden",
       "venue": "J31 - Folkets Debattelt",
-      "url": "https://program.folkemoedet.dk/events/2026/33396/hjernen-i-en-digital-hverdag-derfor-er-soevn-saa-vigtig",
+      "url": "https://program.folkemoedet.dk/events/2026/33672/naar-beloenning-bliver-til-afhaengighed",
       "day": "Fredag",
       "themes": [
-        "Uddannelse og forskning"
+        "Sundhed, omsorg og forebyggelse"
       ],
-      "more": "Mange af os sover i dag mindre end anbefalet. Telefoner, tablets, tv og sociale medier kan gøre det sværere for os at falde til ro, og det kan påvirke både humør, koncentration, læring og mental trivsel i hverdagen. Men søvn er ikke bare “pause” fra dagen. Mens vi sover, arbejder hjernen på højtryk med at sortere indtryk, lagre minder og lade kroppen op igen. Det kræver både ro og tid.\n\nPå dette event dykker vi ned i, hvad der sker i hjernen under søvn, hvorfor søvn er så vigtig for trivsel og læring, og hvad forskningen siger om konsekvenserne af for lidt eller afbrudt søvn. Vi ser også på, hvordan skærme og digitale vaner påvirker søvnen – og hvad man selv kan gøre for at hjælpe hjernen med at koble af.",
+      "more": "For mange unge bliver hjernen hver dag mødt af små, hurtige stimuli, der giver energi, ro eller belønning – nikotin, koffein, lattergas eller konstant digital stimulation. Det kan føles harmløst i øjeblikket. Men i hjernen aktiveres nogle af de samme belønningsmekanismer, som også spiller en rolle ved afhængighed af stærkere rusmidler som opioider.\n\nPå dette event dykker vi ned i, hvordan rusmidler påvirker hjernens belønningssystem – og hvorfor netop unge hjerner kan være særligt sårbare. Vi ser på, hvordan vaner opstår, hvornår de bliver til afhængighed, og hvad forskningen egentlig siger om de produkter, mange ikke engang opfatter som “rigtige” rusmidler.",
       "speakers": [
         {
           "name": "Line Friis Frederiksen",
           "role": "Videnskabs journalist",
-          "org": "Eget firmaModeratorBirgitte Rahbek Kornum, Professor, Institut for Lægemiddeldesign og Farmakologi, KUModeratorNaja Hulvej Rod, Professor, Institut for FolkesundhedsvidenskabModerator"
+          "org": "Eget firmaModeratorAnders Fink-Jensen, Professor og overlæge, Psykiatrisk Center København, Frederiksberg HospitalModerator"
         }
       ]
     },
@@ -34771,7 +34897,7 @@
       "title": "Neurodivergens i praksis: Trivsel, krav og fælles ansvar Hvordan kan arbejdspladser rumme forskellighed uden at svække trivsel og kvalitet?",
       "summary": "",
       "time": "11:15-11:55",
-      "organizers": "Fagbevægelsens Hovedorganisation, Radiograf Rådet",
+      "organizers": "Radiograf Rådet",
       "venue": "D1 - Fagbevægelsens Plads",
       "url": "https://program.folkemoedet.dk/events/2026/33000/neurodivergens-i-praksis-trivsel-krav-og-faelles-ansvar",
       "day": "Fredag",
@@ -36090,23 +36216,23 @@
       ]
     },
     {
-      "id": "33672",
-      "title": "Når belønning bliver til afhængighed Hvad sker der i hjernen ved afhængighed – og hvad har snus, lattergas og opioider med det at gøre?",
-      "summary": "",
+      "id": "33396",
+      "title": "Hjernen i en digital hverdag – derfor er søvn så vigtig!",
+      "summary": "Vores hjerner er konstant på arbejde, og det gælder både børn, unge og voksne.",
       "time": "11:45-12:45",
       "organizers": "Lundbeckfonden",
       "venue": "J31 - Folkets Debattelt",
-      "url": "https://program.folkemoedet.dk/events/2026/33672/naar-beloenning-bliver-til-afhaengighed",
+      "url": "https://program.folkemoedet.dk/events/2026/33396/hjernen-i-en-digital-hverdag-derfor-er-soevn-saa-vigtig",
       "day": "Fredag",
       "themes": [
-        "Sundhed, omsorg og forebyggelse"
+        "Uddannelse og forskning"
       ],
-      "more": "For mange unge bliver hjernen hver dag mødt af små, hurtige stimuli, der giver energi, ro eller belønning – nikotin, koffein, lattergas eller konstant digital stimulation. Det kan føles harmløst i øjeblikket. Men i hjernen aktiveres nogle af de samme belønningsmekanismer, som også spiller en rolle ved afhængighed af stærkere rusmidler som opioider.\n\nPå dette event dykker vi ned i, hvordan rusmidler påvirker hjernens belønningssystem – og hvorfor netop unge hjerner kan være særligt sårbare. Vi ser på, hvordan vaner opstår, hvornår de bliver til afhængighed, og hvad forskningen egentlig siger om de produkter, mange ikke engang opfatter som “rigtige” rusmidler.",
+      "more": "Mange af os sover i dag mindre end anbefalet. Telefoner, tablets, tv og sociale medier kan gøre det sværere for os at falde til ro, og det kan påvirke både humør, koncentration, læring og mental trivsel i hverdagen. Men søvn er ikke bare “pause” fra dagen. Mens vi sover, arbejder hjernen på højtryk med at sortere indtryk, lagre minder og lade kroppen op igen. Det kræver både ro og tid.\n\nPå dette event dykker vi ned i, hvad der sker i hjernen under søvn, hvorfor søvn er så vigtig for trivsel og læring, og hvad forskningen siger om konsekvenserne af for lidt eller afbrudt søvn. Vi ser også på, hvordan skærme og digitale vaner påvirker søvnen – og hvad man selv kan gøre for at hjælpe hjernen med at koble af.",
       "speakers": [
         {
           "name": "Line Friis Frederiksen",
           "role": "Videnskabs journalist",
-          "org": "Eget firmaModeratorAnders Fink-Jensen, Professor og overlæge, Psykiatrisk Center København, Frederiksberg HospitalModerator"
+          "org": "Eget firmaModeratorBirgitte Rahbek Kornum, Professor, Institut for Lægemiddeldesign og Farmakologi, KUModeratorNaja Hulvej Rod, Professor, Institut for FolkesundhedsvidenskabModerator"
         }
       ]
     },
@@ -38857,6 +38983,27 @@
           "name": "Martin Krasnik",
           "role": "Journalist og chefredaktør",
           "org": "moderator.dkModeratorKatrine Bjerre, Branchedirektør, byggeri, Dansk ErhvervModeratorAnita Friis Sommer, COO, The Novo Nordisk Foundation CO2 Research Center (CORC)ModeratorDavid Tveit, Direktør, Energi og Klima, Teknologisk InstitutModeratorJohn Bang, Global Head, Sustainable Growth Strategy, LEGOModerator"
+        }
+      ]
+    },
+    {
+      "id": "33561",
+      "title": "Kvinde, kend dine barselsvilkår Barselsvilkår betyder mere end nogensinde, så hvorfor er de hemmelige?",
+      "summary": "",
+      "time": "12:45-13:30",
+      "organizers": "FRIDAY P/S, Momkind",
+      "venue": "K12 - FRIDAY PÅ FABERS",
+      "url": "https://program.folkemoedet.dk/events/2026/33561/kvinde-kend-dine-barselsvilkaar",
+      "day": "Fredag",
+      "themes": [
+        "Ligestilling, køn og minoriteter"
+      ],
+      "more": "93,7 % af danskerne mener, at det er vigtigt for dem, at en arbejdsplads er transparent omkring sine barselsvilkår, alligevel kender de færreste til dem. Barselsvilkår har stor betydning for livsindkomst, pension, karriereudvikling og fordelingen af ansvar i familien. Desværre er barselsvilkår stadig noget, rigtig mange først får indsigt i, eller tør spørge ind til, alt for sent i rekrutteringsprocessen. Denne debat sætter fokus på, hvordan manglende viden om rettigheder fastholder skævheder i arbejdsliv og privatøkonomi, og hvad der skal til for, at flere kan træffe reelle og oplyste valg frem for tilfældige løsninger.",
+      "speakers": [
+        {
+          "name": "Caroline Cecilie Olesen",
+          "role": "Rådgiver",
+          "org": "FRIDAYModeratorNanna Schultz, Founder, MomkindModeratorBenedikte Løje Nielsen, Forperson, KvindeøkonomienModerator"
         }
       ]
     },
@@ -43649,6 +43796,27 @@
       ]
     },
     {
+      "id": "34777",
+      "title": "Når et barn fortæller – eller ikke fortæller: Hvad gør du?",
+      "summary": "Seksuelle Overgreb opdages for sent. Hør hvad, hvad undervisning og en overgrebspakke kan ændre.",
+      "time": "14:00-14:45",
+      "organizers": "Socialt Indblik, Fefeo",
+      "venue": "J28 - Socialt Indblik",
+      "url": "https://program.folkemoedet.dk/events/2026/34777/naar-et-barn-fortaeller-eller-ikke-fortaeller-hvad-goer-du",
+      "day": "Fredag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Seksuelle overgreb bliver ikke altid opdaget i tide. Og når et barn først fortæller – eller viser tegn uden at have ord for det – kan den voksnes reaktion og den første samtale være afgørende for, om barnet får hjælp hurtigt og fagligt forsvarligt.\n\nAlligevel møder mange fagpersoner børn og unge hver dag uden systematisk undervisning i tegn, reaktioner, handlepligt og den samtale, der skal kunne rumme både omsorg og ansvar. Når vi reagerer tøvende eller usikkert, øges risikoen for langvarige senfølger.\n\nMed støtte fra Rådet for Offerfonden har Fefeo undervist studerende i ansvar og handling med afsæt i lovgivning og sagsgang – og introduceret en samtalemodel, der hjælper fagpersonen med at støtte barnet og samtidig handle korrekt.\n\nHør om evalueringen, og hvorfor Fefeo peger på behovet for en national overgrebspakke, så kompetencer, ansvar og samarbejde bliver ensartet – uanset kommune, arbejdsplads eller uddannelsesbaggrund.",
+      "speakers": [
+        {
+          "name": "Nick Allentoft",
+          "role": "Journalist",
+          "org": "Socialt IndblikModeratorSteffie Syrild, Projektleder, FefeoModeratorKirsten Trans, Direktør, FefeoModerator"
+        }
+      ]
+    },
+    {
       "id": "35095",
       "title": "Når reklamer og kommunikation bliver skabt af AI Vi debatterer, hvad konsekvenserne bliver i takt med, at reklamer bliver mere og mere AI-skabte.",
       "summary": "",
@@ -44468,27 +44636,6 @@
       ]
     },
     {
-      "id": "34976",
-      "title": "Hvordan skaber vi bedre muligheder for børneliv i naturen?",
-      "summary": "Hvordan styrker vi børns muligheder for at lege, lære og trives i naturen?",
-      "time": "14:00-15:30",
-      "organizers": "Center for Børn og Natur",
-      "venue": "G1 - Fonden Grobund - for livet",
-      "url": "https://program.folkemoedet.dk/events/2026/34976/hvordan-skaber-vi-bedre-muligheder-for-boerneliv-i-naturen",
-      "day": "Fredag",
-      "themes": [
-        "Børn, unge og undervisning"
-      ],
-      "more": "Børn vil gerne være mere udenfor, og mange forældre ønsker, at deres børn får mere ud af naturen og dens mange muligheder. Naturen kan spille en vigtig rolle for børns trivsel, fællesskaber, bevægelse, leg og læring. Men hvordan skaber vi endnu bedre muligheder for, at naturen bliver en aktiv og meningsfuld del af børns hverdagsliv? \n\nI denne session inviteres fagpersoner, forskere, beslutningstagere og andre interesserede ind i en fælles samtale om erfaringer, barrierer og nye muligheder. Gennem korte oplæg, deltagerdialog og perspektiver fra flere sider undersøger vi, hvad der virker, hvad der står i vejen, og hvor der er behov for nye løsninger og samarbejder. Alle bliver en aktiv del af samtalen med fokus på fælles ambitioner og nye perspektiver på børns liv i naturen.",
-      "speakers": [
-        {
-          "name": "Mikkel Havelund",
-          "role": "Organisationschef",
-          "org": "Danmarks NaturfredningsforeningModeratorCharlotte Bach Thomassen, Landsformand, DGI, DGIModeratorKaren Barfod, docent og forskningsleder i Program for Outdoordidaktik, VIA University College, VIA University CollegeModeratorCamilla Roed Otte, Programdirektør i Haver til Maver, Haver til MaverModeratorPeter Bentsen, centerchef på Center for Klinisk Forskning og Forebyggelse og adjungeret professor på Københavns Uni, Center for Klinisk Forskning og ForebyggelseModeratorThomas Skovgaard, Professor, leder af Center for Grundskoleforskning, Syddansk UniversitetModerator"
-        }
-      ]
-    },
-    {
       "id": "35276",
       "title": "Hvordan kommer borgerne med efter stop af Bornholms Havvind?",
       "summary": "Hvordan får vi borgerne med i den grønne energiomstilling når initiativerne stoppes af staten?",
@@ -45031,6 +45178,27 @@
           "name": "Andreas Roepstorff",
           "role": "Professor",
           "org": "Aarhus UniversitetModeratorMikkel Rytter, professor antropologi, Aarhus UniversitetModeratorAnne Binderkrantz, Professor, Aarhus UniversitetModeratorRikke Sand Andersen, Professor, Syddansk UniversitetModeratorMichael Bang Petersen, Professor ved Institut for Statskundskab og forskningsleder for Magtudredningen 2.0., Aarhus UniversitetModerator"
+        }
+      ]
+    },
+    {
+      "id": "35558",
+      "title": "Grønlandske børn og unge på Folkemødet Grønlandske børn og unge på Folkemødet Trivsel, medbestemmelse og fremtidens muligheder",
+      "summary": "",
+      "time": "14:15-15:15",
+      "organizers": "UNICEF Danmark, UNICEF Kalaallit Nunaanni",
+      "venue": "K24 - Galleri Sonja",
+      "url": "https://program.folkemoedet.dk/events/2026/35558/groenlandske-boern-og-unge-paa-folkemoedet",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "Hvordan skabes bedre vilkår for børn og unge i Grønland? – og hvordan sikres det, at de selv bliver hørt i debatten om fremtiden?\n\nUNICEF Danmark og UNICEF Kalaallit Nunaani inviterer til en vigtig samtale om trivsel, demokrati, uddannelse og unges muligheder i et Grønland under forandring. Med udgangspunkt i både personlige erfaringer og professionelle perspektiver samler vi stemmer fra civilsamfund, ungdomsorganisationer og politik for at sætte fokus på børn og unges hverdag, drømme og rettigheder.\n\nDebatten tager afsæt i spørgsmålet om, hvordan vi sammen kan skabe bedre muligheder for deltagelse, fællesskab og selvforsørgelse – og hvad der skal til for at styrke næste generation i Grønland.\n\nArrangementet består af korte oplæg, paneldebat og dialog med publikum. Alle med interesse for børn, unge, Grønland og fremtidens fællesskaber er velkomne.\n\n\nPraktisk information\n📍 Villa Sonja, Storegade 4, Allinge\n📅 Fredag den 12. juni 2026\n🕑 Kl. 14:15–15:15",
+      "speakers": [
+        {
+          "name": "Nauja Bianco",
+          "role": "Ejer & Arktis-kender",
+          "org": "Isuma ConsultingModeratorErni Kristiansen, Projektleder, Røde Kors GrønlandModeratorEvi Kreutzmann, Sekretariatsleder, Grønlandske BørnModeratorNaaja Nathanielsen, Folketingsmedlem, FolketingetModeratorStina Sværd, Børnetalsmand, MIOModeratorLine Grove Hermansen, Director of Advocacy and Communication, UNICEF DanmarkModerator"
         }
       ]
     },
@@ -47240,6 +47408,27 @@
       ]
     },
     {
+      "id": "34976",
+      "title": "Hvordan skaber vi bedre muligheder for børneliv i naturen?",
+      "summary": "Hvordan styrker vi børns muligheder for at lege, lære og trives i naturen?",
+      "time": "15:00-15:45",
+      "organizers": "Center for Børn og Natur",
+      "venue": "G1 - Fonden Grobund - for livet",
+      "url": "https://program.folkemoedet.dk/events/2026/34976/hvordan-skaber-vi-bedre-muligheder-for-boerneliv-i-naturen",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "Børn vil gerne være mere udenfor, og mange forældre ønsker, at deres børn får mere ud af naturen og dens mange muligheder. Naturen kan spille en vigtig rolle for børns trivsel, fællesskaber, bevægelse, leg og læring. Men hvordan skaber vi endnu bedre muligheder for, at naturen bliver en aktiv og meningsfuld del af børns hverdagsliv? \n\nI denne session inviteres fagpersoner, forskere, beslutningstagere og andre interesserede ind i en fælles samtale om erfaringer, barrierer og nye muligheder. Gennem korte oplæg, deltagerdialog og perspektiver fra flere sider undersøger vi, hvad der virker, hvad der står i vejen, og hvor der er behov for nye løsninger og samarbejder. Alle bliver en aktiv del af samtalen med fokus på fælles ambitioner og nye perspektiver på børns liv i naturen.",
+      "speakers": [
+        {
+          "name": "Mikkel Havelund",
+          "role": "Organisationschef",
+          "org": "Danmarks NaturfredningsforeningModeratorCharlotte Bach Thomassen, Landsformand, DGI, DGIModeratorKaren Barfod, docent og forskningsleder i Program for Outdoordidaktik, VIA University College, VIA University CollegeModeratorCamilla Roed Otte, Programdirektør i Haver til Maver, Haver til MaverModeratorPeter Bentsen, centerchef på Center for Klinisk Forskning og Forebyggelse og adjungeret professor på Københavns Uni, Center for Klinisk Forskning og ForebyggelseModeratorThomas Skovgaard, Professor, leder af Center for Grundskoleforskning, Syddansk UniversitetModerator"
+        }
+      ]
+    },
+    {
       "id": "35040",
       "title": "Hvad skaber et bedre liv for unge ramt af dobbeltdiagnose?",
       "summary": "Hvordan skaber unge et bedre liv efter år med psykisk mistrivsel og misbrug af rusmidler?",
@@ -47433,7 +47622,7 @@
       "title": "Skal udlandsdanskere ikke kunne stemme i Danmark?",
       "summary": "Hvilke muligheder er der for at udvide stemmeretten for danskere i udlandet?",
       "time": "15:00-15:55",
-      "organizers": "POV International",
+      "organizers": "POV International, Danes Worldwide",
       "venue": "J9 - Fremtidens Scene: Magt, medier og tech",
       "url": "https://program.folkemoedet.dk/events/2026/33270/skal-udlandsdanskere-ikke-kunne-stemme-i-danmark",
       "day": "Fredag",
@@ -49551,12 +49740,12 @@
     },
     {
       "id": "31251",
-      "title": "Systemet fejler - hvem tager ansvar for fremtidens velfærd?",
-      "summary": "Reformer vedtages på Christiansborg. Ansvar placeres i kommunerne. Konsekvenser mærkes hos borgerne.",
+      "title": "Systemet er blevet vigtigere end mennesket Vi ved, hvad der virker.",
+      "summary": "Så hvorfor gør vi det ikke?",
       "time": "16:00-16:45",
       "organizers": "Den Sociale Kapitalfond, AskovFonden",
       "venue": "J26 - AskovFonden",
-      "url": "https://program.folkemoedet.dk/events/2026/31251/systemet-fejler-hvem-tager-ansvar-for-fremtidens-velfaerd",
+      "url": "https://program.folkemoedet.dk/events/2026/31251/systemet-er-blevet-vigtigere-end-mennesket",
       "day": "Fredag",
       "themes": [
         "Socialpolitik og integration"
@@ -54317,6 +54506,27 @@
       ]
     },
     {
+      "id": "31697",
+      "title": "Ånd og Magt: Kan drømmen forandre systemet?",
+      "summary": "Kom med ind i magtens maskinrum, hvor drømme møder politik og systemets virkelighed",
+      "time": "17:30-18:30",
+      "organizers": "Grundtvigsk Forum",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/31697/aand-og-magt-kan-droemmen-forandre-systemet",
+      "day": "Fredag",
+      "themes": [
+        "Offentlighed, dialog og diskussion"
+      ],
+      "more": "Med afsæt i det grundtvigske tankesæt undersøger vi spændingen mellem et levende demokrati og et institutionaliseret folkestyre. Mellem ungdommens progressive visioner og et politisk system præget af forhandling, partidisciplin og magtens logikker.\n\nPå Grundtvigsk Forums scene på skibet Lilla Dan inviterer vi alle med ind i en levende undersøgelse af demokratiets spændinger – midt på Folkemødets egen demokratiske scene – for at blive klogere på, hvad der sker med politiske drømme, når de møder virkelighedens magtsystemer. Ombord på dækket er Anna Bjerre Johansen, aktivist i Den Grønne Ungdomsbevægelse og medlem af folketinget (Å), Lene Holm Pedersen, professor og leder af Magtudredningen 2.0 med indblik i politisk rekruttering og Lise Birk Pedersen, instruktør på dokumentarserien ”Politikerløftet 2017-2027” – en 10 år lang fortælling om syv unge politikeres vej mod magten.",
+      "speakers": [
+        {
+          "name": "Silas Moody",
+          "role": "Kommunikationsrådgiver",
+          "org": "Tænketanken INVIModeratorLise Birk Pedersen, Filminstruktør og manuskriptforfatter, Den Danske FilmskoleModeratorAnna Bjerre Johansen, MF og klimaaktivist, Alternativet og JordskredModeratorLene Holm Pedersen, Professor Institut for Statskundskab, Københavns UniversitetModerator"
+        }
+      ]
+    },
+    {
       "id": "32509",
       "title": "TVA Live TVA Live giver dig overblik over dagens vigtigste nyheder fra Danmark og verden omkring os",
       "summary": "",
@@ -54423,7 +54633,7 @@
     },
     {
       "id": "34224",
-      "title": "Techslam Fire af landets bedste freestyle rappere og forskere dyster igen i år i en intens rapbattle!",
+      "title": "Techslam Oplev forskningsformidling som du aldrig har set det før til freestyle rap med SmækDown!",
       "summary": "",
       "time": "17:55-18:40",
       "organizers": "Engineer the future, Aalborg Universitet - AAU, Ingeniørforeningen, IDA, DTU, Syddansk Universitet, AU Technical Sciences",
@@ -55447,6 +55657,27 @@
           "name": "Stefan Welin",
           "role": "Vice-repræsentationschef",
           "org": "Europa-Kommissionen, Repræsentation i DanmarkModerator"
+        }
+      ]
+    },
+    {
+      "id": "31733",
+      "title": "Folkedans med Nordisk Dans Det er sjovt, svedigt, udfordrende og gør dig glad i låget, så kom og dans med os.",
+      "summary": "",
+      "time": "18:30-20:00",
+      "organizers": "Grundtvigsk Forum",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/31733/folkedans-med-nordisk-dans",
+      "day": "Fredag",
+      "themes": [
+        "Kultur, medier og idræt"
+      ],
+      "more": "Traditionel nordisk musik og dans har en enestående evne til at samle folk, og her er alle med – uanset erfaring.\nKom alene eller med en ven, kollega eller bedsteforældre under armen – man behøver ikke en dansepartner for at være med. \n\nNordisk Dans er skabt af - og for - unge entusiaster indenfor traditionel dans og musik. De både instruerer og spiller for undervejs.",
+      "speakers": [
+        {
+          "name": "Adam Laugesen",
+          "role": "Musiker",
+          "org": "Nordisk DansModerator"
         }
       ]
     },
@@ -57236,6 +57467,27 @@
       ]
     },
     {
+      "id": "34332",
+      "title": "Knokler vi os syge for det perfekte liv?",
+      "summary": "Overser vi prisen? Vi stræber efter at lykkes, men er endt med en sammensætning, der presser sundhed og sundhedsindsats",
+      "time": "09:00-10:00",
+      "organizers": "Lederforeningen i DSR, A4 Medier",
+      "venue": "J5 - A4 Medier",
+      "url": "https://program.folkemoedet.dk/events/2026/34332/knokler-vi-os-syge-for-det-perfekte-liv-overser-vi-prisen",
+      "day": "Lørdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Vi vil så gerne det lykkelige liv. Vi stræber efter det perfekte, men er endt med en farlig kombination, der udfordrer sundheden.\nDen mentale trivsel er under pres. Tre ud af ti danskerne har højt stressniveau – og næsten fire ud af ti må leve med langvarig sygdom eller andre langvarige lidelser. En udvikling i den forkerte retning.\nHar vi sat for høje mål for livet? Og hvad betyder det for hele sundhedsindsatsen?\nMød psykolog Rikke Høgsted, professor Anna Paldam Folker og ledende sygeplejerske Christian Morhordst.\nDet danske samfund har udviklet et tempo både for arbejdsmarkedet og det enkelte menneske, så vi risikerer at bukke under for sygdom. Og samtidig presser vi sundhedssystemet, som forventes altid at stå parat.\nKan vi sammen finde vej til mindre stress og sygdom - uden at miste velfærd og de personlige mål for livet?\nVi inviterer til en ærlig samtale om samfundets tempo. Er vi blevet blinde for konsekvenserne af en målrettet søgen efter velfærd og det perfekte liv?",
+      "speakers": [
+        {
+          "name": "Anna Paldam Folker",
+          "role": "Professor",
+          "org": "Statens Institut for Folkesundhed, SDUModeratorChristian Morhordst, Kredsforperson, DSR LederforeningenModeratorRikke Høgsted, cand.psych. og specialist i psykotraumatologi, Institut for belastningspsykologiModerator"
+        }
+      ]
+    },
+    {
       "id": "34848",
       "title": "Reparation, forbrug og fællesskab for alle aldre Prøv vores repair-dueller, få hjælp til at fixe dine ting og bliv inspireret til cirkulært forbrug.",
       "summary": "",
@@ -57379,6 +57631,27 @@
           "name": "Beredskabsstyrelsen",
           "role": "Beredskabsstyrelsen",
           "org": "BeredskabsstyrelsenModeratorVærnepligtige og frivillige, Værnepligtige og frivillige, BeredskabsstyrelsenModerator"
+        }
+      ]
+    },
+    {
+      "id": "33033",
+      "title": "Morgensang med mening: Fællessang og perspektiv Fællessang og samtale med Kira Marie Peter-Hansen (SF) og Morten Løkkegaard (V).",
+      "summary": "",
+      "time": "09:15-09:45",
+      "organizers": "Operate A/S",
+      "venue": "F34 - Operate",
+      "url": "https://program.folkemoedet.dk/events/2026/33033/morgensang-med-mening-faellessang-og-perspektiv",
+      "day": "Lørdag",
+      "themes": [
+        "EU og udenrigspolitik"
+      ],
+      "more": "Vær med til morgensang i Operates telt, når vi inviterer Kira Marie Peter-Hansen (SF) og Morten Løkkegaard (V) til sammen at synge dagen ind med varme og eftertanke.\n\nDe to EU-politikere medbringer hver især én sang, som betyder noget for dem – det kan være alt fra højskoleklassikere til pop, salmer eller protestsange. Vi synger sangene sammen, og de deler kort, hvorfor de har en særlig betydning for dem.\n\nVær med, når vi synger dagen igang med fællessang, før samtalerne og debatterne tager over.\n\nAlle er velkomne – vi glæder os til at se dig!",
+      "speakers": [
+        {
+          "name": "Anders Dybdal",
+          "role": "CEO",
+          "org": "Operate A/SModeratorKira Marie Peter-Hansen, Medlem af Europa-Parlamentet, SFModeratorMorten Løkkegaard, Gruppeformand, Venstre i Europa-ParlamentetModerator"
         }
       ]
     },
@@ -62236,7 +62509,7 @@
     {
       "id": "33443",
       "title": "Træning og (hjerte)sundhed – hvad venter vi på?",
-      "summary": "En skarp og praksisnær dialog om borgeres efterlevelse af Sundhedsstyrelsens anbefalinger.",
+      "summary": "Hvordan får vi flere til at efterleve Sundhedsstyrelsens anbefalinger",
       "time": "11:00-11:45",
       "organizers": "Outdoorgym",
       "venue": "J59 - Outdoorgym",
@@ -63263,27 +63536,6 @@
       ]
     },
     {
-      "id": "35198",
-      "title": "Bryd Tabuet: Lad os Tale om Alkoholvaner og Børns Trivsel I Ung Revers har vi gennem årene haft terapeutiske samtaler med tusindvis af børn, unge og voksne.",
-      "summary": "",
-      "time": "11:00-12:00",
-      "organizers": "A4 Medier, Ung revers",
-      "venue": "J5 - A4 Medier",
-      "url": "https://program.folkemoedet.dk/events/2026/35198/bryd-tabuet-lad-os-tale-om-alkoholvaner-og-boerns-trivsel",
-      "day": "Lørdag",
-      "themes": [
-        "Børn, unge og undervisning"
-      ],
-      "more": "I Ung Revers har vi gennem årene haft terapeutiske samtaler med tusindvis af børn, unge\nog voksne. Fælles for dem alle er, at de er vokset op i skyggen af deres forældres alkohol-\neller stofmisbrug.\nEn stor del af de børn og unge, vi møder i UNG REVERS, deler en fælles oplevelse: Ingen\nspørger til alkoholvanerne i deres familie eller tør være nysgerrige på, hvordan alkohol\neller andre rusmidler påvirker deres hjem. Det skaber en dyb følelse af ensomhed, når\nomgivelserne ikke tør blande sig, men i stedet understøtter en alkoholkultur.\nHvorfor ser vi ikke alle de børn og unge, der har forældre med misbrug af alkohol eller\nstoffer? Hvorfor er det så svært at tale om? Hvilke stærke kræfter er på spil, når det\nkommer til at bryde tabuet omkring alkohol?\nLad os turde tale om alkoholvaner og hvordan de påvirker vores børn både på kort og lang\nsigt. Hjælp os med at tage debatten! Tag risikoen og bland dig – gør en forskel for bare ét\nbarn eller én ung.",
-      "speakers": [
-        {
-          "name": "Marie Brixtofte",
-          "role": "Autoriseret psykolog og kommunalbestyrelsesmedlem (V)",
-          "org": "Gentofte KommuneModeratorJulie Berggren, Børne- og ungeterapeut, Ung Revers NovaviModeratorVibeke Vigelsø Kjær, Psykoterapeut MPF, Ung Revers NovaviModeratorBjarne Stenger Elholm, Souchef og leder af Alkolinjen, Alkohol & SamfundModerator"
-        }
-      ]
-    },
-    {
       "id": "35355",
       "title": "Ukraine og Danmark - skolemaden som kulturel brobygger Hvordan kan Danmark og Ukraine gå hånd i hånd på den krævende og spændende vej mod skolemad for alle",
       "summary": "",
@@ -63657,6 +63909,27 @@
           "name": "Carsten Damgaard",
           "role": "Forskningsdirektør",
           "org": "DBIModerator"
+        }
+      ]
+    },
+    {
+      "id": "31986",
+      "title": "Fylking og folkeskolen - dilemmaer og dømmekraft Politikerne stiller spørgsmålene og lærerne svarer.",
+      "summary": "En levende debat hvor rollerne er byttet om",
+      "time": "11:15-12:00",
+      "organizers": "Københavns Lærerforening",
+      "venue": "G26 - Lærernes hus",
+      "url": "https://program.folkemoedet.dk/events/2026/31986/fylking-og-folkeskolen-dilemmaer-og-doemmekraft",
+      "day": "Lørdag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "Hvad sker der, når politikerne stiller spørgsmålene – og lærerne svarer? \nPå Folkemødet bytter vi om på rollerne: Politikere fra Børne- og Ungdomsudvalget præsenterer deres dilemmaer og udfordringer i arbejdet med folkeskolen, og et lærerpanel forsøger at løse dem. En levende debat om hverdag, virkelighed og fælles løsninger – med plads til både nysgerrighed, uenighed og input fra publikum.",
+      "speakers": [
+        {
+          "name": "Katrine Fylking",
+          "role": "Formand",
+          "org": "Københavns LærerforeningModerator"
         }
       ]
     },
@@ -66076,6 +66349,27 @@
       ]
     },
     {
+      "id": "34995",
+      "title": "Får vi de helt forkerte oplysninger om vores helbred?",
+      "summary": "Vi søger viden om sygdom og vores helbred via internettet. Men hvad nu, hvis vi får forkerte svar?",
+      "time": "12:00-13:00",
+      "organizers": "Lederforeningen i DSR, A4 Medier",
+      "venue": "J5 - A4 Medier",
+      "url": "https://program.folkemoedet.dk/events/2026/34995/faar-vi-de-helt-forkerte-oplysninger-om-vores-helbred",
+      "day": "Lørdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Den digitale udvikling fører sundhedsindsatsen ind i fremtiden – og sikrer, at vi behandles godt og forsvarligt også med mange flere patienter. Digital viden via nettet gør os alle klogere. Også når det handler om vores egen sygdom og helbred. Når vi pludselig mærker symptomer på, at noget er galt, bliver vi guidet med nyttige råd. Men hvad hvis nettet begynder at give ”fake-viden” og forkerte svar? Mød direktør for sundhed.dk og en del af ledelsen i Digital Sundhed Danmark - Morten Elbæk Petersen – som har spillet en central rolle i udviklingen af dansk digital sundhed, herunder\npatienthåndbogen og den offentlige sundhedsportal. På få måneder har den offentlige sundhedsoplysning via sundhed.dk pludselig fået en overraskende udfordrer, som giver os råd og viden. Men måske ikke altid den rigtige viden! Hvad betyder ”fake-viden” for vores sundhed? Og hvad kan det betyde for den professionelle sundhedsindsats? Eksperter og ledere fra sundhedsindsatsen snakker fremtid, der er blevet nutid.",
+      "speakers": [
+        {
+          "name": "Christian Morhordst",
+          "role": "Kredsforperson",
+          "org": "DSR LederforeningenModeratorMorten Elbæk Petersen, Direktør, sundhed.dkModerator"
+        }
+      ]
+    },
+    {
       "id": "35052",
       "title": "Fordomsquiz – Hvad ved du om danske veteraner?",
       "summary": "Quiz: Test din viden om Forsvaret og danske veteraner med Anders Lund Madsen",
@@ -67316,12 +67610,12 @@
     },
     {
       "id": "32545",
-      "title": "Offentligt medledelse eller styring - hvad vej skal vi?",
+      "title": "Offentlig medledelse eller styring - hvad vej skal vi?",
       "summary": "Kommunerne står midt i et grundlæggende dilemma",
       "time": "13:00-13:40",
       "organizers": "KL, Komponent, Matzen Ledelsesudvikling",
       "venue": "F9 - Kommunernes Telt",
-      "url": "https://program.folkemoedet.dk/events/2026/32545/offentligt-medledelse-eller-styring-hvad-vej-skal-vi",
+      "url": "https://program.folkemoedet.dk/events/2026/32545/offentlig-medledelse-eller-styring-hvad-vej-skal-vi",
       "day": "Lørdag",
       "themes": [
         "Offentlighed, dialog og diskussion"
@@ -68424,6 +68718,27 @@
           "name": "Anne Sophia Hermansen",
           "role": "DR vært",
           "org": "DRModeratorAnne Sofie Allarp, Journalist og forfatter, WeekendavisenModeratorSørine Gotfredsen, Præst, journalist og forfatter, DRModeratorAnna Libak, Udlandsredaktør, WeekendavisenModerator"
+        }
+      ]
+    },
+    {
+      "id": "33381",
+      "title": "Hvem er folket?",
+      "summary": "En slags humoristisk idéhistorie",
+      "time": "13:00-14:00",
+      "organizers": "Grundtvigsk Forum",
+      "venue": "H1 - Fællesskibet Lilla Dan",
+      "url": "https://program.folkemoedet.dk/events/2026/33381/hvem-er-folket",
+      "day": "Lørdag",
+      "themes": [
+        "Offentlighed, dialog og diskussion"
+      ],
+      "more": "Vi taler om folket og danskhed som aldrig før. Men det er svært at blive klog på, hvad det egentlig er, vi taler om. I denne samtale dykker vi ned i det danske folks idéhistorie, der rummer både humor og alvor, kolde øl og lunken mælk, ydmyghed og storhedsvanvid, Grundtvig og Egon Olsen. \n\nKom med ombord på Grundtvigsk Forums scene på det gamle skoleskib, Lilla Dan, når forfatter og idéhistoriker, Kristoffer Bayer, og journalist og styrelsesmedlem i Grundtvigsk Forum, Sofie Buch Hoyer, tager folket under kærlig og kritisk behandling med udgangspunkt i dét, der samler fremfor at splitte.",
+      "speakers": [
+        {
+          "name": "Sofie Buch Hoyer",
+          "role": "Journalist",
+          "org": "Moderator.dkModeratorKristoffer Bayer, Forfatter og ph.d.-stipendiat, Aarhus UniversitetModerator"
         }
       ]
     },
@@ -74077,27 +74392,6 @@
       ]
     },
     {
-      "id": "34452",
-      "title": "Rund folkemødet af med OPS Rundt folkemødet af i de professionsstuderendes tegn",
-      "summary": "",
-      "time": "16:00-17:00",
-      "organizers": "Organisation for Professionshøjskolestuderende",
-      "venue": "A4 - Folkemødets Fællesscene",
-      "url": "https://program.folkemoedet.dk/events/2026/34452/rund-folkemoedet-af-med-ops",
-      "day": "Lørdag",
-      "themes": [
-        "Uddannelse og forskning"
-      ],
-      "more": "Lørdag sætter OPS punkt på årets Folkemødet ved at sætte fokus på de professionsstuderendes vilkår",
-      "speakers": [
-        {
-          "name": "Line Kjær Christensen",
-          "role": "Forperson",
-          "org": "Organisation for ProfessionshøjskolestuderendeModerator"
-        }
-      ]
-    },
-    {
       "id": "34611",
       "title": "Må vi være her?",
       "summary": "mod til at turde være tyk Må man fylde, tage plads og have det godt i sin krop? En snak om selvværd og livet med overvægt",
@@ -74157,6 +74451,27 @@
           "name": "Peter Mogensen",
           "role": "Politisk kommentator",
           "org": "TV 2 DanmarkModerator"
+        }
+      ]
+    },
+    {
+      "id": "32282",
+      "title": "Quiztid – hvad ved du om vores naboer Tyskland og Sverige?",
+      "summary": "Tip en 13’er. Hvad er dansk, hvad er svensk, hvad er tysk?",
+      "time": "16:00-18:00",
+      "organizers": "Interreg Öresund-Kattegat-Skagerrak, Interreg Deutschland-Danmark",
+      "venue": "G9 - €uro-teltet",
+      "url": "https://program.folkemoedet.dk/events/2026/32282/quiztid-hvad-ved-du-om-vores-naboer-tyskland-og-sverige",
+      "day": "Lørdag",
+      "themes": [
+        "EU og udenrigspolitik"
+      ],
+      "more": "Kom forbi til en quiz samt en snak med os om, hvordan du søger EU-penge til samarbejde med Tyskland, Sverige og Norge\nVi er to EU-programmer, som bevilger penge til samarbejdsprojekter i grænseregioner. Vi arbejder med områder som Innovation, Grøn Omstilling, Uddannelse, Transport & Mobilitet, Arbejdsmarked og meget andet. Vi har sammensat en quiz, hvor du kan teste din viden om nabolandene samt høre mere om, hvad din organisation kan søge penge til.",
+      "speakers": [
+        {
+          "name": "Andreas Zilcken",
+          "role": "Proejktrådgiver",
+          "org": "Interreg Öresund-Kattegat-SkagerrakModeratorGitte Bjørn-Lüthi, Projektrådgiver, Interreg Deutschland-DanmarkModeratorSusanne Damerow, Projektkonsulent, Interreg Deutschland-DanmarkModeratorJane Guldbrand-Hansen, Projektkonsulent, Interreg Deutschland-DanmarkModeratorSofie Håkansson, Projektrådgiver, Interreg Öresund-Kattegat-SkagerrakModeratorLone Hylander, Projektrådgiver, Interreg Öresund-Kattegat-SkagerrakModerator"
         }
       ]
     },
@@ -74855,7 +75170,7 @@
     },
     {
       "id": "33031",
-      "title": "Kæledyrenes hemmelige liv: Fup og fakta om din firbenede ven Hvordan ved videnskaben om vores elskede familiedyr (og kan du tåle at høre det)?",
+      "title": "Kæledyrenes hemmelige liv: Fup og fakta om din firbenede ven Hvad ved videnskaben om vores elskede familiedyr (og kan du tåle at høre det)?",
       "summary": "",
       "time": "17:00-17:50",
       "organizers": "Folkemødets Forskningsscene",
@@ -75564,6 +75879,27 @@
           "name": "Kayak",
           "role": "Musikere",
           "org": "BandModerator"
+        }
+      ]
+    },
+    {
+      "id": "35579",
+      "title": "Koncert med Roxy Jules - Support: Astini Roxy Jules og Astini byder på rå elektro-rock og nærværende vokaler.",
+      "summary": "",
+      "time": "19:00-20:30",
+      "organizers": "Balalajka Bornholm",
+      "venue": "J99 - Kæmpestrandens Terrasse",
+      "url": "https://program.folkemoedet.dk/events/2026/35579/koncert-med-roxy-jules-support-astini",
+      "day": "Lørdag",
+      "themes": [
+        "Kultur, medier og idræt"
+      ],
+      "more": "ROXY JULES er lyden af forvrængede guitarer, elektroniske beats og poetiske tekster. En slags kærlighedsbarn af PJ Harvey, Mazzy Star og The Kills.\n\nFlere af sangene har været i rotation på P6 Beat, og hun modtog sidste år prisen som Årets Solist ved Danish Alternative Music Awards 2025. En velfortjent hæder for at blive ved med at gå sine egne veje i musikken. Får I besøg af Roxy Jules, får I besøg af af en elektro-rock-duo med selvbevidst kant og en nerve helt ned til bagerste række blandt publikum.\n\nAstini er en ung, talentfuld bornholmsk sanger, der elsker at sætte sit helt eget præg på sine yndlings-covernumre.\n\nHun er allerede i fuld gang med at arbejde på sine egne sange, og hvis vi er heldige, får vi måske en helt særlig forsmag på.",
+      "speakers": [
+        {
+          "name": "Astini Hansen",
+          "role": "Singerinde",
+          "org": "Balalajka BornholmModeratorRoxy Jules, Sangerinde, Det Mobile SpillestedModerator"
         }
       ]
     },
