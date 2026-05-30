@@ -1198,9 +1198,6 @@ function formatSpeakersHTML(speakers) {
   return items;
 }
 
-// GO
-loadOfficialProgram();
-
 // ============================================================
 // OFFICIAL PROGRAM
 // ============================================================
@@ -1805,6 +1802,9 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+
+// GO — kick everything off now that all declarations are in scope
+loadOfficialProgram();
 </script>
 </body>
 </html>
