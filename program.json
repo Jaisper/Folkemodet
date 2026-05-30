@@ -1,15 +1,15 @@
 {
-  "scraped_at": "2026-05-29T09:35:52.829Z",
+  "scraped_at": "2026-05-30T08:17:43.315Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3629,
+  "event_count": 3639,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
-      "count": 612
+      "count": 615
     },
     {
       "name": "Klima, miljø, natur og energi",
-      "count": 403
+      "count": 405
     },
     {
       "name": "Børn, unge og undervisning",
@@ -17,7 +17,7 @@
     },
     {
       "name": "Andet",
-      "count": 262
+      "count": 263
     },
     {
       "name": "Kultur, medier og idræt",
@@ -29,7 +29,7 @@
     },
     {
       "name": "Vækst, erhverv og beskæftigelse",
-      "count": 223
+      "count": 224
     },
     {
       "name": "Teknologi og digitalisering",
@@ -45,7 +45,7 @@
     },
     {
       "name": "Uddannelse og forskning",
-      "count": 148
+      "count": 150
     },
     {
       "name": "Fødevarer og madkultur",
@@ -53,7 +53,7 @@
     },
     {
       "name": "Ligestilling, køn og minoriteter",
-      "count": 113
+      "count": 114
     },
     {
       "name": "Socialpolitik og integration",
@@ -2472,7 +2472,7 @@
     },
     {
       "id": "33571",
-      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe og byg LEGO ud fra instruktioner over SINE-radioer.",
+      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe over SINE-radioer.",
       "summary": "",
       "time": "10:00-12:00",
       "organizers": "Beredskabsstyrelsen",
@@ -5281,27 +5281,6 @@
           "name": "Valdemar Rejnhold",
           "role": "Frivillig",
           "org": "Foreningen Atomkraft Ja TakModerator"
-        }
-      ]
-    },
-    {
-      "id": "35159",
-      "title": "Sundhed som investering – det glemte regnestykke Hvordan regner vi værdien af sundhed med i økonomi, vækst og politiske beslutninger?",
-      "summary": "",
-      "time": "11:00-12:00",
-      "organizers": "A4 Medier, Amgen Danmark",
-      "venue": "J5 - A4 Medier",
-      "url": "https://program.folkemoedet.dk/events/2026/35159/sundhed-som-investering-det-glemte-regnestykke",
-      "day": "Torsdag",
-      "themes": [
-        "Sundhed, omsorg og forebyggelse"
-      ],
-      "more": "Når Danmark investerer i motorveje, klima eller beskæftigelse, regner vi i stigende grad med de dynamiske effekter: flere i arbejde, højere produktivitet og færre offentlige udgifter. Men når vi vurderer investeringer i nye behandlinger og forebyggelse, glemmer vi denne del af regnestykket.\nDet betyder, at de bredere gevinster for samfundet ofte overses: når behandling holder mennesker på arbejdsmarkedet, reducerer sygedage eller forebygger førtidspension. Resultatet er, at potentialet i sundhed som vækstmotor ofte undervurderes.\nI denne session samler vi derfor aktører fra Arbejderbevægelsens Erhvervsråd, Forsikring & Pension, FOA og Christiansborg til en debat om, hvordan vi kan tænke sundhed mere strategisk i dansk økonomi.",
-      "speakers": [
-        {
-          "name": "Mette Boysen",
-          "role": "Moderator",
-          "org": "LifModerator"
         }
       ]
     },
@@ -13562,7 +13541,7 @@
       "title": "Fremtidens Forbruger En tvær-generationel samtale om vores fælles ansvar for en bæredygtig fremtid",
       "summary": "",
       "time": "14:00-14:45",
-      "organizers": "Verdens Bedste Nyheder, 2030-panelet",
+      "organizers": "2030-panelet, 2030-ungepanelet",
       "venue": "C30 - Verdensmålenes Telt",
       "url": "https://program.folkemoedet.dk/events/2026/33385/fremtidens-forbruger",
       "day": "Torsdag",
@@ -14646,6 +14625,27 @@
           "name": "Book en muslim",
           "role": "www.bookenmuslim.dk",
           "org": "www.bookenmuslim.dkModerator"
+        }
+      ]
+    },
+    {
+      "id": "34700",
+      "title": "ADHD rammer kvinders sundhed hårdere end mænds ADHD er ikke en kønsneutral lidelse – Hvorfor rammes kvinder hårdere, og hvad gør vi ved det?",
+      "summary": "",
+      "time": "14:00-15:00",
+      "organizers": "ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/34700/adhd-rammer-kvinders-sundhed-haardere-end-maends",
+      "day": "Torsdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Forskning viser at kvinder med ADHD dør 9 år tidligere end kvinder uden diagnosen – mens mænd med ADHD \"kun\" mister 7 leveår. Kvinder med ADHD har desuden 4 gange højere risiko for selvmordsforsøg og selvskade end mænd med ADHD, de lider oftere af depression, angst og spiseforstyrrelser, de har højere risiko for at udvikle autoimmune sygdomme, og lever ofte med hormonelle lidelser og kroniske smerter. \nDet en reel sundhedskrise, som har store konsekvenser for ADHD-kvinders livskvalitet og samfundsdeltagelse. Men hvad gør sundhedssystemet egentlig for at hjælpe kvinder med ADHD? \nKom med, når vi indkalder repræsentanter fra sundhedsvæsenet til MUS-samtale om ADHD-kvinders sundhed.",
+      "speakers": [
+        {
+          "name": "Fie Vesterled",
+          "role": "Ejer",
+          "org": "Neurodivergent LedelseModeratorMalene Nepper, Læge og formand, Forum for Yngre AlmenmedicinereModeratorTrine Birk Andersen, Medlem, Bestyrelse, Danske Regioner og regionsrådsmedlem, Region Sjælland (Socialdemokratiet), Region SjællandModerator"
         }
       ]
     },
@@ -17969,7 +17969,7 @@
     },
     {
       "id": "33585",
-      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe og byg LEGO ud fra instruktioner over SINE-radioer.",
+      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe ud fra instruktioner over SINE-radioer.",
       "summary": "",
       "time": "15:00-17:00",
       "organizers": "Beredskabsstyrelsen",
@@ -18221,7 +18221,7 @@
     },
     {
       "id": "32136",
-      "title": "Et styrket specialiseret socialområde Hvordan sikrer, at økonomiske prioriteringer i dag ikke giver større regninger i morgen",
+      "title": "Et styrket specialiseret socialområde Kan regionerne og kommuner i fællesskab løfte indsatserne til mennesker med særlige behov?",
       "summary": "",
       "time": "15:15-16:00",
       "organizers": "Danske Regioner",
@@ -18447,6 +18447,27 @@
           "name": "Mia Tang",
           "role": "Public Affairs og kommunikationschef",
           "org": "Danske MaritimeModeratorJenny Braat, Adm. direktør, Danske MaritimeModeratorMarcus Knuth, Folketingsmedlem, Det Konservative FolkepartiModeratorCarsten Bach, Folketingsmedlem og forsvarsordfører, Liberal AllianceModerator"
+        }
+      ]
+    },
+    {
+      "id": "30884",
+      "title": "Grundforskning – hvad er det?",
+      "summary": "Carlsbergfondet 150 år: Bliv klog på grundforskning med gratis jubilæumsøl og -kage.",
+      "time": "15:25-16:10",
+      "organizers": "Carlsbergfamilien, Carlsbergfondet",
+      "venue": "N17 - Carlsbergfamilien",
+      "url": "https://program.folkemoedet.dk/events/2026/30884/grundforskning-hvad-er-det",
+      "day": "Torsdag",
+      "themes": [
+        "Uddannelse og forskning"
+      ],
+      "more": "Hvordan opstår ny viden? Hvad vil det egentlig sige at bedrive grundforskning – den type nysgerrighedsdrevne forskning, hvor målet ikke altid er givet på forhånd? Og hvordan sikrer vi bedst vilkårene for fri dansk grundforskning? Siden stiftelsen for præcis 150 år siden har Carlsbergfondet som landets første forskningsfond støttet fri dansk grundforskning. Vi fejrer jubilæet med gratis jubilæumsøl og -kage – og frem for alt med en indsigtsfuld samtale om grundforskningens væsen og udvikling med videnskabsjournalist Lone Frank, Nobelpristager Morten Meldal, videnskabshistoriker Kristian Hvidtfelt Nielsen og forskningsordfører Stinus Lindgreen (RV). Velkomst ved Carlsbergfondets forperson Majken Schultz.",
+      "speakers": [
+        {
+          "name": "Lone Frank",
+          "role": "Journalist",
+          "org": "WeekendavisenModeratorStinus Lindgreen, Folketingsmedlem, uddannelses- og forskningsordfører, Radikale VenstreModeratorKristian Hvidtfelt Nielsen, Lektor og centerleder ved Center for Videnskabsstudier, Aarhus UniversitetModeratorMorten Meldal, professor ved Kemisk Institut og leder Center of Evolutionary Chemical Biology, Københavns UniversitetModeratorMajken Schultz, Bestyrelsesforperson, CarlsbergfondetModerator"
         }
       ]
     },
@@ -23386,6 +23407,27 @@
       ]
     },
     {
+      "id": "34702",
+      "title": "ADHD + PMD - En dobbeltbelastning af kvinder Hormonelle lidelser hos kvinder med adhd overses i sundhedssystemet",
+      "summary": "",
+      "time": "17:00-18:00",
+      "organizers": "ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/34702/adhd-pmd-en-dobbeltbelastning-af-kvinder",
+      "day": "Torsdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Alt for mange kvinder går gennem livet uden at få øje på – eller få hjælp til – de hormonelle og neurodivergente mønstre, der præger deres hverdag. ADHD hos kvinder bliver ofte overset, og kombinationen af hormoner, symptomer og forventninger kan gøre det svært at forstå sig selv og få den rette støtte.\nI dette event dykker vi ned i, hvad der sker, når diagnoser trækkes i langdrag, og hvordan hormonelle forandringer påvirker kvinder før og efter de bliver udredt. Vi kombinerer viden og oplevelse og inviterer til en åben samtale om, hvad det betyder for både identitet, relationer og livskvalitet – og hvordan vi kan skabe bedre hjælp, tidligere forståelse og mere inkluderende rammer.",
+      "speakers": [
+        {
+          "name": "Katrine Vrang Hauberg",
+          "role": "Næstformand",
+          "org": "ADHD StorkøbenhavnModeratorMaja Aagaard, Medstifter og direktør, Hormoner på ArbejdeModerator"
+        }
+      ]
+    },
+    {
       "id": "34703",
       "title": "Når løsninger skal holde, i en verden i forandring Dansk Flygtningehjælp samler en bred vifte af aktører til debat om partnerskab og løsninger i kriser",
       "summary": "",
@@ -28070,12 +28112,12 @@
     },
     {
       "id": "32976",
-      "title": "Morgensang med mening: Fællessang og perspektiv Fællessang og samtale med Anders Dybdal og to medværter fredag morgen på Folkemødet.",
+      "title": "Morgensang med mening: Fælleskab og perspektiv Fællessang og samtale med Anders Dybdal og to medværter fredag morgen på Folkemødet.",
       "summary": "",
       "time": "09:15-09:45",
       "organizers": "Operate A/S",
       "venue": "F34 - Operate",
-      "url": "https://program.folkemoedet.dk/events/2026/32976/morgensang-med-mening-faellessang-og-perspektiv",
+      "url": "https://program.folkemoedet.dk/events/2026/32976/morgensang-med-mening-faelleskab-og-perspektiv",
       "day": "Fredag",
       "themes": [
         "Andet"
@@ -31262,7 +31304,7 @@
     },
     {
       "id": "33588",
-      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe og byg LEGO ud fra instruktioner over SINE-radioer.",
+      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe ud fra instruktioner over SINE-radioer.",
       "summary": "",
       "time": "10:00-12:00",
       "organizers": "Beredskabsstyrelsen",
@@ -38735,6 +38777,27 @@
       ]
     },
     {
+      "id": "34704",
+      "title": "ADHD - Alle Damer Har Det Eller har de?",
+      "summary": "Kom og mød virkeligheden bag tallene og kvinderne og vær med i fællesskabet.",
+      "time": "12:30-13:30",
+      "organizers": "ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/34704/adhd-alle-damer-har-det",
+      "day": "Fredag",
+      "themes": [
+        "Ligestilling, køn og minoriteter"
+      ],
+      "more": "Nej, det har alle damer selvfølgelig ikke. Men nogle af os har, og vi har det bedre, når vi ved det, og når vi har nogen at spejle os i. Tankemylder, overansvar, indre uro og følelsen af at være \"for meget\" eller \"for lidt\" er noget, mange kvinder først erkender sent i livet - ofte i forbindelse med andre langvarige psykiske nedture, som resulterer i en udredning eller diagnose.\nPå Folkemødet taler mange om ADHD. I ADHD-foreningen møder du os, der faktisk har det. I Kvindenetværket taler vi om, hvordan ADHD påvirker vores relationer, både privat og professionelt. Vi taler om at være åben om diagnosen, eller sætte ord på udfordringer uden at dele det hele. Gennem erfaringsudveksling får vi et stærkere ståsted i vores eget liv.\nKig forbi ADHD-foreningens Kvindenetværk. Efter en kort introduktion taler vi sammen i mindre grupper. Her kan du møde andre, dele erfaringer og blive klogere, både på dig selv og fællesskabet. \nFor fællesskabet gør en forskel.",
+      "speakers": [
+        {
+          "name": "Katrine Vrang Hauberg",
+          "role": "Næstformand",
+          "org": "ADHD StorkøbenhavnModerator"
+        }
+      ]
+    },
+    {
       "id": "35442",
       "title": "Fremtidens dagpenge Debat om et dagpengesystem, der matcher projektarbejde, freelancere og musikernes virkelighed.",
       "summary": "",
@@ -41822,27 +41885,6 @@
       ]
     },
     {
-      "id": "31263",
-      "title": "Hvordan kommer vi i mål med den grønne trepart?",
-      "summary": "Hvad skal der til for at den grønne trepart går fra skåltaler til virkelighed?",
-      "time": "13:30-13:55",
-      "organizers": "Rådet for Grøn Omstilling, Dansk Erhverv",
-      "venue": "C29 - Klima- og Energihjørnet",
-      "url": "https://program.folkemoedet.dk/events/2026/31263/hvordan-kommer-vi-i-maal-med-den-groenne-trepart",
-      "day": "Fredag",
-      "themes": [
-        "Klima, miljø, natur og energi"
-      ],
-      "more": "Den grønne trepart er i gang. Omstillingsplanerne er lagt og snart falder kvælstofhammeren. Treparten har sat en ny retning for Danmarks landskab. Men herfra begynder det svære. For hvordan går vi fra skåltaler og aftaletekst til virkelighed?\n\nI dag er reglerne ofte skruet skævt sammen. Det kræver for eksempel ingen godkendelser at drive et landbrug intensivt, men hvis man vil anlægge fem hektar løvskov, kræver det miljøgodkendelser, der kan tage flere år. Hvis treparten skal lykkes i praksis, er vi nødt til at tale om regelforenkling og myndighedsprocesser. Og hvis den skal afhjælpe kvælstofproblemet, nytter det ikke at importere mere foder for at erstatte foder, der ikke længere er plads til at dyrke. Samtidig skal treparten kunne rumme flere hensyn end kvælstof og CO2 alene. \n\nHvordan får vi tænkt vedvarende energi, drikkevandsbeskyttelse og biodiversitet ind, så det hele kan lade sig gøre i praksis – uden at gå i stå i konflikter og papirarbejde?",
-      "speakers": [
-        {
-          "name": "Martin Korsgaard",
-          "role": "Partner",
-          "org": "Markedsspecialist, LE34ModeratorMikkel Eeg, Naturspecialist, MomentumModeratorChristian Ege, Seniorkonsulent, Rådet for Grøn OmstillingModerator"
-        }
-      ]
-    },
-    {
       "id": "33021",
       "title": "Nikotin i børnehøjde: et indblik i de seneste tendenser Hvilke nikotinprodukter bruger børn og unge?",
       "summary": "Og hvad skal vi gøre ved det?",
@@ -44552,6 +44594,27 @@
       ]
     },
     {
+      "id": "34701",
+      "title": "ADHD og Arbejdsliv - Spørg vores ekspertpanel Hvordan skaber vi gode arbejdsliv med ADHD?",
+      "summary": "Stil dit spørgsmål til vores ekspertpanel!",
+      "time": "14:00-15:00",
+      "organizers": "ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/34701/adhd-og-arbejdsliv-spoerg-vores-ekspertpanel",
+      "day": "Fredag",
+      "themes": [
+        "Vækst, erhverv og beskæftigelse"
+      ],
+      "more": "Hvordan skaber vi gode arbejdsliv med ADHD, når 60% af voksne med diagnosen oplever udfordringer med tilknytning til arbejdsmarkedet? Barriererne kan ligge hos os selv, på arbejdspladsen eller i samfundet – ofte på grund af manglende viden, ufleksible normer eller forældede strukturer. \nI bedste Mads og Monopolet-style tager vi udgangspunkt i dilemmaer fra publikum og sætter fokus på de udfordringer, der kan opstå, når ADHD møder arbejdsmarkedet. Vi har samlet et stærkt panel med ledelsesprofiler fra vidt forskellige brancher, som   alle har erfaringer med at skabe rummelige arbejdspladser.\nSå kom og stil dine spørgsmål og dilemmaer til det seje panel, og få deres bud på konkrete løsninger til dit dilemma – og på inklusion på arbejdsmarkedet generelt.",
+      "speakers": [
+        {
+          "name": "Fie Vesterled",
+          "role": "Ejer",
+          "org": "Neurodivergent LedelseModeratorAnna Helene Mollerup, Direktør, En Vej Til AlleModeratorJesper Heien, Arbejdsmiljøchef, Snedkermester Arne Pedersen a/sModeratorRikke Hedeager, Teaterchef, Republique RevolverModerator"
+        }
+      ]
+    },
+    {
       "id": "34926",
       "title": "Er der en lærling til stede?",
       "summary": "Quiz og samtale om en alternativ bevaringsværdig byggebranche, med Lærlinge for bæredygtighed.",
@@ -46904,6 +46967,27 @@
       ]
     },
     {
+      "id": "32639",
+      "title": "Når geopolitik ændrer alliancer: Hvordan styrker vi Norden?",
+      "summary": "En debat om styrkelse af Nordens alliancer, konkurrencekraft og rolle i en usikker ny verdensorden.",
+      "time": "15:00-15:45",
+      "organizers": "Nordea Danmark",
+      "venue": "F31 - Geelmuyden Kiese",
+      "url": "https://program.folkemoedet.dk/events/2026/32639/naar-geopolitik-aendrer-alliancer-hvordan-styrker-vi-norden",
+      "day": "Fredag",
+      "themes": [
+        "Vækst, erhverv og beskæftigelse"
+      ],
+      "more": "I en tid, hvor den internationale orden er under pres, står de nordiske lande ved et afgørende vendepunkt. Hvordan kan vi som små, åbne demokratier styrke vores konkurrencekraft og modstandsdygtighed i en stadig mere foranderlig verden? \nDet undersøger Gertrud Højlund, når hun inviterer Nikolaj Sommer, Børsens ansvarshavende chefredaktør, Nana Bule, medlem af Novo Nordisk Fondens bestyrelse og Mark Kandborg, risikochef i Nordea til en samtale om fremtidens nordiske samarbejde og konkurrencekraft.\nMed afsæt i aktuelle tendenser og udfordringer vil de tre bl.a. diskutere, hvordan virksomheder, fonde og regeringer kan omsætte det nordiske potentiale til nye løsninger hurtigere, end det er muligt i den bredere europæiske sammenhæng? Hvad er de nordiske styrker, som kan accelerere vores konkurrencekraft? Og hvad kan Danmark gøre i en tid med geopolitisk uro og forandring, hvor nordisk sammenhold synes vigtigere end nogensinde?",
+      "speakers": [
+        {
+          "name": "Gertrud Højlund",
+          "role": "Journalist",
+          "org": "TV2ModeratorNikolaj Sommer, Ansvarshavende chefredaktør, BørsenModeratorMark Kandborg, Group Risk Officer, NordeaModeratorNana Bule, Forperson (NEKST), Operating advisor, Goldman SachsModerator"
+        }
+      ]
+    },
+    {
       "id": "32759",
       "title": "Hvorfor have seksualundervisning i 2026?",
       "summary": "Kom til debat om relevansen af seksualundervisning i et livs- og samfundsperspektiv.",
@@ -48144,7 +48228,7 @@
     },
     {
       "id": "33591",
-      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe og byg LEGO ud fra instruktioner over SINE-radioer.",
+      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe ud fra instruktioner over SINE-radioer.",
       "summary": "",
       "time": "15:00-17:00",
       "organizers": "Beredskabsstyrelsen",
@@ -48664,27 +48748,6 @@
           "name": "Pia Glud Munksgaard",
           "role": "Vært",
           "org": "DRModeratorTheodora Renard, Journalist, DRModerator"
-        }
-      ]
-    },
-    {
-      "id": "32639",
-      "title": "Når geopolitik ændrer alliancer: Hvordan styrker vi Norden?",
-      "summary": "En debat om styrkelse af Nordens alliancer, konkurrencekraft og rolle i en usikker ny verdensorden.",
-      "time": "15:15-16:15",
-      "organizers": "Nordea Danmark",
-      "venue": "F31 - Geelmuyden Kiese",
-      "url": "https://program.folkemoedet.dk/events/2026/32639/naar-geopolitik-aendrer-alliancer-hvordan-styrker-vi-norden",
-      "day": "Fredag",
-      "themes": [
-        "Vækst, erhverv og beskæftigelse"
-      ],
-      "more": "I en tid, hvor den internationale orden er under pres, står de nordiske lande ved et afgørende vendepunkt. Hvordan kan vi som små, åbne demokratier styrke vores konkurrencekraft og modstandsdygtighed i en stadig mere foranderlig verden? \nDet undersøger Gertrud Højlund, når hun inviterer Nikolaj Sommer, Børsens ansvarshavende chefredaktør, Nana Bule, medlem af Novo Nordisk Fondens bestyrelse og Mark Kandborg, risikochef i Nordea til en samtale om fremtidens nordiske samarbejde og konkurrencekraft.\nMed afsæt i aktuelle tendenser og udfordringer vil de tre bl.a. diskutere, hvordan virksomheder, fonde og regeringer kan omsætte det nordiske potentiale til nye løsninger hurtigere, end det er muligt i den bredere europæiske sammenhæng? Hvad er de nordiske styrker, som kan accelerere vores konkurrencekraft? Og hvad kan Danmark gøre i en tid med geopolitisk uro og forandring, hvor nordisk sammenhold synes vigtigere end nogensinde?",
-      "speakers": [
-        {
-          "name": "Gertrud Højlund",
-          "role": "Journalist",
-          "org": "TV2ModeratorNikolaj Sommer, Ansvarshavende chefredaktør, BørsenModeratorMark Kandborg, Group Risk Officer, NordeaModeratorNana Bule, Forperson (NEKST), Operating advisor, Goldman SachsModerator"
         }
       ]
     },
@@ -49273,6 +49336,27 @@
           "name": "Mille Herum Dideriksen",
           "role": "Sekretariatsleder",
           "org": "Danmarks Veteraner & VeteranstøttenModeratorBirger Kjer Hansen, Hovedbestyrelsesmedlem, Danmarks VeteranerModeratorCarsten Rasmussen, Landsformand for Danmarks Veteraner, Danmarks VeteranerModeratorAnn-Christina Salquist, Ressourceperson, Danmarks VeteranerModerator"
+        }
+      ]
+    },
+    {
+      "id": "35001",
+      "title": "Historisk diagnosebias og blind spots i data om adhd Har flere i virkeligheden fået adhd?",
+      "summary": "Vi kigger på data med et generationsperspektiv",
+      "time": "15:30-16:30",
+      "organizers": "ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/35001/historisk-diagnosebias-og-blind-spots-i-data-om-adhd",
+      "day": "Fredag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Med begreber som ”overdiagnosticering”, ”modediagnose” og ”pdo” er der opstået en ny stigmatisering af mennesker med adhd. Både diagnosen og mennesker med adhd er - helt fra den politiske top - blevet gjort til noget, som alle har ret til en mening om. Men har flere i virkeligheden fået adhd når vi tager historisk diagnosebias, udviklingen i forskningsbaseret viden, opdaterede diagnosekriterier og bedre opsporing i betragtning?",
+      "speakers": [
+        {
+          "name": "Stine Møller Jespersen",
+          "role": "Medstifter",
+          "org": "Imagine OtherwiseModeratorFie Vesterled, Ejer, Neurodivergent LedelseModerator"
         }
       ]
     },
@@ -53095,6 +53179,27 @@
           "name": "Pia Holm Steffensen",
           "role": "Underdirektør",
           "org": "Forsikring & PensionModeratorLars Midtiby, Direktør, Danmarks NaturfredningsforeningModeratorPeter Olsson, Administrerende direktør, AP EjendommeModerator"
+        }
+      ]
+    },
+    {
+      "id": "33650",
+      "title": "Grundvandet synes helligt – men hvad med jorden oven over?",
+      "summary": "Kom og bliv klogere på grundvandet og de rekreative potentialer",
+      "time": "17:00-17:45",
+      "organizers": "Friluftsrådet",
+      "venue": "D10 - Grøn Scene",
+      "url": "https://program.folkemoedet.dk/events/2026/33650/grundvandet-synes-helligt-men-hvad-med-jorden-oven-over",
+      "day": "Fredag",
+      "themes": [
+        "Klima, miljø, natur og energi"
+      ],
+      "more": "Der synes at være bred politisk enighed om, at grundvandet skal beskyttes med et sprøjteforbud. Men hvad skal der ske på de arealer, ofte bynære, som fremover ikke må sprøjtes? Skal de fortsat være produktion eller bør vi i stedet etablere natur til glæde for både drikkevand og befolkning? Hvilke potentialer er der, hvis vi sikrer rettidig planlægning? Og hvordan ser det samfundsøkonomiske regnestykke ud?",
+      "speakers": [
+        {
+          "name": "Anja Philip",
+          "role": "Moderator",
+          "org": "anjaphilip.dkModeratorHelga Grønnegaard, Partner og projektchef for strategisk udvikling, UrlandModeratorMichael Minter, Chef for fødevarerenheden, CONCITOModeratorCarl-Emil Larsen, Direktør, DANVAModerator"
         }
       ]
     },
@@ -59988,12 +60093,12 @@
     },
     {
       "id": "31600",
-      "title": "Hvad skete der med Forældrefremmedgøelse i Familieretten?",
+      "title": "Hvad skete der med Forældrefremmedgørelse i Familieretten?",
       "summary": "Efter indførelse af forælderfremmedgørelse i forældreansvarsloven er effekten udeblevet?",
       "time": "10:00-11:00",
       "organizers": "Manderådet",
       "venue": "A28 - Frihedens Station",
-      "url": "https://program.folkemoedet.dk/events/2026/31600/hvad-skete-der-med-foraeldrefremmedgoeelse-i-familieretten",
+      "url": "https://program.folkemoedet.dk/events/2026/31600/hvad-skete-der-med-foraeldrefremmedgoerelse-i-familieretten",
       "day": "Lørdag",
       "themes": [
         "Socialpolitik og integration"
@@ -60576,7 +60681,7 @@
     },
     {
       "id": "33593",
-      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe og byg LEGO ud fra instruktioner over SINE-radioer.",
+      "title": "Prøv kræfter med radiokommunikation Sænk slagskibe ud fra instruktioner over SINE-radioer.",
       "summary": "",
       "time": "10:00-12:00",
       "organizers": "Beredskabsstyrelsen",
@@ -65782,6 +65887,27 @@
       ]
     },
     {
+      "id": "34815",
+      "title": "Fra tabu til tungekys: Ældres seksualitet på dagsorden Ældres seksualitet er stadig tabu – men nærhed, lyst og kærlighed har ingen udløbsdato",
+      "summary": "",
+      "time": "12:00-12:45",
+      "organizers": "Dansk Sexologforening",
+      "venue": "A4 - Folkemødets Fællesscene",
+      "url": "https://program.folkemoedet.dk/events/2026/34815/fra-tabu-til-tungekys-aeldres-seksualitet-paa-dagsorden",
+      "day": "Lørdag",
+      "themes": [
+        "Sundhed, omsorg og forebyggelse"
+      ],
+      "more": "Seksualitet forsvinder ikke med alderen - den ændrer form, men forbliver en vigtig del af menneskers identitet og trivsel. Nærhed, berøring og lyst er grundlæggende menneskelige behov hele livet igennem. Og heldigvis er programmer som Hotel Romantik med til at gøre det tydeligt, at kærlighed og seksualitet ikke har en udløbsdato.\nAlligevel er ældres seksualitet stadig omgærdet af tabu og fordomme - også i pleje- og omsorgssektoren. Emnet fylder sjældent i uddannelse, faglige retningslinjer og den daglige praksis, og derfor bliver seksualitet ofte håndteret ud fra personlige grænser frem for faglighed. Konsekvensen kan være, at ældre menneskers behov for nærhed og intimitet overses eller begrænses.\nForskning og WHO peger på, at seksualitet er tæt forbundet med sundhed, værdighed og livskvalitet gennem hele livet. Hvis vi vil skabe en ældrepleje med plads til hele mennesket, kræver det større åbenhed, bedre kompetencer og et fælles sprog om seksualitet - også når håret bliver gråt.",
+      "speakers": [
+        {
+          "name": "Pernille Skanderup",
+          "role": "Sexolog",
+          "org": "Dansk SexologforeningModeratorLya Moestrup, Sexolog og Parterapeut, Dansk SexologforeningModeratorHotel Romantik, Tv-program, DRModeratorNanna Hastrup, Analytisk Rådgiver, Sex & SamfundModeratorMia Olivarius, Menig medlem, SexekspressenModerator"
+        }
+      ]
+    },
+    {
       "id": "34907",
       "title": "Ukrainske børn mistrives i Danmark, kan vi være det bekendt?",
       "summary": "Danmark støtter Ukraine på slagmarken, men lader vi deres børn stå alene i skolegården?",
@@ -66307,13 +66433,34 @@
       ]
     },
     {
+      "id": "34284",
+      "title": "Sov under himlen – og tag natten tilbage Få tips og tricks - og måske en enkelt røverhistorie",
+      "summary": "",
+      "time": "12:00-13:00",
+      "organizers": "Friluftsrådet",
+      "venue": "D10 - Grøn Scene",
+      "url": "https://program.folkemoedet.dk/events/2026/34284/sov-under-himlen-og-tag-natten-tilbage",
+      "day": "Lørdag",
+      "themes": [
+        "Klima, miljø, natur og energi"
+      ],
+      "more": "Vi har vænnet os til vægge, lofter og komfort. Men mennesket er skabt til mere end det. På Folkemødet inviterer Kristian Jersing til en rå og inspirerende session om kunsten at sove ude. Med afsæt i tusindvis af nætter i naturen og mere end 10 år, hvor halvdelen af året er blevet levet under åben himmel, handler det ikke om ekstrem overlevelse — men om at genfinde noget, vi har glemt.\nDu lærer:\n•\thvor lidt udstyr det egentlig kræver\n•\thvordan du kommer trygt i gang\n•\thvorfor det ofte er beslutningen — ikke naturen — der holder os tilbage og\n•\thvordan en enkelt nat ude kan ændre dit forhold til ro, frihed og eventyr\n\nDet bliver historier fra vildmarken, konkrete råd og et opgør med idéen om, at naturen kun er for de særligt friluftsvante.\nVi skal ikke bare sove ude.\nVi skal genfinde forbindelsen til natten.",
+      "speakers": [
+        {
+          "name": "Rasmus Schou Christensen",
+          "role": "Politisk konsulent",
+          "org": "FriluftsrådetModeratorKristian Jersing, Deltager i Alene i Vildmarken 2025, DRModerator"
+        }
+      ]
+    },
+    {
       "id": "34568",
-      "title": "Bedre opmærksomhed giver stort løft En løftende hånd til udsatte børn er en bragende succes, der giver genlyd langt ud over Bornholm.",
+      "title": "Sæt den unge i centrum - En bornholmsk succeshistorie En løftende hånd til udsatte børn er en bragende succes, der giver genlyd langt ud over Bornholm.",
       "summary": "",
       "time": "12:00-13:00",
       "organizers": "AskovFonden, TV2 Bornholm",
       "venue": "B5 - TV2 Bornholms debatscene",
-      "url": "https://program.folkemoedet.dk/events/2026/34568/bedre-opmaerksomhed-giver-stort-loeft",
+      "url": "https://program.folkemoedet.dk/events/2026/34568/saet-den-unge-i-centrum-en-bornholmsk-succeshistorie",
       "day": "Lørdag",
       "themes": [
         "Børn, unge og undervisning"
@@ -68386,6 +68533,27 @@
       ]
     },
     {
+      "id": "35545",
+      "title": "Når behandlingen mangler ved sjældne sygdomme Kun 5 procent af verdens 7.000-10.000 sjældne sygdomme kan behandles – hvordan ændrer vi det?",
+      "summary": "",
+      "time": "13:00-13:45",
+      "organizers": "Pharmadanmark",
+      "venue": "G2 - PFA",
+      "url": "https://program.folkemoedet.dk/events/2026/35545/naar-behandlingen-mangler-ved-sjaeldne-sygdomme",
+      "day": "Lørdag",
+      "themes": [
+        "Uddannelse og forskning"
+      ],
+      "more": "På europæisk plan lever mellem 27 og 36 millioner mennesker med en sjælden sygdom. Alligevel er fremskridtene fortsat meget begrænsede. I Danmark lever mellem 30.000 og 50.000 personer med en sjælden diagnose, og for langt de fleste er behandlingsmulighederne få eller helt fraværende. Mange føler sig derfor overladt til sig selv.\n\nSelvom sjældne sygdomme er forskellige, deler de ofte det samme problem: Begrænsede eller ikke-eksisterende muligheder for diagnostik, vejledning og behandling. Det skyldes blandt andet mangel på forskningsmidler, udfordringer med at rekruttere patienter til kliniske forsøg og et for lille marked til at drive udviklingen af nye behandlinger.\n\nSå hvad skal der til for at skabe reel forandring? Kan vi løse udfordringerne i Danmark alene, eller kræver det handling på EU-plan? Og hvordan skaber vi stærkere rammer for forskning, innovation og life science?",
+      "speakers": [
+        {
+          "name": "Mette Boysen",
+          "role": "Nyhedsredaktør",
+          "org": "LIFModeratorSebastian Honoré, Co-founder, Cure Lowe FoundationModeratorMorten Frank Pedersen, Head of Public Policy, Denmark & Nordic, TakedaModeratorLiselotte Wesley Andersen, Formand, Sjældne DiagnoserModeratorStine Bosse, Medlem af Europa-Parlamentet, ModeraterneModeratorStine Hasling Mogensen, Formand for fagforeningen, PharmadanmarkModerator"
+        }
+      ]
+    },
+    {
       "id": "31391",
       "title": "En samtale om dansk filantropis værdi i Grønland.",
       "summary": "Hvordan kan dansk filantropi bidrage med værdi til, i og med Grønland?",
@@ -69579,6 +69747,27 @@
           "name": "Klaus Larsen",
           "role": "Programdirektør",
           "org": "Digital Sundhed Danmark, SundhedsdatastyrelsenModerator"
+        }
+      ]
+    },
+    {
+      "id": "34699",
+      "title": "Dating med diagnose En ærlig samtale om dating, diagnoser og alt det indimellem",
+      "summary": "",
+      "time": "13:30-14:30",
+      "organizers": "Sex & Samfund, ADHD-Foreningen",
+      "venue": "J18 - ADHD-Foreningen",
+      "url": "https://program.folkemoedet.dk/events/2026/34699/dating-med-diagnose",
+      "day": "Lørdag",
+      "themes": [
+        "Andet"
+      ],
+      "more": "Kom med til en ærlig og ufiltreret samtale om dating, diagnoser og alt det indimellem. Hvordan fortæller man om sin diagnose på en date? Hvornår siger man det højt? Og hvad gør man med overtænkning, impulsivitet, ghosting eller følelsen af at være “for meget”? Til Folkemødet inviterer vi til Dating med Diagnose i ADHD-foreningens telt - et event om moderne dating, relationer og de tabuer, usikkerheder og erfaringer mange går rundt med. Eventet starter med et kort og personligt oplæg om dating med diagnose og går derefter over i mere interaktive formater med samtalekort, brevkasse, refleksioner fra publikum og måske endda lidt speeddating. Her er der plads til både grin, genkendelse og de lidt svære spørgsmål. Uanset om du selv har en diagnose, dater én der har, eller bare er nysgerrig på relationer i et mere nuanceret perspektiv, så er du velkommen.",
+      "speakers": [
+        {
+          "name": "Maria Aarup",
+          "role": "Projektmedarbejder",
+          "org": "Sex og SamfundModeratorFie Vesterled, Ejer, Neurodivergent LedelseModerator"
         }
       ]
     },
@@ -72460,6 +72649,27 @@
       ]
     },
     {
+      "id": "33749",
+      "title": "Hvor vilde er de unge - med natur og friluftsliv?",
+      "summary": "Er ungdomspolitikerne mere progressive end ”de voksne” når det kommer til natur- og friluftspolitik?",
+      "time": "15:00-15:45",
+      "organizers": "Friluftsrådet",
+      "venue": "D10 - Grøn Scene",
+      "url": "https://program.folkemoedet.dk/events/2026/33749/hvor-vilde-er-de-unge-med-natur-og-friluftsliv",
+      "day": "Lørdag",
+      "themes": [
+        "Klima, miljø, natur og energi"
+      ],
+      "more": "Hvad mener ungdomspolitikerne om natur og friluftsliv? Er de mere progressive end ”de voksne”? Vi tester moderpartiernes natur- og friluftslivsstandpunkter og hører, hvad ungdomspartierne synes om dem?\n\nDebatten kommer bl.a. omkring en dansk allemandsret, garanti for lejrskoler i naturen, restriktioner i det åbne land (planloven), naturnationalparker, Grøn Trepart og natur- og biodiversitetslov.\n\nMåske er der med de kommende generationer håb forude for naturen og friluftslivet…",
+      "speakers": [
+        {
+          "name": "Anja Philip",
+          "role": "Moderator",
+          "org": "anjaphilip.dkModeratorVictoria Helene Olsen, Forretningsudvalgsmedlem, Konservativ UngdomModeratorSebastian Schwartz, Hovedbestyrelsessekretær, DSUModeratorEzekiel Rohde, Landsformand, Liberal Alliances UngdomModerator"
+        }
+      ]
+    },
+    {
       "id": "33758",
       "title": "Seksuelle overgreb online: Hvad ser vi ikke – og hvad gør vi Digtale seksuelle overgreb: tegn, tvivl og handling – på 45 minutter",
       "summary": "",
@@ -73367,7 +73577,7 @@
       "title": "Senskader efter fysisk og psykisk vold Vold af enhver art kan give skader resten af livet.",
       "summary": "Hvordan forholder man sig til det?",
       "time": "15:30-16:00",
-      "organizers": "TV2 Bornholm",
+      "organizers": "TV2 Bornholm, Balder Film",
       "venue": "B5 - TV2 Bornholms debatscene",
       "url": "https://program.folkemoedet.dk/events/2026/34584/senskader-efter-fysisk-og-psykisk-vold",
       "day": "Lørdag",
