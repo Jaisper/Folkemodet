@@ -1218,6 +1218,20 @@ const programState = {
 
 // === FAVORITES (saved to localStorage) ===
 const FAV_STORAGE_KEY = "folkemodet2026_favorites_v1";
+let favoritesStorageWorks = true;
+
+// Test if localStorage actually works on this device/browser/mode.
+// iOS Safari in private mode allows reads but throws on writes — so test write.
+(function testStorage() {
+  try {
+    const testKey = "__folkemodet_test__";
+    localStorage.setItem(testKey, "1");
+    localStorage.removeItem(testKey);
+  } catch (e) {
+    favoritesStorageWorks = false;
+    console.warn("localStorage not available — favorites won't persist:", e);
+  }
+})();
 
 function extractEventId(url) {
   // URL like: https://program.folkemoedet.dk/events/2026/32550/morgenyoga-med-grundtvig
@@ -1228,25 +1242,59 @@ function extractEventId(url) {
 }
 
 function loadFavorites() {
+  if (!favoritesStorageWorks) return;
   try {
     const raw = localStorage.getItem(FAV_STORAGE_KEY);
     if (raw) {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr)) {
         programState.favorites = new Set(arr.map(String));
+        console.log(`Loaded ${programState.favorites.size} favorites from localStorage`);
       }
     }
   } catch (e) {
     console.warn("Could not load favorites:", e);
+    favoritesStorageWorks = false;
   }
 }
 
 function saveFavorites() {
-  try {
-    localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify([...programState.favorites]));
-  } catch (e) {
-    console.warn("Could not save favorites:", e);
+  if (!favoritesStorageWorks) {
+    console.warn("Favorites not saved — localStorage unavailable");
+    showStorageWarning();
+    return;
   }
+  try {
+    const arr = [...programState.favorites];
+    const json = JSON.stringify(arr);
+    localStorage.setItem(FAV_STORAGE_KEY, json);
+    // Verify it actually got written (some private modes silently fail)
+    const readback = localStorage.getItem(FAV_STORAGE_KEY);
+    if (readback !== json) {
+      favoritesStorageWorks = false;
+      console.warn("Favorites write verification failed");
+      showStorageWarning();
+    } else {
+      console.log(`Saved ${arr.length} favorites to localStorage`);
+    }
+  } catch (e) {
+    favoritesStorageWorks = false;
+    console.warn("Could not save favorites:", e);
+    showStorageWarning();
+  }
+}
+
+let storageWarningShown = false;
+function showStorageWarning() {
+  if (storageWarningShown) return;
+  storageWarningShown = true;
+  // Show a one-time non-blocking notification
+  const notice = document.createElement("div");
+  notice.style.cssText = "position:fixed;bottom:16px;left:16px;right:16px;max-width:480px;margin:0 auto;padding:12px 16px;background:#FBF1D9;color:#7A5410;border:1px solid #E0C470;border-radius:6px;font-size:13px;line-height:1.4;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+  notice.innerHTML = `⚠️ <b>Favoritter kan ikke gemmes.</b> Din browser blokerer for lokal lagring. Prøv at slå "blokér tredjepart-cookies" fra, eller åbn siden uden privat/inkognito-tilstand. <button style="float:right;background:transparent;border:none;cursor:pointer;color:inherit;font-size:18px;line-height:1;padding:0 0 0 8px;">×</button>`;
+  notice.querySelector("button").addEventListener("click", () => notice.remove());
+  document.body.appendChild(notice);
+  setTimeout(() => notice.remove(), 15000);
 }
 
 function toggleFavorite(eventId, btnEl) {
