@@ -1,7 +1,7 @@
 {
-  "scraped_at": "2026-05-30T08:17:43.315Z",
+  "scraped_at": "2026-05-31T08:35:19.616Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3639,
+  "event_count": 3641,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
@@ -13,7 +13,7 @@
     },
     {
       "name": "Børn, unge og undervisning",
-      "count": 281
+      "count": 282
     },
     {
       "name": "Andet",
@@ -53,7 +53,7 @@
     },
     {
       "name": "Ligestilling, køn og minoriteter",
-      "count": 114
+      "count": 115
     },
     {
       "name": "Socialpolitik og integration",
@@ -3228,7 +3228,7 @@
     },
     {
       "id": "34302",
-      "title": "SPS, fra vugge til krukke Samtale om at skabe et SPS-system med øje for individet, uden løbende at skulle forsvare sit behov.",
+      "title": "SPS, fra vugge til krukke Hvordan skaber vi et SPS-system der tager højde for individet?",
       "summary": "",
       "time": "10:30-11:10",
       "organizers": "Organisation for Professionshøjskolestuderende",
@@ -4383,7 +4383,7 @@
     },
     {
       "id": "32980",
-      "title": "Kvindehad og bekymrende mandeidealer i unge mænds feed Hvordan ser kvindehad og snævre maskulinitetsidealer ud i danske unge mænds feeds?",
+      "title": "Kvindehad og bekymrende mandeidealer i unge mænds feed Unge mænd og manosfæren: Hvordan ser det ud i Danmark, og hvad kan vi gøre?",
       "summary": "",
       "time": "11:00-11:45",
       "organizers": "Center for Digital Pædagogik",
@@ -18179,12 +18179,12 @@
     },
     {
       "id": "30831",
-      "title": "Regningsvest eller Bæredygtig Kystsikring?",
+      "title": "Redningsvest eller bæredygtig kystsikring?",
       "summary": "Hvordan holder vi vandmasserne ude, uden at tømme vores råstofgrave?",
       "time": "15:15-16:00",
       "organizers": "Region Hovedstaden, The Capital Region of Denmark (Region Hovedstaden)",
       "venue": "A26 - ByggePladsen - Villaen",
-      "url": "https://program.folkemoedet.dk/events/2026/30831/regningsvest-eller-baeredygtig-kystsikring",
+      "url": "https://program.folkemoedet.dk/events/2026/30831/redningsvest-eller-baeredygtig-kystsikring",
       "day": "Torsdag",
       "themes": [
         "Klima, miljø, natur og energi"
@@ -27317,7 +27317,7 @@
       "title": "\"18 år og pludselig voksen?",
       "summary": "Hvad så? At gøre opmærksom på, hvilke udfordringer de unge står med i overgangen",
       "time": "09:00-09:45",
-      "organizers": "ADHD foreningen",
+      "organizers": "ADHD-Foreningen",
       "venue": "A4 - Folkemødets Fællesscene",
       "url": "https://program.folkemoedet.dk/events/2026/33288/18-aar-og-pludselig-voksen-hvad-saa",
       "day": "Fredag",
@@ -42410,6 +42410,27 @@
       ]
     },
     {
+      "id": "35582",
+      "title": "Red Barnet: Unges afhængighed af Techgiganterne SoMe er del af ungdomslivet.",
+      "summary": "Hvordan håndterer vi spændingen mellem deltagelse og afhængighed?",
+      "time": "13:45-14:20",
+      "organizers": "Red Barnet",
+      "venue": "A21 - Ungdommens Plads",
+      "url": "https://program.folkemoedet.dk/events/2026/35582/red-barnet-unges-afhaengighed-af-techgiganterne",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "Børn og unges digitale liv rummer en grundlæggende dobbelthed. På den ene side er ønsket om at være fri for fastholdelse, afhængighed og ubehagelige oplevelser online. På den anden side er der et stærkt ønske om at være en del af de fællesskaber der udspiller sig i det digitale; hvor venskaber leves, holdninger formes og ungdomskultur udfolder sig.\nDebatten tager udgangspunkt i unges egne dilemmaer og hverdagsfortællinger om skærmbrug, sociale relationer og oplevelsen af, at digitale platformen både er afgørende for at høre til i fællesskabet og samtidig kan skabe afhængighed. \nDebatten sætter fokus på, hvordan man som ung navigerer og hvordan vi som samfund forstår og håndterer denne spænding.\n\n\n\nDeltagere\nDavid Madsen, Psykolog og stifter af Dansk Behandling for Computerspil og Onlineafhængighed\nDaniel M. Blaabjerg-Zederkoff, Forsker i børn og unges digitale liv, Aarhus Universitet\nStefan Vaskov, Danske Skoleelever",
+      "speakers": [
+        {
+          "name": "Malte Siglev",
+          "role": "Digital Trivselskoordinator",
+          "org": "Red BarnetModerator"
+        }
+      ]
+    },
+    {
       "id": "31144",
       "title": "Råd til det fede studieliv - investering m/ Sofie Østergaard Hvordan får du råd til det fede studieliv med SU, investering og smarte valg – også som begynder?",
       "summary": "",
@@ -45556,6 +45577,27 @@
           "name": "Gustav Hagild",
           "role": "DR vært",
           "org": "DRModeratorAne Cortzen, TV-vært og selvstændig, Danmarks RadioModerator"
+        }
+      ]
+    },
+    {
+      "id": "33315",
+      "title": "Tal Dansk Med Mig!",
+      "summary": "med The Nearly Danish Dame Hvad koster det samfundet, når tilflyttere aldrig bliver flydende på dansk?",
+      "time": "14:30-15:15",
+      "organizers": "Nearly Danish Dame",
+      "venue": "A23 - ByggePladsen - Pavillonen",
+      "url": "https://program.folkemoedet.dk/events/2026/33315/tal-dansk-med-mig-med-the-nearly-danish-dame",
+      "day": "Fredag",
+      "themes": [
+        "Socialpolitik og integration"
+      ],
+      "more": "Som tusindvis af andre kom jeg til Danmark og hørte: “Should we just speak English?”\n\nJeg har to stole. Én til mig. Én til dig. Og jeg vil rigtig gerne øve mit dansk!\n\nKom og “Tal Dansk Med Mig” med mig, Brooke, “The Nearly Danish Dame” – en udlænding i Danmark, der stadig prøver at knække koden til danskhed og sproglig integration.\n\nGennem min Instagramprofil deler jeg sjove ord, særlige danske udtryk og samtaler med danskere, tilflyttere og hjemvendte danskere.\n\nVi starter med fællessang, grin og en lille quiz om sjove og overraskende ting, jeg har lært om dansk sprog og kultur. Derefter åbner vi samtalen:\n\nHvad betyder sproget for følelsen af at høre til?\nKan man integrere sig uden dansk?\nHvorfor skifter danskere så hurtigt til engelsk?\nOg hvad koster det – menneskeligt og samfundsmæssigt – når mennesker aldrig bliver trygge på dansk?\n\nAlle er velkomne. Vi taler dansk, engelsk og Danglish - det vigtigste er at tale sammen!\n\nGå derfra med nye perspektiver – og mod på samtalen.",
+      "speakers": [
+        {
+          "name": "Brooke Fossey",
+          "role": "Creator",
+          "org": "Community Builder & Cross-Cultural Storyteller, The Nearly Danish DameModerator"
         }
       ]
     },
@@ -52192,6 +52234,27 @@
           "name": "Anders Harck",
           "role": "Formand",
           "org": "L&F's sektor for økonomi & virksomhedsledelseModeratorSusie Jessen, Folketingsmedlem, politisk ordfører, DanmarksdemokraterneModeratorCharlotte Bagge Hansen, Erhvervsordfører, ModeraterneModeratorSteffen Damsgaard, Formand, Landdistrikternes FællesrådModerator"
+        }
+      ]
+    },
+    {
+      "id": "35583",
+      "title": "Kvinder i ’mandefag’ – Kønnede normer og deres betydning Vi undersøger kønnede normer og deres betydning for ligestilling og mangfoldighed på arbejdspladsen",
+      "summary": "",
+      "time": "16:30-17:15",
+      "organizers": "Kvindelige Veteraner, Hverdagsmod",
+      "venue": "A23 - ByggePladsen - Pavillonen",
+      "url": "https://program.folkemoedet.dk/events/2026/35583/kvinder-i-mandefag-koennede-normer-og-deres-betydning",
+      "day": "Fredag",
+      "themes": [
+        "Ligestilling, køn og minoriteter"
+      ],
+      "more": "Mangfoldighed er vigtig for opgaveløsningen, det er langt det meste forskning enige om, ligestilling er nødvendigt for bedre repræsentation og for at afspejle det samfund man eksisterer i, men ligestilling og mangfoldigheden halter mange steder i samfundet. \n\nDe fleste af os ser stadig en ’rigtig’ soldat, som en mand, og nok også som en særlig type mand. Det samme gør sig i nogen grad gældende, når vi taler om politibetjente og håndværkere.  \n\nDet får stor betydning for kvinderne i de brancher, fordi de ofte har et billede af en maskulin norm, de skal leve op til. Kønnede normer, og deres indvirkning på kvinders – særligt unge kvinders – selvbillede og ligestilling på arbejdsmarkedet vil vi sætte fokus på i denne debat. \n\nI denne debat taler vi om ligestilling og mangfoldighed for fire forskellige professioner; soldater, politibetjente og håndværkere. Vi ønsker at forstå hvilke mekanismer og udfordringer, der går igen på tværs af brancher, og lærer af hinandens erfaringer.",
+      "speakers": [
+        {
+          "name": "Malue Henriksen",
+          "role": "Forkvinde",
+          "org": "Foreningen Kvindelige VeteranerModeratorLouise Aborg Weje, Selvstændig, HverdagsmodModeratorAmalie Niewald, Politibetjent, PolitietModeratorEmil Eir Frederiksen, Medlem af Værnepligtsrådet, VærnepligtsrådetModerator"
         }
       ]
     },
@@ -59337,7 +59400,7 @@
     },
     {
       "id": "33350",
-      "title": "Når de unge får ordet: fra erfaringer til fagligt engagement Hvordan bruger vi unges stemmer ansvarligt og meningsfuldt, uden at se bort fra af faglighed?",
+      "title": "Når de unge får ordet: fra erfaringer til fagligt engagement Hvordan bruger vi unges stemmer ansvarligt og meningsfuldt, uden at se bort fra faglighed?",
       "summary": "",
       "time": "10:00-10:45",
       "organizers": "SSP-Samrådet, Nordic Pioneers",
@@ -75186,27 +75249,6 @@
           "name": "Amy Jean Hamilton",
           "role": "Leder af Vores Regenerative Akademi",
           "org": "Vores Regenerative AkademiModeratorRasmus Prehn, Administrerende Direktør, Økologisk LandsforeningModeratorThomas Roland, Chef for Vareansvarlighed og kvalitet, COOPModeratorLeif Friis Jørgensen, Direktør, De økologiske mejerierModeratorChristian Prip, Bestyrelsesmedlem i Dansk Økojord, Hovedbestyrelsesmedlem Danmarks Naturfredningsforening, Dansk Økojord og Danmarks NaturfredningsforeningModeratorKim Christiansen, Bestyrelsesmedlem, Landsforeningen Mindre AffaldModerator"
-        }
-      ]
-    },
-    {
-      "id": "33315",
-      "title": "Tal Dansk Med Mig!",
-      "summary": "med The Nearly Danish Dame Hvad koster det samfundet, når tilflyttere aldrig bliver flydende på dansk?",
-      "time": "17:00-17:45",
-      "organizers": "Nearly Danish Dame",
-      "venue": "A24 - ByggePladsen - Huset",
-      "url": "https://program.folkemoedet.dk/events/2026/33315/tal-dansk-med-mig-med-the-nearly-danish-dame",
-      "day": "Lørdag",
-      "themes": [
-        "Socialpolitik og integration"
-      ],
-      "more": "Som tusindvis af andre kom jeg til Danmark og hørte: “Should we just speak English?”\n\nJeg har to stole. Én til mig. Én til dig. Og jeg vil rigtig gerne øve mit dansk!\n\nKom og “Tal Dansk Med Mig” med mig, Brooke, “The Nearly Danish Dame” – en udlænding i Danmark, der stadig prøver at knække koden til danskhed og sproglig integration.\n\nGennem min Instagramprofil deler jeg sjove ord, særlige danske udtryk og samtaler med danskere, tilflyttere og hjemvendte danskere.\n\nVi starter med fællessang, grin og en lille quiz om sjove og overraskende ting, jeg har lært om dansk sprog og kultur. Derefter åbner vi samtalen:\n\nHvad betyder sproget for følelsen af at høre til?\nKan man integrere sig uden dansk?\nHvorfor skifter danskere så hurtigt til engelsk?\nOg hvad koster det – menneskeligt og samfundsmæssigt – når mennesker aldrig bliver trygge på dansk?\n\nAlle er velkomne. Vi taler dansk, engelsk og Danglish - det vigtigste er at tale sammen!\n\nGå derfra med nye perspektiver – og mod på samtalen.",
-      "speakers": [
-        {
-          "name": "Brooke Fossey",
-          "role": "Creator",
-          "org": "Community Builder & Cross-Cultural Storyteller, The Nearly Danish DameModerator"
         }
       ]
     },
