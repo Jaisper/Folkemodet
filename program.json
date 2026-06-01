@@ -1,7 +1,7 @@
 {
-  "scraped_at": "2026-05-31T08:35:19.616Z",
+  "scraped_at": "2026-06-01T11:10:07.000Z",
   "source": "https://program.folkemoedet.dk/2026",
-  "event_count": 3641,
+  "event_count": 3647,
   "themes": [
     {
       "name": "Sundhed, omsorg og forebyggelse",
@@ -13,7 +13,7 @@
     },
     {
       "name": "Børn, unge og undervisning",
-      "count": 282
+      "count": 283
     },
     {
       "name": "Andet",
@@ -37,19 +37,19 @@
     },
     {
       "name": "EU og udenrigspolitik",
-      "count": 175
+      "count": 176
     },
     {
       "name": "Retspolitik og forvaltning",
       "count": 166
     },
     {
-      "name": "Uddannelse og forskning",
-      "count": 150
+      "name": "Fødevarer og madkultur",
+      "count": 151
     },
     {
-      "name": "Fødevarer og madkultur",
-      "count": 148
+      "name": "Uddannelse og forskning",
+      "count": 150
     },
     {
       "name": "Ligestilling, køn og minoriteter",
@@ -65,7 +65,7 @@
     },
     {
       "name": "Transport og byggeri",
-      "count": 84
+      "count": 85
     },
     {
       "name": "Økonomi, finans og skat",
@@ -17947,6 +17947,27 @@
       ]
     },
     {
+      "id": "35349",
+      "title": "\"Jeg bliver aldrig veganer(!)\" Har du nogensinde sagt ordene \"Jeg bliver aldrig veganer(!)\"?",
+      "summary": "Nu skal vi høre hvorfor og tale om det",
+      "time": "15:00-16:00",
+      "organizers": "Dyrenes Alliance",
+      "venue": "A27 - Dyrenes Alliance, Plantegrillen",
+      "url": "https://program.folkemoedet.dk/events/2026/35349/jeg-bliver-aldrig-veganer",
+      "day": "Torsdag",
+      "themes": [
+        "Fødevarer og madkultur"
+      ],
+      "more": "Har du nogensinde sagt ordene \"Jeg bliver aldrig veganer!\"? Kom med til en spændende og sjov debat-session, hvor vi hører danskere om hvorfor de har sagt netop den sætning. Vi tester om ordene stadig står ved magt, eller om der er mulighed for, at de kan lave om på det. Det bliver en spændende dag, hvor alle parter lærer og debatterer. Vi inviterer politiske aktører og folk ind. Der er mulighed for, at deltagere fra publikum også kan spørges og indgå i debatten.",
+      "speakers": [
+        {
+          "name": "Martin Jensen",
+          "role": "Repræsentant",
+          "org": "Dyrenes AllianceModerator"
+        }
+      ]
+    },
+    {
       "id": "33498",
       "title": "Hvordan kan ungdomsuddannelserne styrke et fælles Norden?",
       "summary": "Nordiske unge viser vejen for et fælles nordisk svar på fremtidens globale udfordringer.",
@@ -22374,6 +22395,27 @@
           "name": "Rasmus Staghøj",
           "role": "Vært",
           "org": "TV 2 DanmarkModeratorJanni Pedersen, Vært, TV 2 DanmarkModerator"
+        }
+      ]
+    },
+    {
+      "id": "32439",
+      "title": "Global sundhedsbazar Mød inspirerende organisationer, der gør en forskel globalt til en pulserende global sundhedsbazar",
+      "summary": "",
+      "time": "16:45-18:45",
+      "organizers": "Dansk Industri, Gates Foundation, Alliancen for Global Sundhed",
+      "venue": "C30 - Verdensmålenes Telt",
+      "url": "https://program.folkemoedet.dk/events/2026/32439/global-sundhedsbazar",
+      "day": "Torsdag",
+      "themes": [
+        "EU og udenrigspolitik"
+      ],
+      "more": "Eventet er en del af Folkemødets Forum for Global Sundhed, som er arrangeret af Alliancen for Global Sundhed og Dansk Industri med støtte fra Gates Fonden.\n\nTag med på en rejse med fokus på global sundhed og udvikling, når Verdensmålenes Plads forvandles til en pulserende bazar fyldt med inspirerende organisationer. Du får chancen for at gå på opdagelse mellem stande og aktiviteter fra civilsamfunds- og FN-organisationer, der hver dag gør en forskel ude i verden.\n\nMød blandt andre repræsentanter fra Sex & Samfund, Læger uden Grænser, UNICEF Danmark, UNHCR, Røde Kors, WaterAid og Real Relief. Du kommer bl.a. til at høre fra dem, der arbejder i marken og hver dag står sammen med de mennesker, hvis liv og sundhed afhænger af det globale og internationale samarbejde.\n\nTag en kollega, en ven eller et familiemedlem under armen, alle er velkomne til en festlig og inspirerende eftermiddag i godt selskab på Verdensmålenes Plads.",
+      "speakers": [
+        {
+          "name": "Mette Lybye",
+          "role": "Sekretariatsleder",
+          "org": "Alliancen for Global SundhedModerator"
         }
       ]
     },
@@ -33552,7 +33594,7 @@
     {
       "id": "34025",
       "title": "Mød fondene Bliv klogere på danske fonde.",
-      "summary": "Mød 10 fonde og lær mere om, hvad de støtter og hvordan de arbejder.",
+      "summary": "Mød ni fonde og lær mere om, hvad de støtter og hvordan de arbejder.",
       "time": "11:00-11:45",
       "organizers": "Realdania, Bikubenfonden, TrygFonden, Fondenes Videnscenter, Egmont Fonden, LEGO Fonden, Tuborgfondet, Nordea-fonden, Lokale og Anlægsfonden, Augustinus Fonden, Nordjyllandsfonden",
       "venue": "A4 - Folkemødets Fællesscene",
@@ -34659,6 +34701,27 @@
           "name": "Henning Bo Madsen",
           "role": "Bestyrelsesmedlem",
           "org": "Miljøorganisaitonen VedvarendeEnergi og INFORSE-EuropeModeratorFrederik Zacho, Politisk aktiv, Miljøorganisationen VedvarendeEnergiModeratorGunnar Boye Olesen, Politisk Koordinator, Miljøorganisationen VedvarendeEnergiModerator"
+        }
+      ]
+    },
+    {
+      "id": "35352",
+      "title": "\"Jeg bliver aldrig veganer!\" Har du nogensinde sagt ordene \"Jeg bliver aldrig veganer(!)\"?",
+      "summary": "Nu skal vi høre hvorfor og tale om det",
+      "time": "11:00-12:00",
+      "organizers": "Dyrenes Alliance",
+      "venue": "A27 - Dyrenes Alliance, Plantegrillen",
+      "url": "https://program.folkemoedet.dk/events/2026/35352/jeg-bliver-aldrig-veganer",
+      "day": "Fredag",
+      "themes": [
+        "Fødevarer og madkultur"
+      ],
+      "more": "Har du nogensinde sagt ordene \"Jeg bliver aldrig veganer!\"? Kom med til en spændende og sjov debat-session, hvor vi hører danskere om hvorfor de har sagt netop den sætning. Vi tester om ordene stadig ved magt, eller om der er mulighed for, at de kan lave om på det. Det bliver en spændende dag, hvor alle parter lærer og debatterer. Vi inviterer politiske aktører og folk ind. Der er mulighed for, at deltagere fra publikum også kan spørges og indgå i debatten.",
+      "speakers": [
+        {
+          "name": "Martin Jensen",
+          "role": "Repræsentant",
+          "org": "Dyrenes AllianceModerator"
         }
       ]
     },
@@ -38210,6 +38273,27 @@
       ]
     },
     {
+      "id": "31693",
+      "title": "Guld og grønne byggerier Byggeriet kan bidrage til betalbare boliger, grøn omstilling og vækst – vil Danmark investere?",
+      "summary": "",
+      "time": "12:15-13:00",
+      "organizers": "ForskByg",
+      "venue": "A26 - ByggePladsen - Villaen",
+      "url": "https://program.folkemoedet.dk/events/2026/31693/guld-og-groenne-byggerier",
+      "day": "Fredag",
+      "themes": [
+        "Transport og byggeri"
+      ],
+      "more": "Grøn energi, life science og fødevarer er blevet danske styrkepositioner. Kan byggeriet blive den næste? Byggeriet er centralt for at løse store samfundsudfordringer og kan bidrage til betalbare boliger, robuste byer, grøn omstilling og styrket konkurrencekraft. Byggeriet står samlet på tværs af virksomheder, forskning og uddannelse – er politikerne klar til at satse? Debatten modereres af journalist Lars Trier Mogensen, kendt fra podcasten Guld og Grønne Skove.",
+      "speakers": [
+        {
+          "name": "Lars Trier Mogensen",
+          "role": "Journalist",
+          "org": "Moderator.dkModeratorCecilie Brøkner, Direktør, InnovationsfondenModeratorSøren Sand Kirk, Direktør, BAT kartelletModeratorLars Storr-Hansen, Adm. direktør, Danske ArkitektvirksomhederModeratorMette Glavind, Direktør, Byggeri og Anlæg, Teknologisk InstitutModerator"
+        }
+      ]
+    },
+    {
       "id": "31755",
       "title": "Ledernes Hule Hvordan tænker topledere, når de svære valg skal træffes?",
       "summary": "Kom ind til debat med toplederne.",
@@ -39088,6 +39172,27 @@
           "name": "Repræsentant fra Tubanu",
           "role": "Repræsentant",
           "org": "TubanuModeratorUng fra TUBA, Ung, TUBAModeratorRepræsentant fra TUBA, Repræsentant, TUBAModerator"
+        }
+      ]
+    },
+    {
+      "id": "34304",
+      "title": "Børns risiko eller potentiale - hvad ser vi først?",
+      "summary": "Ord skaber virkelighed -og med fokus på risici før muligheder, skaber vi måske børns liv i udsathed?",
+      "time": "12:45-13:30",
+      "organizers": "Børnesagens Fællesråd",
+      "venue": "A8 - Det Kriminalpræventive Råd",
+      "url": "https://program.folkemoedet.dk/events/2026/34304/boerns-risiko-eller-potentiale-hvad-ser-vi-foerst",
+      "day": "Fredag",
+      "themes": [
+        "Børn, unge og undervisning"
+      ],
+      "more": "Tidlig forebyggelse er afgørende for at nå til gode børne- og ungeliv for alle børn. Det kræver tidlig opsporing af og indsatser til dem, som har brug for støtte. Men måske har vi i iveren for at nå dertil stirret os blinde på risici frem for ressourcer? \n\nNår vi taler om sårbarheder, udsathed og i sidste ende ex misbrug og kriminalitet, risikerer vi at definere børn og unge ud fra alt det, der kan gå galt – frem for det, der kan lykkedes.\n\nOg ord skaber virkeligheder. Også for dem. For hvad sker der, når de igen og igen mødes af fortællinger om høj risiko, stor sårbarhed og negative prognoser? Kan vi ende med – i bedste mening – at spænde ben for deres egne og systemernes tro på mulighederne?\n\nDe spørgsmål stiller vi nogle af dem, som arbejder med emnet til dagligt - i alt fra foreninger indsatser, over forskeren til socialdirektøren. For i Børnesagens Fællesråd arbejder vi for at styrke den tidlige forebyggelse, og det kræver et kritisk blik på vores tilgange og forståelser.",
+      "speakers": [
+        {
+          "name": "Pernille Gry Petersen",
+          "role": "Generalsekretær",
+          "org": "Børnesagens FællesrådModeratorGrethe Højrup Nielsen, Socialdirektør, TønderModeratorKatrine Iversen, Projektchef, VIVEModeratorMaria Kavita Nielsen, Direktør, Mind Your Own BusinessModeratorKaren Haumann, Direktør, Lær for LivetModerator"
         }
       ]
     },
@@ -52848,12 +52953,12 @@
     },
     {
       "id": "30945",
-      "title": "Hvad virker dér, hvor behovet er størst?",
+      "title": "Lægedækning: Hvad virker dér, hvor behovet er størst?",
       "summary": "Hvad virker for patienter med størst behov – og hvad kan sundhedsvæsenet lære?",
       "time": "17:00-17:45",
       "organizers": "PLO",
       "venue": "K1 - Danmarks Apotekerforening",
-      "url": "https://program.folkemoedet.dk/events/2026/30945/hvad-virker-der-hvor-behovet-er-stoerst",
+      "url": "https://program.folkemoedet.dk/events/2026/30945/laegedaekning-hvad-virker-der-hvor-behovet-er-stoerst",
       "day": "Fredag",
       "themes": [
         "Sundhed, omsorg og forebyggelse"
@@ -69164,8 +69269,8 @@
     },
     {
       "id": "35346",
-      "title": "\"Jeg bliver aldrig veganer\" Har du før sagt \"jeg bliver aldrig veganer!\" Hvis ikke, så er det din tur i dag.",
-      "summary": "Giv og dine grunde",
+      "title": "\"Jeg bliver aldrig veganer(!)\" Har du nogensinde sagt ordene \"Jeg bliver aldrig veganer(!)\"?",
+      "summary": "Nu skal vi høre hvorfor og tale om det",
       "time": "13:00-14:00",
       "organizers": "Dyrenes Alliance",
       "venue": "A27 - Dyrenes Alliance, Plantegrillen",
@@ -73317,6 +73422,27 @@
           "name": "Torben Schønwaldt",
           "role": "Formand",
           "org": "TandlægeforeningenModeratorAnni Rønmann, Tandlæge, hovedbestyrelsesmedlem, TandlægeforeningenModeratorSusanne Egtoft Nielsen, Næstformand, TandlægeforeningenModerator"
+        }
+      ]
+    },
+    {
+      "id": "35344",
+      "title": "Færre dyr – stadig landmand?",
+      "summary": "Hvad gør man, når man vil have færre dyr – men stadig være landmand?",
+      "time": "15:00-16:00",
+      "organizers": "Dyrenes Alliance",
+      "venue": "A27 - Dyrenes Alliance, Plantegrillen",
+      "url": "https://program.folkemoedet.dk/events/2026/35344/faerre-dyr-stadig-landmand",
+      "day": "Lørdag",
+      "themes": [
+        "Fødevarer og madkultur"
+      ],
+      "more": "En åben og pragmatisk samtale om protein-diversificering og overgangen fra animalsk til planteproduktion. Fokus er ikke på slutmål eller skyld, men på overgangene: Hvad gør man som landmand, hvis man gerne vil reducere antallet af dyr, men sidder i et system med økonomi, gæld og identitet?\n\nVi samler et panel med en landmand i transition, organisationen Farm Animal Adaptiaption, LandboUngdom og en repræsentant fra Dyrenes Alliance. Tonen er inkluderende, humoristisk, faglig og folkelig – med plads til uenighed, men uden pegede fingre.",
+      "speakers": [
+        {
+          "name": "Lars Corvinius Olesen",
+          "role": "Presseansvarlig og repræsentant",
+          "org": "Dyrenes AllianceModerator"
         }
       ]
     },
