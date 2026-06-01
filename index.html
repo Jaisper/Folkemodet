@@ -68,6 +68,49 @@
     height: 4px;
     background: linear-gradient(90deg, var(--red) 0%, var(--red) 50%, var(--orange) 50%, var(--orange) 100%);
   }
+  .lang-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+  }
+  .lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    transition: all .15s ease;
+    line-height: 1;
+  }
+  .lang-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .lang-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+  .lang-btn svg {
+    display: block;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .lang-label { display: inline; }
+  @media (max-width: 480px) {
+    .lang-label { display: none; }
+    .lang-btn { padding: 4px 6px; }
+  }
   .eyebrow {
     font-family: 'Source Sans 3', sans-serif;
     font-size: 11px;
@@ -743,32 +786,52 @@
 <div class="wrap">
 
   <header>
-    <div class="eyebrow">Allinge · Bornholm · 11.–13. juni 2026</div>
+    <div class="lang-toggle" role="group" aria-label="Sprog / Language">
+      <button class="lang-btn active" data-lang="da" type="button" aria-pressed="true" title="Dansk">
+        <svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true">
+          <rect width="28" height="20" fill="#C8102E"/>
+          <rect x="8" width="2" height="20" fill="#FFFFFF"/>
+          <rect y="9" width="28" height="2" fill="#FFFFFF"/>
+        </svg>
+        <span class="lang-label">DA</span>
+      </button>
+      <button class="lang-btn" data-lang="en" type="button" aria-pressed="false" title="English">
+        <svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true">
+          <rect width="28" height="20" fill="#012169"/>
+          <path d="M0,0 L28,20 M28,0 L0,20" stroke="#FFFFFF" stroke-width="3"/>
+          <path d="M0,0 L28,20 M28,0 L0,20" stroke="#C8102E" stroke-width="1.5" clip-path="inset(0 0 50% 50%)"/>
+          <path d="M14,0 V20 M0,10 H28" stroke="#FFFFFF" stroke-width="4"/>
+          <path d="M14,0 V20 M0,10 H28" stroke="#C8102E" stroke-width="2"/>
+        </svg>
+        <span class="lang-label">EN</span>
+      </button>
+    </div>
+    <div class="eyebrow" data-i18n="eyebrow">Allinge · Bornholm · 11.–13. juni 2026</div>
     <h1>Folkemødet <span class="ampersand">2026</span></h1>
-    <div class="subtitle"><b>Folkemødets program.</b> Søg, filtrer, find vej til arrangementerne.</div>
+    <div class="subtitle" data-i18n-html="subtitle"><b>Folkemødets program.</b> Søg, filtrer, find vej til arrangementerne.</div>
   </header>
 
   <section class="panel" id="programPanel">
-    <div class="panel-title">Officielt program</div>
-    <div id="programStatus" class="panel-help">Loader…</div>
+    <div class="panel-title" data-i18n="panel.title">Officielt program</div>
+    <div id="programStatus" class="panel-help" data-i18n="status.loading">Loader…</div>
     <div id="programControls" style="display:none">
       <div class="program-theme-chips" id="programThemeChips"></div>
 
       <div class="program-filters">
-        <select id="filterDay"><option value="">Alle dage</option></select>
-        <select id="filterVenue"><option value="">Alle venues</option></select>
-        <input type="search" id="filterSearch" placeholder="Søg titel, beskrivelse, arrangør, deltagere…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
-        <button class="filter-clear" id="filterClear" type="button">Nulstil</button>
+        <select id="filterDay"><option value="" data-i18n="filter.allDays">Alle dage</option></select>
+        <select id="filterVenue"><option value="" data-i18n="filter.allVenues">Alle venues</option></select>
+        <input type="search" id="filterSearch" data-i18n-placeholder="filter.searchPlaceholder" data-i18n-aria="filter.searchAria" placeholder="Søg titel, beskrivelse, arrangør, deltagere…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="program-search-query" aria-label="Søg i programmet" inputmode="search" enterkeyhint="search">
+        <button class="filter-clear" id="filterClear" type="button" data-i18n="filter.clear">Nulstil</button>
       </div>
       <div class="program-meta" id="programMeta"></div>
       <div id="programResults" class="program-results"></div>
-      <button class="load-more" id="loadMoreBtn" type="button" style="display:none">Vis flere</button>
+      <button class="load-more" id="loadMoreBtn" type="button" style="display:none" data-i18n="loadMore">Vis flere</button>
     </div>
   </section>
 
   <footer>
-    <div>Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
-    <div style="margin-top:6px">Bygget af <a href="https://github.com/Jaisper/Folkemodet" target="_blank">@Jaisper</a> — ingen affiliering med Folkemødet.</div>
+    <div data-i18n-html="footer.line1">Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
+    <div style="margin-top:6px" data-i18n-html="footer.line2">Bygget af <a href="https://github.com/Jaisper/Folkemodet" target="_blank">@Jaisper</a> — ingen affiliering med Folkemødet.</div>
   </footer>
 
 </div>
@@ -781,19 +844,19 @@
         <div class="modal-title" id="mapTitle">Lokation</div>
         <div class="modal-sub" id="mapSub"></div>
       </div>
-      <button class="modal-close" id="mapClose" aria-label="Luk">×</button>
+      <button class="modal-close" id="mapClose" data-i18n-aria="map.close" aria-label="Luk">×</button>
     </div>
     <div class="map-info" id="mapInfo"></div>
     <div id="leafletMap"></div>
     <div class="map-actions" id="mapActions">
-      <a class="map-nav-btn" id="navGoogle" href="#" target="_blank" rel="noopener">
+      <a class="map-nav-btn" id="navGoogle" href="#" target="_blank" rel="noopener" data-i18n="map.navigate">
         🚶 Naviger med Google Maps
       </a>
-      <a class="map-nav-btn map-nav-secondary" id="openMapPdf" href="#" target="_blank" rel="noopener">
+      <a class="map-nav-btn map-nav-secondary" id="openMapPdf" href="#" target="_blank" rel="noopener" data-i18n="map.pdf">
         📄 Officielt PDF-kort
       </a>
     </div>
-    <a class="map-overview-link" id="openMapOverview" href="#" target="_blank" rel="noopener">Se alle officielle teknikkort →</a>
+    <a class="map-overview-link" id="openMapOverview" href="#" target="_blank" rel="noopener" data-i18n="map.allMaps">Se alle officielle teknikkort →</a>
     <div class="modal-footer" id="mapFooter">Allinge, Bornholm</div>
   </div>
 </div>
@@ -1042,16 +1105,16 @@ function openVenueMap(venue, eventTitle) {
     precision = "fallback";
   }
 
-  mapTitleEl.textContent = code || "Lokation";
+  mapTitleEl.textContent = code || (currentLang === "en" ? "Location" : "Lokation");
   mapSubEl.textContent = eventTitle || "";
 
   const infoEl = document.getElementById("mapInfo");
   if (precision === "exact" && zoneName) {
-    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> i ${esc(zoneName)} · præcis position fra officielt teknikkort</div>`;
+    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> ${t("map.preciseIn", { zone: esc(zoneName) })}</div>`;
   } else if (zoneName) {
-    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> ligger i ${esc(zoneName)} · viser zone</div>`;
+    infoEl.innerHTML = `<div class="map-find-hint"><b>${esc(code)}</b> ${t("map.zoneOnly", { zone: esc(zoneName) })}</div>`;
   } else {
-    infoEl.innerHTML = `<div class="map-find-hint">Viser Allinge centrum</div>`;
+    infoEl.innerHTML = `<div class="map-find-hint">${esc(t("map.fallback"))}</div>`;
   }
 
   // Navigation buttons
@@ -1066,7 +1129,7 @@ function openVenueMap(venue, eventTitle) {
   }
   document.getElementById("openMapOverview").href = MAP_OVERVIEW_URL;
 
-  mapFooterEl.innerHTML = `Stade-position udtrukket fra Folkemødets officielle teknikkort. Officielt PDF-kort: <a href="${MAP_OVERVIEW_URL}" target="_blank" rel="noopener">folkemoedet.dk</a>`;
+  mapFooterEl.innerHTML = t("map.footer", { url: MAP_OVERVIEW_URL });
   mapFooterEl.className = "modal-footer";
 
   mapModalEl.classList.add("show");
@@ -1199,6 +1262,177 @@ function formatSpeakersHTML(speakers) {
 // ============================================================
 // OFFICIAL PROGRAM
 // ============================================================
+// ============================================================
+// I18N — language toggle (Danish/English)
+// External links remain Danish (Folkemødet's own pages, PDFs, etc.)
+// ============================================================
+const I18N = {
+  da: {
+    "eyebrow": "Allinge · Bornholm · 11.–13. juni 2026",
+    "subtitle": "<b>Folkemødets program.</b> Søg, filtrer, find vej til arrangementerne.",
+    "panel.title": "Officielt program",
+    "status.loading": "Loader…",
+    "status.empty": "Programmet er tomt. Kør GitHub Action <b>Scrape Folkemødet Program</b> for at populere.",
+    "status.error": "Kunne ikke loade programmet.",
+    "filter.allDays": "Alle dage",
+    "filter.allVenues": "Alle venues",
+    "filter.searchPlaceholder": "Søg titel, beskrivelse, arrangør, deltagere…",
+    "filter.searchAria": "Søg i programmet",
+    "filter.clear": "Nulstil",
+    "loadMore": "Vis flere",
+    "footer.line1": "Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href=\"https://program.folkemoedet.dk\" target=\"_blank\">program.folkemoedet.dk</a>.",
+    "footer.line2": "Bygget af <a href=\"https://github.com/Jaisper/Folkemodet\" target=\"_blank\">@Jaisper</a> — ingen affiliering med Folkemødet.",
+    "map.close": "Luk",
+    "map.navigate": "🚶 Naviger med Google Maps",
+    "map.pdf": "📄 Officielt PDF-kort",
+    "map.allMaps": "Se alle officielle teknikkort →",
+    "map.preciseIn": "i {zone} · præcis position fra officielt teknikkort",
+    "map.zoneOnly": "ligger i {zone} · viser zone",
+    "map.fallback": "Viser Allinge centrum",
+    "map.footer": "Stade-position udtrukket fra Folkemødets officielle teknikkort. Officielt PDF-kort: <a href=\"{url}\" target=\"_blank\" rel=\"noopener\">folkemoedet.dk</a>",
+    "chip.allThemes": "Alle temaer",
+    "chip.favorites": "Egne favoritter",
+    "chip.favoritesTitle": "Vis kun arrangementer du har hjertet",
+    "fav.add": "Tilføj til favoritter",
+    "fav.remove": "Fjern fra favoritter",
+    "fav.aria": "Favorit",
+    "card.showDetails": "Vis detaljer",
+    "card.officialPage": "🔗 Officiel side",
+    "card.showOnMap": "📍 Vis på kort",
+    "meta.count": "Viser <b>{visible}</b> af <b>{total}</b> events · Programmet senest opdateret: {date} · Kilde: <a href=\"https://program.folkemoedet.dk/2026\" target=\"_blank\" style=\"color:var(--orange)\">program.folkemoedet.dk</a>",
+    "day.Torsdag": "Torsdag",
+    "day.Fredag": "Fredag",
+    "day.Lørdag": "Lørdag",
+    "day.Søndag": "Søndag",
+    "day.Andet": "Andet",
+    "date.11. juni": "11. juni",
+    "date.12. juni": "12. juni",
+    "date.13. juni": "13. juni",
+    "date.14. juni": "14. juni",
+    "speakers.label": "Talere:"
+  },
+  en: {
+    "eyebrow": "Allinge · Bornholm · 11–13 June 2026",
+    "subtitle": "<b>Folkemødet programme.</b> Search, filter, find your way to the events.",
+    "panel.title": "Official programme",
+    "status.loading": "Loading…",
+    "status.empty": "Programme is empty. Run GitHub Action <b>Scrape Folkemødet Program</b> to populate.",
+    "status.error": "Could not load programme.",
+    "filter.allDays": "All days",
+    "filter.allVenues": "All venues",
+    "filter.searchPlaceholder": "Search title, description, organiser, speakers…",
+    "filter.searchAria": "Search the programme",
+    "filter.clear": "Reset",
+    "loadMore": "Show more",
+    "footer.line1": "Folkemødet 2026 · 11–13 June in Allinge on Bornholm · programme updates daily from <a href=\"https://program.folkemoedet.dk\" target=\"_blank\">program.folkemoedet.dk</a>.",
+    "footer.line2": "Built by <a href=\"https://github.com/Jaisper/Folkemodet\" target=\"_blank\">@Jaisper</a> — not affiliated with Folkemødet.",
+    "map.close": "Close",
+    "map.navigate": "🚶 Navigate with Google Maps",
+    "map.pdf": "📄 Official PDF map",
+    "map.allMaps": "See all official technical maps →",
+    "map.preciseIn": "in {zone} · exact position from official map",
+    "map.zoneOnly": "located in {zone} · showing zone",
+    "map.fallback": "Showing Allinge centre",
+    "map.footer": "Venue position extracted from Folkemødet's official technical maps. Official PDF map: <a href=\"{url}\" target=\"_blank\" rel=\"noopener\">folkemoedet.dk</a>",
+    "chip.allThemes": "All themes",
+    "chip.favorites": "My favourites",
+    "chip.favoritesTitle": "Show only events you have hearted",
+    "fav.add": "Add to favourites",
+    "fav.remove": "Remove from favourites",
+    "fav.aria": "Favourite",
+    "card.showDetails": "Show details",
+    "card.officialPage": "🔗 Official page",
+    "card.showOnMap": "📍 Show on map",
+    "meta.count": "Showing <b>{visible}</b> of <b>{total}</b> events · Programme last updated: {date} · Source: <a href=\"https://program.folkemoedet.dk/2026\" target=\"_blank\" style=\"color:var(--orange)\">program.folkemoedet.dk</a>",
+    "day.Torsdag": "Thursday",
+    "day.Fredag": "Friday",
+    "day.Lørdag": "Saturday",
+    "day.Søndag": "Sunday",
+    "day.Andet": "Other",
+    "date.11. juni": "11 June",
+    "date.12. juni": "12 June",
+    "date.13. juni": "13 June",
+    "date.14. juni": "14 June",
+    "speakers.label": "Speakers:"
+  }
+};
+
+const LANG_STORAGE_KEY = "folkemodet2026_lang_v1";
+let currentLang = "da";
+
+function t(key, params) {
+  let s = (I18N[currentLang] && I18N[currentLang][key]) || (I18N.da[key]) || key;
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      s = s.replace(new RegExp("\\{" + k + "\\}", "g"), v);
+    }
+  }
+  return s;
+}
+
+function setLanguage(lang) {
+  if (!I18N[lang]) lang = "da";
+  currentLang = lang;
+  document.documentElement.lang = lang;
+
+  // Update language toggle buttons
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    const active = btn.getAttribute("data-lang") === lang;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  // Update all static elements with data-i18n attributes
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    const key = el.getAttribute("data-i18n-html");
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.setAttribute("placeholder", t(key));
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+    const key = el.getAttribute("data-i18n-aria");
+    el.setAttribute("aria-label", t(key));
+  });
+
+  // Persist choice
+  try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (e) {}
+
+  // Re-render dynamic content (event list, chips, meta)
+  if (typeof renderEvents === "function" && programState && programState.events.length > 0) {
+    rebuildThemeChips();
+    applyFilters();
+  }
+}
+
+function rebuildThemeChips() {
+  // Re-render theme chips and filters with translated labels
+  if (programState.events.length === 0) return;
+  populateFilters();
+}
+
+function loadLanguagePref() {
+  try {
+    const saved = localStorage.getItem(LANG_STORAGE_KEY);
+    if (saved && I18N[saved]) currentLang = saved;
+  } catch (e) {}
+}
+
+// Wire up language toggle buttons on DOMContentLoaded
+function initLanguageToggle() {
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const lang = btn.getAttribute("data-lang");
+      setLanguage(lang);
+    });
+  });
+}
+
 const programState = {
   events: [],
   filtered: [],
@@ -1298,17 +1532,15 @@ function toggleFavorite(eventId, btnEl) {
     programState.favorites.delete(eventId);
     btnEl.classList.remove("favorited");
     btnEl.setAttribute("aria-pressed", "false");
-    btnEl.setAttribute("title", "Tilføj til favoritter");
+    btnEl.setAttribute("title", t("fav.add"));
   } else {
     programState.favorites.add(eventId);
     btnEl.classList.add("favorited");
     btnEl.setAttribute("aria-pressed", "true");
-    btnEl.setAttribute("title", "Fjern fra favoritter");
+    btnEl.setAttribute("title", t("fav.remove"));
   }
   saveFavorites();
-  // Update the favorites chip badge count
   updateFavoritesChip();
-  // If we're viewing favorites and an item is removed, re-filter
   if (programState.showFavoritesOnly) {
     applyFilters();
   }
@@ -1468,6 +1700,11 @@ async function loadOfficialProgram() {
   const statusEl = document.getElementById("programStatus");
   const controlsEl = document.getElementById("programControls");
 
+  // Load saved language preference and apply it (translates all static UI)
+  loadLanguagePref();
+  setLanguage(currentLang);
+  initLanguageToggle();
+
   // Load saved favorites first
   loadFavorites();
 
@@ -1480,7 +1717,7 @@ async function loadOfficialProgram() {
     programState.officialThemes = data.themes || [];
 
     if (programState.events.length === 0) {
-      statusEl.innerHTML = "Programmet er tomt. Kør GitHub Action <b>Scrape Folkemødet Program</b> for at populere.";
+      statusEl.innerHTML = t("status.empty");
       return;
     }
 
@@ -1509,9 +1746,7 @@ async function loadOfficialProgram() {
       renderProgram();
     });
   } catch (err) {
-    statusEl.innerHTML = `<b>Programmet er ikke scraped endnu.</b><br>
-      Gå til repo'ets <b>Actions</b>-fane på GitHub og kør <b>Scrape Folkemødet Program</b> manuelt første gang.
-      Derefter kører den automatisk hver morgen og opdaterer <code>program.json</code>.<br>
+    statusEl.innerHTML = `<b>${esc(t("status.error"))}</b><br>
       <span style="color:var(--ink-muted);font-size:12px">(${esc(err.message)})</span>`;
   }
 }
@@ -1522,11 +1757,19 @@ function populateFilters() {
   days.sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
 
   const daySel = document.getElementById("filterDay");
+  // Preserve currently selected day across re-render
+  const prevDayValue = daySel.value;
+  // Clear existing options except the "all days" placeholder (which has data-i18n)
+  while (daySel.options.length > 1) daySel.remove(1);
   days.forEach(d => {
     const opt = document.createElement("option");
-    opt.value = d; opt.textContent = d;
+    opt.value = d;
+    const key = "day." + d;
+    const translated = t(key);
+    opt.textContent = translated !== key ? translated : d;
     daySel.appendChild(opt);
   });
+  daySel.value = prevDayValue;
 
   // Render theme chips — use OFFICIAL themes from program.json if available,
   // falling back to our 16 hardcoded categories
@@ -1535,8 +1778,11 @@ function populateFilters() {
 
   // "Alle" chip
   const allChip = document.createElement("div");
-  allChip.className = "pg-chip all-chip active";
-  allChip.textContent = "Alle temaer";
+  allChip.className = "pg-chip all-chip";
+  if (!programState.showFavoritesOnly && programState.selectedThemes.size === 0) {
+    allChip.classList.add("active");
+  }
+  allChip.textContent = t("chip.allThemes");
   allChip.addEventListener("click", () => {
     programState.selectedThemes.clear();
     programState.showFavoritesOnly = false;
@@ -1550,8 +1796,9 @@ function populateFilters() {
   const favChip = document.createElement("div");
   favChip.className = "pg-chip favorites-chip";
   favChip.id = "favoritesChip";
-  favChip.innerHTML = `<span class="favorites-heart">♥</span> Egne favoritter <span class="pg-chip-count">${programState.favorites.size}</span>`;
-  favChip.title = "Vis kun arrangementer du har hjertet";
+  favChip.innerHTML = `<span class="favorites-heart">♥</span> ${esc(t("chip.favorites"))} <span class="pg-chip-count">${programState.favorites.size}</span>`;
+  favChip.title = t("chip.favoritesTitle");
+  if (programState.showFavoritesOnly) favChip.classList.add("active");
   favChip.addEventListener("click", () => {
     if (programState.showFavoritesOnly) {
       // Toggling off: go back to "all themes"
@@ -1587,6 +1834,7 @@ function populateFilters() {
   themeList.forEach(theme => {
     const chip = document.createElement("div");
     chip.className = "pg-chip";
+    if (programState.selectedThemes.has(theme)) chip.classList.add("active");
     const displayName = capitalize(theme);
     // Show count badge for official themes
     if (useOfficial) {
@@ -1694,7 +1942,7 @@ function renderProgram() {
   const scrapedStr = programState.scrapedAt
     ? new Date(programState.scrapedAt).toLocaleString("da-DK", { dateStyle: "short", timeStyle: "short" })
     : "ukendt";
-  meta.innerHTML = `Viser <b>${visible}</b> af <b>${total}</b> events · Programmet senest opdateret: ${esc(scrapedStr)} · Kilde: <a href="https://program.folkemoedet.dk/2026" target="_blank" style="color:var(--orange)">program.folkemoedet.dk</a>`;
+  meta.innerHTML = t("meta.count", { visible, total, date: esc(scrapedStr) });
 
   if (total === 0) {
     out.innerHTML = `<div class="program-empty">Ingen events matcher dine filtre.</div>`;
@@ -1737,7 +1985,7 @@ function renderProgram() {
         <div class="pg-body">
           <div class="pg-time-row">
             <div class="pg-time">${esc(e.time || "?")}</div>
-            ${eventId ? `<button class="pg-fav-btn ${isFav ? 'favorited' : ''}" data-fav-id="${esc(eventId)}" type="button" aria-pressed="${isFav ? 'true' : 'false'}" title="${isFav ? 'Fjern fra favoritter' : 'Tilføj til favoritter'}" aria-label="Favorit">
+            ${eventId ? `<button class="pg-fav-btn ${isFav ? 'favorited' : ''}" data-fav-id="${esc(eventId)}" type="button" aria-pressed="${isFav ? 'true' : 'false'}" title="${esc(isFav ? t('fav.remove') : t('fav.add'))}" aria-label="${esc(t('fav.aria'))}">
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                 <path d="M12 21s-7-4.5-9.5-9.1C.9 8.5 2.5 5 6 5c2 0 3.5 1.2 4 2.5C10.5 6.2 12 5 14 5c3.5 0 5.1 3.5 3.5 6.9C19 16.5 12 21 12 21z"/>
               </svg>
@@ -1753,21 +2001,21 @@ function renderProgram() {
           </div>
           ${hasExtra ? `
           <details class="pg-details">
-            <summary class="pg-details-toggle">Vis detaljer</summary>
+            <summary class="pg-details-toggle">${esc(t("card.showDetails"))}</summary>
             <div class="pg-details-body">
               ${fullDesc && fullDesc !== subtitle ? `<div class="pg-fulldesc">${esc(fullDesc)}</div>` : ""}
-              ${speakerHTML ? `<div class="pg-speakers"><span class="pg-label">Deltagere</span>${speakerHTML}</div>` : ""}
+              ${speakerHTML ? `<div class="pg-speakers"><span class="pg-label">${esc(t("speakers.label"))}</span>${speakerHTML}</div>` : ""}
             </div>
           </details>` : ""}
           <div class="pg-actions">
-            ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">🔗 Officiel side</a>` : ""}
-            <button class="pg-action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">📍 Vis på kort</button>
+            ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(t("card.officialPage"))}</a>` : ""}
+            <button class="pg-action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">${esc(t("card.showOnMap"))}</button>
           </div>
         </div>
       </div>
     `;
     }).join("");
-    return `<div class="pg-day-header">${esc(d)} ${esc(date)} · ${events.length}</div>${rows}`;
+    return `<div class="pg-day-header">${esc(t("day." + d) !== "day." + d ? t("day." + d) : d)} ${esc(t("date." + date) !== "date." + date ? t("date." + date) : date)} · ${events.length}</div>${rows}`;
   }).join("");
 
   out.innerHTML = html;
