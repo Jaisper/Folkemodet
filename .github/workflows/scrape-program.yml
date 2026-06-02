@@ -6,7 +6,7 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
-      max_events:100
+      max_events:
         description: 'Max events to scrape (leave blank for ALL ~3600). Use 100 for fast test.'
         required: false
         default: ''
