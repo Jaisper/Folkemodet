@@ -712,8 +712,14 @@ FIELD COMPLETENESS:
 - Every non-empty input field MUST have a corresponding non-empty translated _en field
 - If input "more" is empty, return "more_en": ""
 
-Output ONLY a JSON array (no markdown fences, no preamble):
-[{"id": "...", "title_en": "...", "summary_en": "...", "more_en": "...", "lang": "da" or "en"}, ...]
+OUTPUT FORMAT (CRITICAL):
+- You MUST return a JSON ARRAY (square brackets), NEVER a bare object
+- Even if there is only one entry, wrap it in an array: [{...}]
+- No markdown fences, no preamble, no trailing text
+- The response_format requires a JSON object at the top level, so wrap the array in {"results": [...]}
+
+Output exactly this shape:
+{"results": [{"id": "...", "title_en": "...", "summary_en": "...", "more_en": "...", "lang": "da" or "en"}, ...]}
 
 Input:
 ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary, more: i.more || '' })), null, 0)}`;
@@ -800,11 +806,32 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary,
   } catch (e) {
     throw new Error(`Could not parse JSON response: ${content.slice(0, 200)}`);
   }
-  // If wrapped, find the array inside
+  // Normalise shape — the model sometimes returns:
+  //   1. An array of items [{...}, {...}]  ← what we want
+  //   2. An object wrapping the array {results: [...], ...}
+  //   3. A single item object {id: ..., title_en: ..., ...}  ← collapses with 1-item batches
+  //   4. An object keyed by id {"id1": {...}, "id2": {...}}
   if (!Array.isArray(parsed)) {
-    const arrKey = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
-    if (arrKey) parsed = parsed[arrKey];
-    else throw new Error(`Unexpected JSON shape: ${Object.keys(parsed).join(',')}`);
+    // Case 3: single event object with the expected fields
+    if (parsed && (parsed.id !== undefined || parsed.title_en !== undefined)) {
+      parsed = [parsed];
+    } else {
+      // Case 2: find the first array property
+      const arrKey = parsed && Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+      if (arrKey) {
+        parsed = parsed[arrKey];
+      } else if (parsed && typeof parsed === 'object') {
+        // Case 4: id-keyed map of events
+        const values = Object.values(parsed);
+        if (values.length > 0 && values[0] && typeof values[0] === 'object' && values[0].title_en !== undefined) {
+          parsed = values;
+        } else {
+          throw new Error(`Unexpected JSON shape: ${Object.keys(parsed).slice(0, 5).join(',')}`);
+        }
+      } else {
+        throw new Error(`Unexpected JSON shape: ${typeof parsed}`);
+      }
+    }
   }
   return { results: parsed, tokensUsed };
 }
