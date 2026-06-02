@@ -585,18 +585,32 @@ async function scrape() {
     events: allEvents
   };
 
+  // === SAFETY-NET SAVE ===
+  // Always save the scraped (untranslated) program first. This way, even if
+  // the translation step crashes or times out, the user still has fresh data.
+  fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
+  console.log(`\n✓ Wrote ${allEvents.length} events to ${OUT_FILE} (pre-translation)`);
+
   // === TRANSLATION STEP ===
   // If GROQ_API_KEY is set, translate Danish titles + summaries to English.
   // Uses an incremental cache (program.json from previous run) so we only
   // translate NEW events on each daily scrape.
   if (process.env.GROQ_API_KEY) {
-    await translateEvents(out);
+    try {
+      await translateEvents(out);
+      // Re-save with translations
+      fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
+      console.log(`\n✓ Re-wrote ${allEvents.length} events with translations`);
+    } catch (e) {
+      console.error('\n[translate] FATAL — translation step crashed but program.json is already saved');
+      console.error('[translate] Error:', e.message);
+      console.error('[translate] Stack:', e.stack);
+      // Do not throw — let the scraper exit 0 so the workflow commits the untranslated data
+    }
   } else {
-    console.log('\n[translate] No GROQ_API_KEY set — skipping translation step.');
+    console.log('\n[translate] No GROQ_API_KEY env var set — skipping translation step.');
+    console.log('[translate] To enable translations, set GROQ_API_KEY as a GitHub Actions secret.');
   }
-
-  fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
-  console.log(`\n✓ Wrote ${allEvents.length} events to ${OUT_FILE}`);
 }
 
 // ============================================================
@@ -715,12 +729,15 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
 
 async function translateEvents(out) {
   console.log('\n=== Translating events to English ===');
+  console.log(`[translate] API key present: ${process.env.GROQ_API_KEY ? 'YES (length ' + process.env.GROQ_API_KEY.length + ')' : 'NO'}`);
+
   const cache = await loadCache();
 
   // Identify events that NEED translation:
   // - Have an ID
   // - Not in cache (or cache lacks title_en)
   const toTranslate = [];
+  let alreadyEnglish = 0;
   for (const e of out.events) {
     const id = extractEventIdFromUrl(e.url);
     if (!id) continue;
@@ -733,50 +750,73 @@ async function translateEvents(out) {
       const cached = cache.get(id);
       e.title_en = cached.title_en;
       e.summary_en = cached.summary_en;
-      // Cache may have its own language detection — trust the current one
       continue;
     }
 
     if (lang === 'en') {
-      // Already English — no translation needed, copy as-is
       e.title_en = e.title;
       e.summary_en = e.summary;
+      alreadyEnglish++;
       continue;
     }
 
-    // Needs translation
     toTranslate.push({
       id,
       title: e.title || '',
       summary: e.summary || '',
-      _ref: e // reference back to the event so we can patch in results
+      _ref: e
     });
   }
 
-  console.log(`[translate] ${toTranslate.length} events need translation (${cache.size} cached, ${out.events.length - toTranslate.length - cache.size} are English)`);
+  console.log(`[translate] Status: ${cache.size} cached, ${alreadyEnglish} already English, ${toTranslate.length} need translation`);
 
   if (toTranslate.length === 0) {
     console.log('[translate] Nothing to translate. Done.');
     return;
   }
 
+  // === SMOKE TEST ===
+  // Send a single 3-event batch first to detect API issues early.
+  console.log('[translate] Running smoke test with 3 events…');
+  const smokeBatch = toTranslate.slice(0, 3);
+  try {
+    const results = await translateBatch(smokeBatch);
+    console.log(`[translate] Smoke test OK — got ${results.length} results back`);
+    if (results.length > 0) {
+      console.log(`[translate] Example result:`, JSON.stringify(results[0]).slice(0, 200));
+    }
+    // Apply smoke batch results
+    const byId = new Map(results.map(r => [String(r.id), r]));
+    for (const item of smokeBatch) {
+      const r = byId.get(String(item.id));
+      if (r) {
+        item._ref.title_en = r.title_en || item.title;
+        item._ref.summary_en = r.summary_en || item.summary;
+      }
+    }
+  } catch (e) {
+    console.error('[translate] SMOKE TEST FAILED — aborting translation:', e.message);
+    console.error('[translate] Stack:', e.stack);
+    throw e;
+  }
+
+  const remaining = toTranslate.slice(3);
+  if (remaining.length === 0) {
+    console.log('[translate] Done (smoke test covered all events).');
+    return;
+  }
+
   // Batch + parallelize
   const batches = [];
-  for (let i = 0; i < toTranslate.length; i += BATCH_SIZE) {
-    batches.push(toTranslate.slice(i, i + BATCH_SIZE));
+  for (let i = 0; i < remaining.length; i += BATCH_SIZE) {
+    batches.push(remaining.slice(i, i + BATCH_SIZE));
   }
   console.log(`[translate] Processing ${batches.length} batches of up to ${BATCH_SIZE} events (${MAX_CONCURRENT_BATCHES} parallel)…`);
 
-  let done = 0;
+  let done = 3; // smoke test
   let failed = 0;
   let queueIdx = 0;
-
-  // Periodic partial save during translation
-  const partialSave = () => {
-    try {
-      fs.writeFileSync(OUT_FILE + '.partial', JSON.stringify(out, null, 2));
-    } catch (e) {}
-  };
+  const startTime = Date.now();
 
   async function worker() {
     while (queueIdx < batches.length) {
@@ -784,7 +824,6 @@ async function translateEvents(out) {
       const batch = batches[myIdx];
       try {
         const results = await translateBatch(batch);
-        // Map results back to events
         const byId = new Map(results.map(r => [String(r.id), r]));
         for (const item of batch) {
           const r = byId.get(String(item.id));
@@ -793,20 +832,19 @@ async function translateEvents(out) {
             item._ref.summary_en = r.summary_en || item.summary;
             if (r.lang === 'en') item._ref.language = 'en';
           } else {
-            // Result missing for this id — fall back
             item._ref.title_en = item.title;
             item._ref.summary_en = item.summary;
           }
         }
         done += batch.length;
-        if (myIdx % 5 === 0) {
-          console.log(`[translate] Batch ${myIdx + 1}/${batches.length} done (${done}/${toTranslate.length})`);
-          partialSave();
-        }
+        // Log every batch — easier to spot stalls
+        const pct = Math.round(done / toTranslate.length * 100);
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        console.log(`[translate] Batch ${myIdx + 1}/${batches.length} done · ${done}/${toTranslate.length} (${pct}%) · ${elapsed}s elapsed`);
       } catch (e) {
         failed += batch.length;
-        console.warn(`[translate] Batch ${myIdx + 1} failed: ${e.message}`);
-        // Fall back: leave title_en/summary_en undefined → frontend falls back to DA
+        console.warn(`[translate] Batch ${myIdx + 1}/${batches.length} FAILED: ${e.message}`);
+        // Leave events untranslated — frontend falls back to DA
         for (const item of batch) {
           item._ref.title_en = item._ref.title_en || item.title;
           item._ref.summary_en = item._ref.summary_en || item.summary;
@@ -821,10 +859,8 @@ async function translateEvents(out) {
   }
   await Promise.all(workers);
 
-  // Clean up partial
-  try { fs.unlinkSync(OUT_FILE + '.partial'); } catch (e) {}
-
-  console.log(`[translate] Done. Translated ${done}, failed ${failed}, cached ${cache.size}`);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  console.log(`[translate] Done. Translated ${done}, failed ${failed}, cached ${cache.size}. Total elapsed: ${elapsed}s`);
 }
 
 scrape().catch(err => {
