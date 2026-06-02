@@ -8,6 +8,14 @@ import fs from 'fs';
 const PROGRAM_URL = 'https://program.folkemoedet.dk/2026';
 const OUT_FILE = 'program.json';
 
+// TEST MODE: set env var MAX_EVENTS=100 (or any number) to limit the scrape.
+// Useful for fast end-to-end testing without burning workflow time.
+// In production, leave unset to scrape everything.
+const MAX_EVENTS = process.env.MAX_EVENTS ? parseInt(process.env.MAX_EVENTS, 10) : Infinity;
+if (MAX_EVENTS !== Infinity) {
+  console.log(`[test mode] MAX_EVENTS=${MAX_EVENTS} — will stop scraping early`);
+}
+
 const DAY_MAP = {
   '11': 'Torsdag',
   '12': 'Fredag',
@@ -212,8 +220,13 @@ async function scrape() {
         ev.day = dayLabel;
         allEvents.push(ev);
         added++;
+        if (allEvents.length >= MAX_EVENTS) break;
       }
       console.log(`  Found ${events.length} events on page, ${added} new`);
+      if (allEvents.length >= MAX_EVENTS) {
+        console.log(`[test mode] Reached MAX_EVENTS=${MAX_EVENTS}, stopping scrape early`);
+        break;
+      }
     } catch (err) {
       console.error(`Error on ${dayLabel}: ${err.message}`);
     }
