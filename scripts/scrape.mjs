@@ -85,6 +85,88 @@ async function scrape() {
           return '';
         };
 
+        // Try to split a title that has its subtitle concatenated into it.
+        // Returns {title, summary} or null if no split found.
+        const splitCompoundTitle = (text) => {
+          if (!text || text.length < 50) return null;
+
+          // Strategy A: Detect repeated phrase (same prefix appears at both ends)
+          //   "Morgensang med Søren Pind på Kapitalens Scene Morgensang med Søren Pind"
+          //   → title = repeated phrase, summary = middle
+          const words = text.split(/\s+/);
+          for (let n = Math.floor(words.length / 2); n >= 3; n--) {
+            const prefix = words.slice(0, n).join(' ');
+            const suffix = words.slice(-n).join(' ');
+            if (prefix.toLowerCase() === suffix.toLowerCase()) {
+              const middle = words.slice(n, words.length - n).join(' ').trim();
+              return { title: prefix, summary: middle.length > 5 ? middle : prefix };
+            }
+          }
+
+          // Strategy B: Split on sentence-ending punctuation followed by space + new sentence
+          //   "Hvad betyder X? Heatwaves..." → "Hvad betyder X?" + "Heatwaves..."
+          const punctMatch = text.match(/^(.{20,}?[?!])\s+([A-ZÆØÅ].{15,})$/);
+          if (punctMatch) {
+            return { title: punctMatch[1].trim(), summary: punctMatch[2].trim() };
+          }
+
+          // Strategy C: Find best split point using scoring.
+          // We score each candidate split position (at word boundaries) and pick the highest-scoring.
+          // Signals (each adds to score):
+          //   +5: prev word ends with proper noun (capitalised, length > 3, in middle of text)
+          //   +4: next word starts with a "starter" verb in imperative or new-sentence form
+          //   +3: prev word is in {personal-name-list} or matches "med X" pattern  
+          //   +2: left side length is 25-70 chars (natural title length)
+          //   +2: right side starts with capital letter
+          //   -3: split happens within the first 15 chars or last 15 chars
+          //   -2: prev word ends with comma or "og"/"og" linker
+
+          const STARTER_WORDS = new Set([
+            'kom', 'start', 'mød', 'mod', 'oplev', 'få', 'se', 'lyt', 'lyt', 'lær',
+            'vær', 'bliv', 'tag', 'tilmeld', 'prøv', 'deltag', 'hør', 'læs', 'gå',
+            'er', 'hvad', 'hvor', 'hvordan', 'hvorfor', 'hvem', 'hvilken', 'hvilke',
+            'et', 'en', 'den', 'det', 'denne', 'dette', 'disse', 'fra', 'med', 'på',
+            'fællessang'
+          ]);
+
+          let bestScore = 0;
+          let bestSplit = null;
+          for (let i = 15; i < text.length - 15; i++) {
+            if (text[i] !== ' ') continue;
+            const left = text.slice(0, i).trim();
+            const right = text.slice(i + 1).trim();
+            if (left.length < 15 || right.length < 15) continue;
+
+            const prevWord = (left.match(/(\S+)$/) || ['', ''])[1];
+            const nextWord = (right.match(/^(\S+)/) || ['', ''])[1];
+            if (!prevWord || !nextWord) continue;
+
+            let score = 0;
+            // Natural title length bonus
+            if (left.length >= 25 && left.length <= 70) score += 2;
+            if (left.length >= 35 && left.length <= 55) score += 1;
+            // Right side starts with capital → new sentence
+            if (/^[A-ZÆØÅ]/.test(nextWord)) score += 2;
+            // Next word is a known "starter" word
+            if (STARTER_WORDS.has(nextWord.toLowerCase())) score += 4;
+            // Previous word is a capitalised proper noun (length > 3)
+            if (prevWord.length > 3 && /^[A-ZÆØÅ]/.test(prevWord) && !/^[A-ZÆØÅ]+$/.test(prevWord)) score += 3;
+            // Previous word ends with sentence punctuation
+            if (/[.!?]$/.test(prevWord)) score += 5;
+            // Penalty: previous word ends with comma (mid-sentence)
+            if (/,$/.test(prevWord)) score -= 3;
+            // Penalty: next word is lowercase function word
+            if (/^(og|eller|men|som|der|af|til|i|på|med|fra|hvor|om)$/i.test(nextWord)) score -= 4;
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestSplit = { title: left, summary: right };
+            }
+          }
+
+          return bestScore >= 5 ? bestSplit : null;
+        };
+
         // Walk DOM and insert spaces at block element boundaries
         const getStructuredText = (root) => {
           const BLOCK_TAGS = new Set(['DIV', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
@@ -199,6 +281,16 @@ async function scrape() {
           // Strip leading punctuation from summary
           summary = summary.replace(/^[\s.,;:!?-]+/, '');
           if (summary.length > 400) summary = summary.slice(0, 400) + '…';
+
+          // POST-PROCESS: Some events have title+subtitle concatenated in one heading element
+          // and an empty summary. Try to split when summary is empty and title looks composite.
+          if (title && !summary && title.length > 50) {
+            const splitResult = splitCompoundTitle(title);
+            if (splitResult) {
+              title = splitResult.title;
+              summary = splitResult.summary;
+            }
+          }
 
           out.push({
             id,
