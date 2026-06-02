@@ -585,8 +585,246 @@ async function scrape() {
     events: allEvents
   };
 
+  // === TRANSLATION STEP ===
+  // If GROQ_API_KEY is set, translate Danish titles + summaries to English.
+  // Uses an incremental cache (program.json from previous run) so we only
+  // translate NEW events on each daily scrape.
+  if (process.env.GROQ_API_KEY) {
+    await translateEvents(out);
+  } else {
+    console.log('\n[translate] No GROQ_API_KEY set — skipping translation step.');
+  }
+
   fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
   console.log(`\n✓ Wrote ${allEvents.length} events to ${OUT_FILE}`);
+}
+
+// ============================================================
+// TRANSLATION (Groq → llama-3.3-70b-versatile)
+// ============================================================
+
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const BATCH_SIZE = 25;            // events per API call (keeps within token limits)
+const MAX_CONCURRENT_BATCHES = 4; // parallel batches
+
+// Simple Danish-vs-English heuristic. Returns 'da', 'en', or 'da' as fallback.
+function detectLanguage(text) {
+  if (!text || text.length < 4) return 'da';
+  const t = text.toLowerCase();
+  // Strong Danish markers
+  if (/[æøå]/.test(t)) return 'da';
+  // Danish words
+  const daWords = /\b(og|med|til|for|på|af|som|ikke|den|det|der|fra|samt|hvordan|hvorfor|kan|vil|skal)\b/g;
+  // English words (only counts if no Danish letters)
+  const enWords = /\b(the|and|with|for|of|how|why|can|will|shall|what|where|when|our|your)\b/g;
+  const daMatches = (t.match(daWords) || []).length;
+  const enMatches = (t.match(enWords) || []).length;
+  if (enMatches > daMatches * 1.5 && enMatches >= 2) return 'en';
+  return 'da';
+}
+
+async function loadCache() {
+  // Load previous program.json to reuse existing translations.
+  // Cache key = event ID (from URL).
+  try {
+    if (!fs.existsSync(OUT_FILE)) return new Map();
+    const prev = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'));
+    const cache = new Map();
+    for (const e of (prev.events || [])) {
+      const id = extractEventIdFromUrl(e.url);
+      if (id && (e.title_en || e.language)) {
+        cache.set(id, {
+          title_en: e.title_en,
+          summary_en: e.summary_en,
+          language: e.language
+        });
+      }
+    }
+    console.log(`[translate] Loaded ${cache.size} cached translations from previous run`);
+    return cache;
+  } catch (e) {
+    console.warn('[translate] Could not load cache:', e.message);
+    return new Map();
+  }
+}
+
+function extractEventIdFromUrl(url) {
+  if (!url) return null;
+  const m = String(url).match(/\/events\/\d+\/(\d+)/);
+  return m ? m[1] : null;
+}
+
+async function translateBatch(items) {
+  // items: array of { id, title, summary } objects
+  const prompt = `You are a professional Danish-to-English translator working on a programme for the Danish political festival "Folkemødet" (a public-debate festival on Bornholm).
+
+Translate the following ${items.length} event entries from Danish to natural, idiomatic British English. Keep:
+- Proper nouns, organisation names, person names exactly as-is (do NOT translate them)
+- The tone (often debate/panel/keynote style — keep it engaging but accurate)
+- Concise length (don't pad)
+
+Some entries may already be in English — in that case return them unchanged but with "lang": "en".
+
+Output ONLY a JSON array (no markdown fences, no preamble) where each item has:
+  {"id": "<original id>", "title_en": "<translated title>", "summary_en": "<translated summary>", "lang": "da" or "en"}
+
+Input:
+${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary })), null, 0)}`;
+
+  const resp = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+      max_tokens: 8000,
+      response_format: { type: 'json_object' }
+    })
+  });
+
+  if (!resp.ok) {
+    const txt = await resp.text();
+    throw new Error(`Groq API ${resp.status}: ${txt.slice(0, 200)}`);
+  }
+
+  const data = await resp.json();
+  let content = data.choices?.[0]?.message?.content || '';
+  // Strip markdown fences if model added them anyway
+  content = content.replace(/```json\s*|```\s*$/g, '').trim();
+
+  // Some models wrap arrays in an object — handle both
+  let parsed;
+  try {
+    parsed = JSON.parse(content);
+  } catch (e) {
+    throw new Error(`Could not parse JSON response: ${content.slice(0, 200)}`);
+  }
+  // If wrapped, find the array inside
+  if (!Array.isArray(parsed)) {
+    const arrKey = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+    if (arrKey) parsed = parsed[arrKey];
+    else throw new Error(`Unexpected JSON shape: ${Object.keys(parsed).join(',')}`);
+  }
+  return parsed;
+}
+
+async function translateEvents(out) {
+  console.log('\n=== Translating events to English ===');
+  const cache = await loadCache();
+
+  // Identify events that NEED translation:
+  // - Have an ID
+  // - Not in cache (or cache lacks title_en)
+  const toTranslate = [];
+  for (const e of out.events) {
+    const id = extractEventIdFromUrl(e.url);
+    if (!id) continue;
+
+    // Detect language first
+    const lang = detectLanguage((e.title || '') + ' ' + (e.summary || ''));
+    e.language = lang;
+
+    if (cache.has(id)) {
+      const cached = cache.get(id);
+      e.title_en = cached.title_en;
+      e.summary_en = cached.summary_en;
+      // Cache may have its own language detection — trust the current one
+      continue;
+    }
+
+    if (lang === 'en') {
+      // Already English — no translation needed, copy as-is
+      e.title_en = e.title;
+      e.summary_en = e.summary;
+      continue;
+    }
+
+    // Needs translation
+    toTranslate.push({
+      id,
+      title: e.title || '',
+      summary: e.summary || '',
+      _ref: e // reference back to the event so we can patch in results
+    });
+  }
+
+  console.log(`[translate] ${toTranslate.length} events need translation (${cache.size} cached, ${out.events.length - toTranslate.length - cache.size} are English)`);
+
+  if (toTranslate.length === 0) {
+    console.log('[translate] Nothing to translate. Done.');
+    return;
+  }
+
+  // Batch + parallelize
+  const batches = [];
+  for (let i = 0; i < toTranslate.length; i += BATCH_SIZE) {
+    batches.push(toTranslate.slice(i, i + BATCH_SIZE));
+  }
+  console.log(`[translate] Processing ${batches.length} batches of up to ${BATCH_SIZE} events (${MAX_CONCURRENT_BATCHES} parallel)…`);
+
+  let done = 0;
+  let failed = 0;
+  let queueIdx = 0;
+
+  // Periodic partial save during translation
+  const partialSave = () => {
+    try {
+      fs.writeFileSync(OUT_FILE + '.partial', JSON.stringify(out, null, 2));
+    } catch (e) {}
+  };
+
+  async function worker() {
+    while (queueIdx < batches.length) {
+      const myIdx = queueIdx++;
+      const batch = batches[myIdx];
+      try {
+        const results = await translateBatch(batch);
+        // Map results back to events
+        const byId = new Map(results.map(r => [String(r.id), r]));
+        for (const item of batch) {
+          const r = byId.get(String(item.id));
+          if (r) {
+            item._ref.title_en = r.title_en || item.title;
+            item._ref.summary_en = r.summary_en || item.summary;
+            if (r.lang === 'en') item._ref.language = 'en';
+          } else {
+            // Result missing for this id — fall back
+            item._ref.title_en = item.title;
+            item._ref.summary_en = item.summary;
+          }
+        }
+        done += batch.length;
+        if (myIdx % 5 === 0) {
+          console.log(`[translate] Batch ${myIdx + 1}/${batches.length} done (${done}/${toTranslate.length})`);
+          partialSave();
+        }
+      } catch (e) {
+        failed += batch.length;
+        console.warn(`[translate] Batch ${myIdx + 1} failed: ${e.message}`);
+        // Fall back: leave title_en/summary_en undefined → frontend falls back to DA
+        for (const item of batch) {
+          item._ref.title_en = item._ref.title_en || item.title;
+          item._ref.summary_en = item._ref.summary_en || item.summary;
+        }
+      }
+    }
+  }
+
+  const workers = [];
+  for (let i = 0; i < Math.min(MAX_CONCURRENT_BATCHES, batches.length); i++) {
+    workers.push(worker());
+  }
+  await Promise.all(workers);
+
+  // Clean up partial
+  try { fs.unlinkSync(OUT_FILE + '.partial'); } catch (e) {}
+
+  console.log(`[translate] Done. Translated ${done}, failed ${failed}, cached ${cache.size}`);
 }
 
 scrape().catch(err => {
