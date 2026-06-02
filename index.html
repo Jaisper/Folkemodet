@@ -797,6 +797,30 @@
   }
   footer a { color: var(--orange); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+  .fav-tools {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .fav-tool-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .fav-tool-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
 
   @media (max-width: 600px) {
     .wrap { padding: 20px 16px 60px; }
@@ -861,6 +885,10 @@
   <footer>
     <div data-i18n-html="footer.line1">Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
     <div style="margin-top:6px" data-i18n-html="footer.line2">Bygget af <a href="https://github.com/Jaisper/Folkemodet" target="_blank">@Jaisper</a> — ingen affiliering med Folkemødet.</div>
+    <div class="fav-tools">
+      <button class="fav-tool-btn" id="exportFavBtn" type="button" data-i18n="fav.export">Eksportér favoritter</button>
+      <button class="fav-tool-btn" id="importFavBtn" type="button" data-i18n="fav.import">Importér favoritter</button>
+    </div>
   </footer>
 
 </div>
@@ -1325,6 +1353,8 @@ const I18N = {
     "fav.add": "Tilføj til favoritter",
     "fav.remove": "Fjern fra favoritter",
     "fav.aria": "Favorit",
+    "fav.export": "💾 Eksportér favoritter",
+    "fav.import": "📂 Importér favoritter",
     "card.showDetails": "Vis detaljer",
     "card.officialPage": "🔗 Officiel side",
     "card.showOnMap": "📍 Vis på kort",
@@ -1369,6 +1399,8 @@ const I18N = {
     "fav.add": "Add to favourites",
     "fav.remove": "Remove from favourites",
     "fav.aria": "Favourite",
+    "fav.export": "💾 Export favourites",
+    "fav.import": "📂 Import favourites",
     "card.showDetails": "Show details",
     "card.officialPage": "🔗 Official page",
     "card.showOnMap": "📍 Show on map",
@@ -1517,6 +1549,13 @@ function initLanguageToggle() {
   });
 }
 
+function initFavoriteTools() {
+  const exportBtn = document.getElementById("exportFavBtn");
+  if (exportBtn) exportBtn.addEventListener("click", exportFavorites);
+  const importBtn = document.getElementById("importFavBtn");
+  if (importBtn) importBtn.addEventListener("click", importFavorites);
+}
+
 const programState = {
   events: [],
   filtered: [],
@@ -1563,7 +1602,12 @@ function loadFavorites() {
       if (Array.isArray(arr)) {
         programState.favorites = new Set(arr.map(String));
         console.log(`Loaded ${programState.favorites.size} favorites from localStorage`);
+        return;
       }
+    }
+    // Main key empty/missing — try backup
+    if (tryRestoreFromBackup()) {
+      console.log("Favorites restored from backup");
     }
   } catch (e) {
     console.warn("Could not load favorites:", e);
@@ -1581,6 +1625,11 @@ function saveFavorites() {
     const arr = [...programState.favorites];
     const json = JSON.stringify(arr);
     localStorage.setItem(FAV_STORAGE_KEY, json);
+    // Also save a timestamped backup so we can recover if main key gets wiped
+    localStorage.setItem(FAV_STORAGE_KEY + "_backup", JSON.stringify({
+      favorites: arr,
+      timestamp: new Date().toISOString()
+    }));
     // Verify it actually got written (some private modes silently fail)
     const readback = localStorage.getItem(FAV_STORAGE_KEY);
     if (readback !== json) {
@@ -1595,6 +1644,88 @@ function saveFavorites() {
     console.warn("Could not save favorites:", e);
     showStorageWarning();
   }
+}
+
+// Export favorites as a JSON string the user can save somewhere safe.
+// Includes event titles so we can recover even if event IDs change.
+function exportFavorites() {
+  const ids = [...programState.favorites];
+  const enriched = ids.map(id => {
+    const ev = programState.events.find(e => extractEventId(e.url) === id);
+    return {
+      id,
+      title: ev ? ev.title : null,
+      url: ev ? ev.url : null
+    };
+  });
+  const data = {
+    version: 1,
+    exported_at: new Date().toISOString(),
+    count: ids.length,
+    favorites: enriched
+  };
+  const json = JSON.stringify(data, null, 2);
+  // Trigger download
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `folkemodet-favoritter-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Import favorites from a JSON file the user selects.
+function importFavorites() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.addEventListener("change", async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      let imported = 0;
+      const favsArray = Array.isArray(data) ? data : data.favorites || [];
+      for (const fav of favsArray) {
+        const id = typeof fav === "string" ? fav : fav.id;
+        if (id) {
+          programState.favorites.add(String(id));
+          imported++;
+        }
+      }
+      saveFavorites();
+      updateFavoritesChip();
+      applyFilters();
+      alert(`Importerede ${imported} favoritter.`);
+    } catch (e) {
+      alert(`Kunne ikke importere: ${e.message}`);
+    }
+  });
+  input.click();
+}
+
+// Try to restore favorites from the backup key if main key is empty
+function tryRestoreFromBackup() {
+  try {
+    const backupRaw = localStorage.getItem(FAV_STORAGE_KEY + "_backup");
+    if (!backupRaw) return false;
+    const backup = JSON.parse(backupRaw);
+    if (backup.favorites && backup.favorites.length > 0) {
+      for (const id of backup.favorites) {
+        programState.favorites.add(String(id));
+      }
+      console.log(`Restored ${backup.favorites.length} favorites from backup (saved ${backup.timestamp})`);
+      saveFavorites();
+      return true;
+    }
+  } catch (e) {
+    console.warn("Could not restore from backup:", e);
+  }
+  return false;
 }
 
 let storageWarningShown = false;
@@ -1788,6 +1919,7 @@ async function loadOfficialProgram() {
   loadLanguagePref();
   setLanguage(currentLang);
   initLanguageToggle();
+  initFavoriteTools();
 
   // Load saved favorites first
   loadFavorites();
