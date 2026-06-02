@@ -90,9 +90,15 @@ async function scrape() {
         const splitCompoundTitle = (text) => {
           if (!text || text.length < 50) return null;
 
-          // Strategy A: Detect repeated phrase (same prefix appears at both ends)
+          const STARTER_WORDS = new Set([
+            'kom', 'start', 'mød', 'oplev', 'få', 'se', 'lyt', 'lær',
+            'vær', 'bliv', 'tag', 'tilmeld', 'prøv', 'deltag', 'hør', 'læs',
+            'hvad', 'hvor', 'hvordan', 'hvorfor', 'hvem', 'hvilken', 'hvilke',
+            'fællessang', 'live', 'publikum', 'tandlægeforeningen'
+          ]);
+
+          // Strategy A: Detect repeated phrase
           //   "Morgensang med Søren Pind på Kapitalens Scene Morgensang med Søren Pind"
-          //   → title = repeated phrase, summary = middle
           const words = text.split(/\s+/);
           for (let n = Math.floor(words.length / 2); n >= 3; n--) {
             const prefix = words.slice(0, n).join(' ');
@@ -103,60 +109,38 @@ async function scrape() {
             }
           }
 
-          // Strategy B: Split on sentence-ending punctuation followed by space + new sentence
-          //   "Hvad betyder X? Heatwaves..." → "Hvad betyder X?" + "Heatwaves..."
+          // Strategy B: Sentence-ending punctuation followed by new sentence
           const punctMatch = text.match(/^(.{20,}?[?!])\s+([A-ZÆØÅ].{15,})$/);
           if (punctMatch) {
             return { title: punctMatch[1].trim(), summary: punctMatch[2].trim() };
           }
 
-          // Strategy C: Find best split point using scoring.
-          // We score each candidate split position (at word boundaries) and pick the highest-scoring.
-          // Signals (each adds to score):
-          //   +5: prev word ends with proper noun (capitalised, length > 3, in middle of text)
-          //   +4: next word starts with a "starter" verb in imperative or new-sentence form
-          //   +3: prev word is in {personal-name-list} or matches "med X" pattern  
-          //   +2: left side length is 25-70 chars (natural title length)
-          //   +2: right side starts with capital letter
-          //   -3: split happens within the first 15 chars or last 15 chars
-          //   -2: prev word ends with comma or "og"/"og" linker
-
-          const STARTER_WORDS = new Set([
-            'kom', 'start', 'mød', 'mod', 'oplev', 'få', 'se', 'lyt', 'lyt', 'lær',
-            'vær', 'bliv', 'tag', 'tilmeld', 'prøv', 'deltag', 'hør', 'læs', 'gå',
-            'er', 'hvad', 'hvor', 'hvordan', 'hvorfor', 'hvem', 'hvilken', 'hvilke',
-            'et', 'en', 'den', 'det', 'denne', 'dette', 'disse', 'fra', 'med', 'på',
-            'fællessang'
-          ]);
-
+          // Strategy C: Score-based split at word boundaries
           let bestScore = 0;
           let bestSplit = null;
           for (let i = 15; i < text.length - 15; i++) {
             if (text[i] !== ' ') continue;
             const left = text.slice(0, i).trim();
             const right = text.slice(i + 1).trim();
-            if (left.length < 15 || right.length < 15) continue;
+            if (left.length < 18 || right.length < 18) continue;
 
             const prevWord = (left.match(/(\S+)$/) || ['', ''])[1];
             const nextWord = (right.match(/^(\S+)/) || ['', ''])[1];
             if (!prevWord || !nextWord) continue;
 
+            // Hard skips — never split here
+            if (/^(med|på|i|til|af|fra|for|over|under|ved|hos|om|den|det|de|en|et|som|der|hvor|når|fordi)$/i.test(prevWord)) continue;
+            if (/^(og|eller|men|som|der|af|til|i|på|med|fra|hvor|om)$/i.test(nextWord)) continue;
+            if (/,$/.test(prevWord)) continue;
+            if (/-$/.test(prevWord)) continue;
+
             let score = 0;
-            // Natural title length bonus
-            if (left.length >= 25 && left.length <= 70) score += 2;
+            if (/[.!?]$/.test(prevWord)) score += 10;
+            if (STARTER_WORDS.has(nextWord.toLowerCase()) && /^[A-ZÆØÅ]/.test(nextWord)) score += 6;
+            if (/^[A-ZÆØÅ]/.test(nextWord) && nextWord.length > 1) score += 3;
+            if (prevWord.length > 3 && /^[A-ZÆØÅ]/.test(prevWord) && /[a-zæøå]/.test(prevWord)) score += 2;
+            if (left.length >= 25 && left.length <= 65) score += 2;
             if (left.length >= 35 && left.length <= 55) score += 1;
-            // Right side starts with capital → new sentence
-            if (/^[A-ZÆØÅ]/.test(nextWord)) score += 2;
-            // Next word is a known "starter" word
-            if (STARTER_WORDS.has(nextWord.toLowerCase())) score += 4;
-            // Previous word is a capitalised proper noun (length > 3)
-            if (prevWord.length > 3 && /^[A-ZÆØÅ]/.test(prevWord) && !/^[A-ZÆØÅ]+$/.test(prevWord)) score += 3;
-            // Previous word ends with sentence punctuation
-            if (/[.!?]$/.test(prevWord)) score += 5;
-            // Penalty: previous word ends with comma (mid-sentence)
-            if (/,$/.test(prevWord)) score -= 3;
-            // Penalty: next word is lowercase function word
-            if (/^(og|eller|men|som|der|af|til|i|på|med|fra|hvor|om)$/i.test(nextWord)) score -= 4;
 
             if (score > bestScore) {
               bestScore = score;
