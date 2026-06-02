@@ -1990,7 +1990,8 @@ function applyFilters() {
       const hay = [
         e.title, e.title_en,
         e.summary, e.summary_en,
-        e.more, e.organizers, e.venue,
+        e.more, e.more_en,
+        e.organizers, e.venue,
         themesAsString,
         Array.isArray(e.speakers) ? e.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || ''))).join(' ') : ''
       ].filter(Boolean).join(' ').toLowerCase();
@@ -2072,11 +2073,14 @@ function renderProgram() {
       const showEN = currentLang === "en";
       const displayTitle = (showEN && eventLang === "da" && e.title_en) ? e.title_en : (e.title || "");
       const displaySummary = (showEN && eventLang === "da" && e.summary_en) ? e.summary_en : (e.summary || "");
+      // Show translated full description when EN view + Danish event + we have a translation.
+      // Otherwise show original (with a small language indicator).
+      const displayMore = (showEN && eventLang === "da" && e.more_en) ? e.more_en : (e.more || "");
+      const moreIsTranslated = showEN && eventLang === "da" && e.more_en && e.more_en !== e.more;
 
       const subtitle = displaySummary;
-      // Full description (more) is shown in original language regardless of UI choice
-      const fullDesc = e.more || "";
-      const hasExtra = (fullDesc && fullDesc !== (e.summary || "")) || speakerStr;
+      const fullDesc = displayMore;
+      const hasExtra = (fullDesc && fullDesc !== (showEN && eventLang === "da" && e.summary_en ? e.summary_en : e.summary || "")) || speakerStr;
       const eventId = extractEventId(e.url);
       const isFav = eventId && programState.favorites.has(eventId);
 
@@ -2084,11 +2088,11 @@ function renderProgram() {
       // - "EN" badge on events held in English
       // - "DA" badge on events held in Danish (where the translated title is shown)
       const langBadge = showEN
-        ? `<span class="lang-badge lang-badge-${eventLang}" title="${eventLang === 'en' ? 'Event held in English' : 'Event held in Danish (translated title shown)'}">${eventLang.toUpperCase()}</span>`
+        ? `<span class="lang-badge lang-badge-${eventLang}" title="${eventLang === 'en' ? 'Event held in English' : 'Event held in Danish (translated content shown)'}">${eventLang.toUpperCase()}</span>`
         : "";
 
-      // Full-description label
-      const fullDescLabel = eventLang === "en" ? "EN" : "DA";
+      // Full-description label — show whether we're showing translation or original
+      const fullDescLabel = moreIsTranslated ? "EN ✓" : (eventLang === "en" ? "EN" : "DA");
 
       return `
       <div class="pg-event">
