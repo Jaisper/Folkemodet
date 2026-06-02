@@ -693,13 +693,18 @@ Translate the following ${items.length} event entries from Danish to natural, id
 - The tone (often debate/panel/keynote style — keep it engaging but accurate)
 - Concise length (don't pad). Match the original length closely.
 
-Each entry has up to three fields to translate: "title", "summary" (short subtitle), and "more" (full description, may be empty).
+IMPORTANT: Each entry has THREE fields you MUST translate, even if short:
+1. "title"   → "title_en"   (always required if input title is non-empty)
+2. "summary" → "summary_en" (always required if input summary is non-empty)
+3. "more"    → "more_en"    (always required if input more is non-empty; empty string if input is empty)
 
-Some entries may already be in English — in that case return them unchanged but with "lang": "en".
-If a "more" field is empty or missing in input, return "more_en": "" in output.
+DO NOT leave any of the three _en fields empty unless the corresponding input field is also empty.
+DO NOT skip fields just because they are short — even single-sentence summaries must be translated.
 
-Output ONLY a JSON array (no markdown fences, no preamble) where each item has:
-  {"id": "<original id>", "title_en": "<translated title>", "summary_en": "<translated summary>", "more_en": "<translated full description>", "lang": "da" or "en"}
+Some entries may already be in English — in that case return the original text in all three _en fields and add "lang": "en".
+
+Output ONLY a JSON array (no markdown fences, no preamble) where each item has ALL FOUR fields:
+  {"id": "<original id>", "title_en": "<translated>", "summary_en": "<translated>", "more_en": "<translated or empty>", "lang": "da" or "en"}
 
 Input:
 ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary, more: i.more || '' })), null, 0)}`;
@@ -819,8 +824,15 @@ async function translateEvents(out) {
       e.title_en = cached.title_en;
       e.summary_en = cached.summary_en;
       e.more_en = cached.more_en;
-      // If cached version lacks more_en but current event has a `more`, queue for re-translation
-      if (e.more && !cached.more_en) {
+      // Check if cached translation is COMPLETE:
+      // - title_en should exist if original title exists
+      // - summary_en should exist if original summary exists
+      // - more_en should exist if original more exists
+      // If any are missing, re-queue this event for translation.
+      const missingTitle = e.title && !cached.title_en;
+      const missingSummary = e.summary && !cached.summary_en;
+      const missingMore = e.more && !cached.more_en;
+      if (missingTitle || missingSummary || missingMore) {
         // Fall through to translation queue
       } else {
         continue;
