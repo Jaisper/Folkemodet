@@ -627,20 +627,13 @@ async function scrape() {
 const GROQ_MODEL = 'openai/gpt-oss-120b';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// Groq pay-as-you-go (dev tier) limits for llama-3.3-70b-versatile:
-//   - 400,000 tokens per minute (TPM)  ← 33x more than free tier
-//   - 6,000 requests per minute (RPM)  ← 200x more than free tier
-//   - No daily quota
-//
-// Cost: $0.59 input / $0.79 output per 1M tokens.
-// For 3600 events with ~1100 tokens/batch (8 events) = ~50,000 batches lifetime work.
-// Initial run cost: ~$0.35. Daily incremental cost: well under $0.01.
-//
-// With these limits we can go aggressive: 25 events/batch, 4 parallel batches.
-const BATCH_SIZE = 25;
+// Per-batch event count. With full descriptions included, average payload
+// grows from ~150 chars/event to ~700 chars/event — so we shrink batch size
+// to keep request token count reasonable (~5-8k tokens/batch).
+const BATCH_SIZE = 10;
 const MAX_CONCURRENT_BATCHES = 4;
 const MAX_RETRIES_PER_BATCH = 5;
-const MAX_BATCHES_PER_RUN = 250;  // ~6 min, plenty of headroom for full programme
+const MAX_BATCHES_PER_RUN = 400;
 
 // Simple Danish-vs-English heuristic. Returns 'da', 'en', or 'da' as fallback.
 function detectLanguage(text) {
@@ -671,6 +664,7 @@ async function loadCache() {
         cache.set(id, {
           title_en: e.title_en,
           summary_en: e.summary_en,
+          more_en: e.more_en,
           language: e.language
         });
       }
@@ -690,22 +684,25 @@ function extractEventIdFromUrl(url) {
 }
 
 async function translateBatch(items, attempt = 1) {
-  // items: array of { id, title, summary } objects
+  // items: array of { id, title, summary, more } objects
   // Returns { results: [...], tokensUsed: number }
   const prompt = `You are a professional Danish-to-English translator working on a programme for the Danish political festival "Folkemødet" (a public-debate festival on Bornholm).
 
 Translate the following ${items.length} event entries from Danish to natural, idiomatic British English. Keep:
 - Proper nouns, organisation names, person names exactly as-is (do NOT translate them)
 - The tone (often debate/panel/keynote style — keep it engaging but accurate)
-- Concise length (don't pad)
+- Concise length (don't pad). Match the original length closely.
+
+Each entry has up to three fields to translate: "title", "summary" (short subtitle), and "more" (full description, may be empty).
 
 Some entries may already be in English — in that case return them unchanged but with "lang": "en".
+If a "more" field is empty or missing in input, return "more_en": "" in output.
 
 Output ONLY a JSON array (no markdown fences, no preamble) where each item has:
-  {"id": "<original id>", "title_en": "<translated title>", "summary_en": "<translated summary>", "lang": "da" or "en"}
+  {"id": "<original id>", "title_en": "<translated title>", "summary_en": "<translated summary>", "more_en": "<translated full description>", "lang": "da" or "en"}
 
 Input:
-${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary })), null, 0)}`;
+${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary, more: i.more || '' })), null, 0)}`;
 
   const resp = await fetch(GROQ_URL, {
     method: 'POST',
@@ -717,7 +714,7 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
       model: GROQ_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
-      max_tokens: 4000,
+      max_tokens: 8000,
       response_format: { type: 'json_object' }
     })
   });
@@ -821,12 +818,19 @@ async function translateEvents(out) {
       const cached = cache.get(id);
       e.title_en = cached.title_en;
       e.summary_en = cached.summary_en;
-      continue;
+      e.more_en = cached.more_en;
+      // If cached version lacks more_en but current event has a `more`, queue for re-translation
+      if (e.more && !cached.more_en) {
+        // Fall through to translation queue
+      } else {
+        continue;
+      }
     }
 
     if (lang === 'en') {
       e.title_en = e.title;
       e.summary_en = e.summary;
+      e.more_en = e.more;
       alreadyEnglish++;
       continue;
     }
@@ -835,6 +839,7 @@ async function translateEvents(out) {
       id,
       title: e.title || '',
       summary: e.summary || '',
+      more: e.more || '',
       _ref: e
     });
   }
@@ -864,6 +869,7 @@ async function translateEvents(out) {
       if (r) {
         item._ref.title_en = r.title_en || item.title;
         item._ref.summary_en = r.summary_en || item.summary;
+        item._ref.more_en = r.more_en || item.more;
       }
     }
   } catch (e) {
@@ -923,10 +929,12 @@ async function translateEvents(out) {
           if (r) {
             item._ref.title_en = r.title_en || item.title;
             item._ref.summary_en = r.summary_en || item.summary;
+            item._ref.more_en = r.more_en || item.more;
             if (r.lang === 'en') item._ref.language = 'en';
           } else {
             item._ref.title_en = item.title;
             item._ref.summary_en = item.summary;
+            item._ref.more_en = item.more;
           }
         }
         done += batch.length;
@@ -942,6 +950,7 @@ async function translateEvents(out) {
         for (const item of batch) {
           item._ref.title_en = item._ref.title_en || item.title;
           item._ref.summary_en = item._ref.summary_en || item.summary;
+          item._ref.more_en = item._ref.more_en || item.more;
         }
         if (e.dailyQuotaHit) {
           console.log(`[translate] Worker ${workerId} hit daily quota — stopping all workers.`);
