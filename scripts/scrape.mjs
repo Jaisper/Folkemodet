@@ -712,23 +712,38 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
     })
   });
 
-  // Rate limit hit — wait based on retry-after header and retry
+  // Rate limit hit — wait based on reset headers + exponential floor
   if (resp.status === 429) {
     if (attempt > MAX_RETRIES_PER_BATCH) {
       throw new Error(`Rate limited after ${MAX_RETRIES_PER_BATCH} retries`);
     }
-    // Groq sets X-RateLimit-Reset-Tokens to seconds-until-reset (e.g. "12.34s")
-    // Or Retry-After in seconds. Fall back to 30s exponential backoff.
+    // Groq exposes:
+    //   x-ratelimit-reset-tokens   — seconds until TPM budget resets
+    //   x-ratelimit-reset-requests — seconds until RPM budget resets
+    //   retry-after                — generic retry hint
     const resetTokens = resp.headers.get('x-ratelimit-reset-tokens');
+    const resetReqs = resp.headers.get('x-ratelimit-reset-requests');
     const retryAfter = resp.headers.get('retry-after');
-    let waitSec = 30 * attempt;
-    if (resetTokens) {
-      const m = resetTokens.match(/[\d.]+/);
-      if (m) waitSec = Math.ceil(parseFloat(m[0])) + 2; // small buffer
-    } else if (retryAfter) {
-      waitSec = parseInt(retryAfter, 10) + 2;
-    }
-    console.log(`[translate]   429 rate limit — waiting ${waitSec}s before retry ${attempt}/${MAX_RETRIES_PER_BATCH}`);
+
+    const parseSeconds = (h) => {
+      if (!h) return 0;
+      const m = String(h).match(/[\d.]+/);
+      return m ? Math.ceil(parseFloat(m[0])) : 0;
+    };
+
+    // Take the LARGEST reset window — we must satisfy whichever budget is exhausted
+    let waitSec = Math.max(
+      parseSeconds(resetTokens),
+      parseSeconds(resetReqs),
+      parseSeconds(retryAfter)
+    );
+
+    // Header may say "3s" but in practice we often need longer because RPM is a
+    // sliding window. Use exponential floor: attempt 1=10s, 2=20s, 3=40s, 4=60s, 5=90s.
+    const expFloor = Math.min(90, 10 * Math.pow(2, attempt - 1));
+    waitSec = Math.max(waitSec, expFloor) + 2; // +2s buffer
+
+    console.log(`[translate]   429 rate limit — waiting ${waitSec}s before retry ${attempt}/${MAX_RETRIES_PER_BATCH} (headers: tok=${resetTokens||'?'}, req=${resetReqs||'?'}, retry-after=${retryAfter||'?'})`);
     await new Promise(r => setTimeout(r, waitSec * 1000));
     return translateBatch(items, attempt + 1);
   }
@@ -838,13 +853,22 @@ async function translateEvents(out) {
     return;
   }
 
-  // Estimate batch token usage from smoke test (3 events used ~smokeTokens)
-  // Scale up for BATCH_SIZE events
-  const estTokensPerBatch = Math.max(2000, Math.round(smokeTokens / 3 * BATCH_SIZE));
-  // Groq free tier: 12,000 tokens/minute. Stay under 10,000 (safety margin).
+  // Estimate batch token usage from smoke test (3 events used ~smokeTokens).
+  // The prompt overhead is fixed (~700 tokens), so larger batches don't scale linearly.
+  // Use a conservative estimate: prompt overhead + per-event tokens.
+  const tokensPerEvent = Math.max(50, (smokeTokens - 700) / 3);
+  const estTokensPerBatch = Math.max(1000, Math.round(700 + tokensPerEvent * BATCH_SIZE));
+
+  // Groq free tier has TWO limits we must respect simultaneously:
+  //   - TPM: 12,000 tokens/minute  → at ~1100 tokens/batch we could do 10/min
+  //   - RPM: 30 requests/minute    → max 30 batches/min = 1 every 2s
+  // The TIGHTER of the two constraints wins. With small batches RPM dominates.
   const SAFE_TPM = 10000;
-  const msPerBatch = Math.ceil(estTokensPerBatch / SAFE_TPM * 60 * 1000);
-  console.log(`[translate] Estimated ${estTokensPerBatch} tokens/batch → throttling to one batch every ${(msPerBatch/1000).toFixed(1)}s`);
+  const SAFE_RPM = 25; // 30 with safety margin
+  const msFromTPM = Math.ceil(estTokensPerBatch / SAFE_TPM * 60 * 1000);
+  const msFromRPM = Math.ceil(60 * 1000 / SAFE_RPM);
+  const msPerBatch = Math.max(msFromTPM, msFromRPM);
+  console.log(`[translate] ~${estTokensPerBatch} tokens/batch · TPM-cap=${(msFromTPM/1000).toFixed(1)}s · RPM-cap=${(msFromRPM/1000).toFixed(1)}s → throttling to one batch every ${(msPerBatch/1000).toFixed(1)}s`);
 
   // Build batches
   const allBatches = [];
