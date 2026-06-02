@@ -1487,10 +1487,10 @@ function setLanguage(lang) {
   // Persist choice
   try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (e) {}
 
-  // Re-render dynamic content (event list, chips, meta)
-  if (typeof renderEvents === "function" && programState && programState.events.length > 0) {
-    rebuildThemeChips();
-    applyFilters();
+  // Re-render dynamic content (chips, event list, meta)
+  if (programState && programState.events && programState.events.length > 0) {
+    rebuildThemeChips();  // re-renders chips with translated theme names
+    applyFilters();       // re-renders the event list with translated titles/badges/day headers
   }
 }
 
