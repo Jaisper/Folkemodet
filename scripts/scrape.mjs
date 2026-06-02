@@ -619,8 +619,18 @@ async function scrape() {
 
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const BATCH_SIZE = 25;            // events per API call (keeps within token limits)
-const MAX_CONCURRENT_BATCHES = 4; // parallel batches
+
+// Groq free-tier limits for llama-3.3-70b-versatile:
+//   - 12,000 tokens per minute (TPM)
+//   - 30 requests per minute (RPM)
+// At ~3000 tokens/batch (8 events), we can do ~4 batches/min serially.
+// 3600 events ÷ 8 = 450 batches ÷ 4 = ~110 min — too long for one workflow run.
+// SOLUTION: cap to N batches per run, save progress, continue next day.
+// On day 1: translate ~600 events. Day 2: cached, only new ones. After ~1 week: all cached.
+const BATCH_SIZE = 8;
+const MAX_CONCURRENT_BATCHES = 1;
+const MAX_RETRIES_PER_BATCH = 5;
+const MAX_BATCHES_PER_RUN = 100;  // ~30 min cap. Adjust if workflow timeout permits more.
 
 // Simple Danish-vs-English heuristic. Returns 'da', 'en', or 'da' as fallback.
 function detectLanguage(text) {
@@ -669,8 +679,9 @@ function extractEventIdFromUrl(url) {
   return m ? m[1] : null;
 }
 
-async function translateBatch(items) {
+async function translateBatch(items, attempt = 1) {
   // items: array of { id, title, summary } objects
+  // Returns { results: [...], tokensUsed: number }
   const prompt = `You are a professional Danish-to-English translator working on a programme for the Danish political festival "Folkemødet" (a public-debate festival on Bornholm).
 
 Translate the following ${items.length} event entries from Danish to natural, idiomatic British English. Keep:
@@ -696,10 +707,31 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
       model: GROQ_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2,
-      max_tokens: 8000,
+      max_tokens: 4000,
       response_format: { type: 'json_object' }
     })
   });
+
+  // Rate limit hit — wait based on retry-after header and retry
+  if (resp.status === 429) {
+    if (attempt > MAX_RETRIES_PER_BATCH) {
+      throw new Error(`Rate limited after ${MAX_RETRIES_PER_BATCH} retries`);
+    }
+    // Groq sets X-RateLimit-Reset-Tokens to seconds-until-reset (e.g. "12.34s")
+    // Or Retry-After in seconds. Fall back to 30s exponential backoff.
+    const resetTokens = resp.headers.get('x-ratelimit-reset-tokens');
+    const retryAfter = resp.headers.get('retry-after');
+    let waitSec = 30 * attempt;
+    if (resetTokens) {
+      const m = resetTokens.match(/[\d.]+/);
+      if (m) waitSec = Math.ceil(parseFloat(m[0])) + 2; // small buffer
+    } else if (retryAfter) {
+      waitSec = parseInt(retryAfter, 10) + 2;
+    }
+    console.log(`[translate]   429 rate limit — waiting ${waitSec}s before retry ${attempt}/${MAX_RETRIES_PER_BATCH}`);
+    await new Promise(r => setTimeout(r, waitSec * 1000));
+    return translateBatch(items, attempt + 1);
+  }
 
   if (!resp.ok) {
     const txt = await resp.text();
@@ -707,11 +739,10 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
   }
 
   const data = await resp.json();
+  const tokensUsed = data.usage?.total_tokens || 0;
   let content = data.choices?.[0]?.message?.content || '';
-  // Strip markdown fences if model added them anyway
   content = content.replace(/```json\s*|```\s*$/g, '').trim();
 
-  // Some models wrap arrays in an object — handle both
   let parsed;
   try {
     parsed = JSON.parse(content);
@@ -724,7 +755,7 @@ ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary 
     if (arrKey) parsed = parsed[arrKey];
     else throw new Error(`Unexpected JSON shape: ${Object.keys(parsed).join(',')}`);
   }
-  return parsed;
+  return { results: parsed, tokensUsed };
 }
 
 async function translateEvents(out) {
@@ -776,16 +807,17 @@ async function translateEvents(out) {
   }
 
   // === SMOKE TEST ===
-  // Send a single 3-event batch first to detect API issues early.
+  // Send a single small batch first to detect API issues early.
   console.log('[translate] Running smoke test with 3 events…');
   const smokeBatch = toTranslate.slice(0, 3);
+  let smokeTokens = 0;
   try {
-    const results = await translateBatch(smokeBatch);
-    console.log(`[translate] Smoke test OK — got ${results.length} results back`);
+    const { results, tokensUsed } = await translateBatch(smokeBatch);
+    smokeTokens = tokensUsed;
+    console.log(`[translate] Smoke test OK — got ${results.length} results back, used ${tokensUsed} tokens`);
     if (results.length > 0) {
       console.log(`[translate] Example result:`, JSON.stringify(results[0]).slice(0, 200));
     }
-    // Apply smoke batch results
     const byId = new Map(results.map(r => [String(r.id), r]));
     for (const item of smokeBatch) {
       const r = byId.get(String(item.id));
@@ -806,61 +838,89 @@ async function translateEvents(out) {
     return;
   }
 
-  // Batch + parallelize
-  const batches = [];
+  // Estimate batch token usage from smoke test (3 events used ~smokeTokens)
+  // Scale up for BATCH_SIZE events
+  const estTokensPerBatch = Math.max(2000, Math.round(smokeTokens / 3 * BATCH_SIZE));
+  // Groq free tier: 12,000 tokens/minute. Stay under 10,000 (safety margin).
+  const SAFE_TPM = 10000;
+  const msPerBatch = Math.ceil(estTokensPerBatch / SAFE_TPM * 60 * 1000);
+  console.log(`[translate] Estimated ${estTokensPerBatch} tokens/batch → throttling to one batch every ${(msPerBatch/1000).toFixed(1)}s`);
+
+  // Build batches
+  const allBatches = [];
   for (let i = 0; i < remaining.length; i += BATCH_SIZE) {
-    batches.push(remaining.slice(i, i + BATCH_SIZE));
+    allBatches.push(remaining.slice(i, i + BATCH_SIZE));
   }
-  console.log(`[translate] Processing ${batches.length} batches of up to ${BATCH_SIZE} events (${MAX_CONCURRENT_BATCHES} parallel)…`);
+
+  // Cap to MAX_BATCHES_PER_RUN to fit within workflow timeout.
+  // Remaining batches get processed on the next daily scrape (cache picks them up).
+  const batches = allBatches.slice(0, MAX_BATCHES_PER_RUN);
+  const skipped = allBatches.length - batches.length;
+  if (skipped > 0) {
+    console.log(`[translate] Capping to ${MAX_BATCHES_PER_RUN} batches this run. ${skipped} batches (${skipped * BATCH_SIZE} events) will be translated on next scheduled run.`);
+  }
+
+  const totalMin = Math.round(batches.length * msPerBatch / 60000);
+  console.log(`[translate] Processing ${batches.length} batches of up to ${BATCH_SIZE} events (serial, throttled). ETA: ~${totalMin} min`);
 
   let done = 3; // smoke test
   let failed = 0;
-  let queueIdx = 0;
   const startTime = Date.now();
+  let lastBatchEndTime = Date.now();
 
-  async function worker() {
-    while (queueIdx < batches.length) {
-      const myIdx = queueIdx++;
-      const batch = batches[myIdx];
+  // Serial loop with throttling — we MUST stay under Groq's TPM limit.
+  // Also save periodically so we don't lose progress on errors.
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+
+    // Throttle: wait until enough time has passed since last batch
+    const elapsedSinceLast = Date.now() - lastBatchEndTime;
+    if (elapsedSinceLast < msPerBatch) {
+      const wait = msPerBatch - elapsedSinceLast;
+      await new Promise(r => setTimeout(r, wait));
+    }
+
+    try {
+      const { results, tokensUsed } = await translateBatch(batch);
+      const byId = new Map(results.map(r => [String(r.id), r]));
+      for (const item of batch) {
+        const r = byId.get(String(item.id));
+        if (r) {
+          item._ref.title_en = r.title_en || item.title;
+          item._ref.summary_en = r.summary_en || item.summary;
+          if (r.lang === 'en') item._ref.language = 'en';
+        } else {
+          item._ref.title_en = item.title;
+          item._ref.summary_en = item.summary;
+        }
+      }
+      done += batch.length;
+      const pct = Math.round(done / toTranslate.length * 100);
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      console.log(`[translate] Batch ${i + 1}/${batches.length} done · ${tokensUsed} tokens · ${done}/${toTranslate.length} (${pct}%) · ${elapsed}s elapsed`);
+    } catch (e) {
+      failed += batch.length;
+      console.warn(`[translate] Batch ${i + 1}/${batches.length} FAILED: ${e.message}`);
+      for (const item of batch) {
+        item._ref.title_en = item._ref.title_en || item.title;
+        item._ref.summary_en = item._ref.summary_en || item.summary;
+      }
+    }
+    lastBatchEndTime = Date.now();
+
+    // Periodic save every 20 batches so we don't lose work on crash
+    if ((i + 1) % 20 === 0) {
       try {
-        const results = await translateBatch(batch);
-        const byId = new Map(results.map(r => [String(r.id), r]));
-        for (const item of batch) {
-          const r = byId.get(String(item.id));
-          if (r) {
-            item._ref.title_en = r.title_en || item.title;
-            item._ref.summary_en = r.summary_en || item.summary;
-            if (r.lang === 'en') item._ref.language = 'en';
-          } else {
-            item._ref.title_en = item.title;
-            item._ref.summary_en = item.summary;
-          }
-        }
-        done += batch.length;
-        // Log every batch — easier to spot stalls
-        const pct = Math.round(done / toTranslate.length * 100);
-        const elapsed = Math.round((Date.now() - startTime) / 1000);
-        console.log(`[translate] Batch ${myIdx + 1}/${batches.length} done · ${done}/${toTranslate.length} (${pct}%) · ${elapsed}s elapsed`);
+        fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
+        console.log(`[translate]   (saved progress to ${OUT_FILE})`);
       } catch (e) {
-        failed += batch.length;
-        console.warn(`[translate] Batch ${myIdx + 1}/${batches.length} FAILED: ${e.message}`);
-        // Leave events untranslated — frontend falls back to DA
-        for (const item of batch) {
-          item._ref.title_en = item._ref.title_en || item.title;
-          item._ref.summary_en = item._ref.summary_en || item.summary;
-        }
+        console.warn(`[translate]   could not save partial: ${e.message}`);
       }
     }
   }
 
-  const workers = [];
-  for (let i = 0; i < Math.min(MAX_CONCURRENT_BATCHES, batches.length); i++) {
-    workers.push(worker());
-  }
-  await Promise.all(workers);
-
   const elapsed = Math.round((Date.now() - startTime) / 1000);
-  console.log(`[translate] Done. Translated ${done}, failed ${failed}, cached ${cache.size}. Total elapsed: ${elapsed}s`);
+  console.log(`[translate] Done. Translated ${done}, failed ${failed}, cached ${cache.size}. Total elapsed: ${elapsed}s (${(elapsed/60).toFixed(1)} min)`);
 }
 
 scrape().catch(err => {
