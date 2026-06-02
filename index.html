@@ -1390,23 +1390,34 @@ const LANG_STORAGE_KEY = "folkemodet2026_lang_v1";
 let currentLang = "da";
 
 // === THEME TRANSLATIONS ===
-// Folkemødet's official theme taxonomy. Maps lower-case Danish theme name to English.
-// Themes not in this map fall back to the Danish name when viewing in English.
+// Folkemødet's official theme taxonomy (Allinge 2026). Maps lower-case Danish
+// theme name to English. Themes not in this map fall back to the Danish name.
 const THEME_TRANSLATIONS = {
+  // Verified from program.folkemoedet.dk for 2026
   "andet": "Other",
   "børn, unge og undervisning": "Children, youth and education",
-  "demokrati, ytringsfrihed og medborgerskab": "Democracy, free speech and citizenship",
   "eu og udenrigspolitik": "EU and foreign policy",
   "forsvarspolitik": "Defence policy",
   "fødevarer og madkultur": "Food and food culture",
   "klima, miljø, natur og energi": "Climate, environment, nature and energy",
   "kultur, medier og idræt": "Culture, media and sport",
-  "kunst, kultur og religion": "Art, culture and religion",
-  "ligestilling og minoriteter": "Equality and minorities",
+  "ligestilling, køn og minoriteter": "Equality, gender and minorities",
+  "offentlighed, dialog og diskussion": "Public discourse and debate",
   "retspolitik og forvaltning": "Legal policy and public administration",
+  "socialpolitik og integration": "Social policy and integration",
+  "sundhed, omsorg og forebyggelse": "Health, care and prevention",
+  "teknologi og digitalisering": "Technology and digitalisation",
+  "transport og byggeri": "Transport and construction",
+  "tro og religion": "Faith and religion",
+  "uddannelse og forskning": "Education and research",
+  "vækst, erhverv og beskæftigelse": "Growth, business and employment",
+  "økonomi, finans og skat": "Economy, finance and tax",
+
+  // Other common Folkemødet themes (legacy / variants)
+  "demokrati, ytringsfrihed og medborgerskab": "Democracy, free speech and citizenship",
+  "kunst, kultur og religion": "Art, culture and religion",
   "social- og sundhedspolitik": "Social and health policy",
   "sundhed": "Health",
-  "tro og religion": "Faith and religion",
   "uddannelse": "Education",
   "udsatte og minoriteter": "Vulnerable groups and minorities",
   "økonomi og erhverv": "Economy and business",
