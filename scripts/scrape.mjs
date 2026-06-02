@@ -688,23 +688,32 @@ async function translateBatch(items, attempt = 1) {
   // Returns { results: [...], tokensUsed: number }
   const prompt = `You are a professional Danish-to-English translator working on a programme for the Danish political festival "Folkemødet" (a public-debate festival on Bornholm).
 
-Translate the following ${items.length} event entries from Danish to natural, idiomatic British English. Keep:
-- Proper nouns, organisation names, person names exactly as-is (do NOT translate them)
-- The tone (often debate/panel/keynote style — keep it engaging but accurate)
-- Concise length (don't pad). Match the original length closely.
+Translate the following ${items.length} event entries from Danish to natural, idiomatic British English.
 
-IMPORTANT: Each entry has THREE fields you MUST translate, even if short:
-1. "title"   → "title_en"   (always required if input title is non-empty)
-2. "summary" → "summary_en" (always required if input summary is non-empty)
-3. "more"    → "more_en"    (always required if input more is non-empty; empty string if input is empty)
+CRITICAL FIELD SEPARATION RULES:
+- The input has THREE separate fields: "title", "summary", "more"
+- You MUST keep them strictly separate in the output as "title_en", "summary_en", "more_en"
+- NEVER merge content from "summary" into "title_en"
+- NEVER merge content from "more" into "title_en" or "summary_en"
+- Each output field translates ONLY its corresponding input field
+- If "title" is "Morgen yoga", then "title_en" is "Morning yoga" — NOT "Morning yoga — start the day with movement"
+- Even if the title looks incomplete on its own (e.g. just a name or partial phrase), translate it as-is
 
-DO NOT leave any of the three _en fields empty unless the corresponding input field is also empty.
-DO NOT skip fields just because they are short — even single-sentence summaries must be translated.
+TRANSLATION QUALITY:
+- Keep proper nouns, organisation names, person names exactly as-is (do NOT translate them)
+- Match the original tone (debate/panel/keynote style)
+- Match the original length closely. Do not pad or expand.
 
-Some entries may already be in English — in that case return the original text in all three _en fields and add "lang": "en".
+LANGUAGE DETECTION:
+- If an entry is already in English, return original text in all three _en fields and set "lang": "en"
+- Otherwise set "lang": "da"
 
-Output ONLY a JSON array (no markdown fences, no preamble) where each item has ALL FOUR fields:
-  {"id": "<original id>", "title_en": "<translated>", "summary_en": "<translated>", "more_en": "<translated or empty>", "lang": "da" or "en"}
+FIELD COMPLETENESS:
+- Every non-empty input field MUST have a corresponding non-empty translated _en field
+- If input "more" is empty, return "more_en": ""
+
+Output ONLY a JSON array (no markdown fences, no preamble):
+[{"id": "...", "title_en": "...", "summary_en": "...", "more_en": "...", "lang": "da" or "en"}, ...]
 
 Input:
 ${JSON.stringify(items.map(i => ({ id: i.id, title: i.title, summary: i.summary, more: i.more || '' })), null, 0)}`;
@@ -824,15 +833,17 @@ async function translateEvents(out) {
       e.title_en = cached.title_en;
       e.summary_en = cached.summary_en;
       e.more_en = cached.more_en;
-      // Check if cached translation is COMPLETE:
-      // - title_en should exist if original title exists
-      // - summary_en should exist if original summary exists
-      // - more_en should exist if original more exists
-      // If any are missing, re-queue this event for translation.
+      // Check if cached translation is COMPLETE and CONSISTENT:
+      // - All three _en fields exist when their input counterpart exists
+      // - title_en is not absurdly longer than title (sign of summary being merged into it)
       const missingTitle = e.title && !cached.title_en;
       const missingSummary = e.summary && !cached.summary_en;
       const missingMore = e.more && !cached.more_en;
-      if (missingTitle || missingSummary || missingMore) {
+      // Heuristic: if title_en is more than 2.5x the length of title (in chars),
+      // the LLM probably merged summary into title — re-translate this event.
+      const titleBloated = e.title && cached.title_en &&
+        cached.title_en.length > Math.max(60, e.title.length * 2.5);
+      if (missingTitle || missingSummary || missingMore || titleBloated) {
         // Fall through to translation queue
       } else {
         continue;
