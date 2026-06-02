@@ -5,6 +5,12 @@ on:
     # Daily at 06:00 UTC = 08:00 CEST
     - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      max_events:100
+        description: 'Max events to scrape (leave blank for ALL ~3600). Use 100 for fast test.'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -12,7 +18,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Up from 45 — translation step adds ~5-15 min on first run
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -28,13 +34,15 @@ jobs:
       - name: Run scraper
         run: node scripts/scrape.mjs
         env:
-          # When the GROQ_API_KEY repo-secret is set, the scraper translates
-          # Danish titles + summaries to English via Groq (llama-3.3-70b-versatile).
-          # Translations are cached in program.json so only NEW events incur cost.
-          # If the secret is missing, scraping continues without translation.
+          # Pass MAX_EVENTS through only if provided in workflow_dispatch input
+          MAX_EVENTS: ${{ github.event.inputs.max_events }}
+          # If GROQ_API_KEY repo-secret is set, scraper translates titles + summaries to English.
+          # Caches translations across runs so only new events incur API cost.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
       - name: Commit program.json if changed
+        # Skip commit when running in test mode (MAX_EVENTS set) to avoid polluting the live file
+        if: github.event.inputs.max_events == ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -47,12 +55,12 @@ jobs:
 
             MAX_RETRIES=5
             for i in $(seq 1 $MAX_RETRIES); do
-              echo "Push attempt $i/$MAX_RETRIES…"
+              echo "Push attempt $i/$MAX_RETRIESâ€¦"
               if git push; then
-                echo "✓ Pushed successfully"
+                echo "âœ“ Pushed successfully"
                 exit 0
               fi
-              echo "Push rejected — pulling with rebase…"
+              echo "Push rejected â€” pulling with rebaseâ€¦"
               git pull --rebase origin main || {
                 echo "Rebase failed, aborting"
                 git rebase --abort 2>/dev/null || true
@@ -60,6 +68,14 @@ jobs:
               }
               sleep 2
             done
-            echo "× Could not push after $MAX_RETRIES attempts"
+            echo "Ã— Could not push after $MAX_RETRIES attempts"
             exit 1
           fi
+
+      - name: Upload test artifact
+        if: github.event.inputs.max_events != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-program-json
+          path: program.json
+          retention-days: 3
