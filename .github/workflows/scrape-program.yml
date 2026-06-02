@@ -4,7 +4,7 @@ on:
   schedule:
     # Daily at 06:00 UTC = 08:00 CEST
     - cron: '0 6 * * *'
-  workflow_dispatch:  # Manual trigger from Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,7 +12,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 60  # Up from 45 — translation step adds ~5-15 min on first run
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +27,12 @@ jobs:
 
       - name: Run scraper
         run: node scripts/scrape.mjs
+        env:
+          # When the GROQ_API_KEY repo-secret is set, the scraper translates
+          # Danish titles + summaries to English via Groq (llama-3.3-70b-versatile).
+          # Translations are cached in program.json so only NEW events incur cost.
+          # If the secret is missing, scraping continues without translation.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
       - name: Commit program.json if changed
         run: |
@@ -39,7 +45,6 @@ jobs:
             EVENTS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('program.json')).events.length)")
             git commit -m "Update program.json (${EVENTS} events)"
 
-            # Retry-push with rebase in case remote has new commits during our long scrape
             MAX_RETRIES=5
             for i in $(seq 1 $MAX_RETRIES); do
               echo "Push attempt $i/$MAX_RETRIES…"
