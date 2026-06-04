@@ -2099,10 +2099,73 @@ function populateFilters() {
   });
 }
 
+// Normalize text for search: lowercase, strip diacritics, unify quotes
+function normalizeForSearch(s) {
+  return (s || '').toLowerCase()
+    .replace(/[\u2018\u2019\u02BC]/g, "'")
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Match a single search token against text.
+// Short tokens (<4 chars like "ufo", "ai", "eu") require whole-word matches.
+// Longer tokens match as word-prefix (so "klima" finds "klimaforandring").
+function tokenMatchesText(token, text) {
+  if (!token || !text) return false;
+  const t = normalizeForSearch(token);
+  const txt = normalizeForSearch(text);
+  if (t.length < 4) {
+    const re = new RegExp(`(^|[^a-zæøå0-9])${escapeRegex(t)}([^a-zæøå0-9]|$)`, 'i');
+    return re.test(txt);
+  } else {
+    const re = new RegExp(`(^|[^a-zæøå0-9])${escapeRegex(t)}`, 'i');
+    return re.test(txt);
+  }
+}
+
+// Decide if event matches the search string.
+// Splits search into tokens (space-separated). Every token must match somewhere.
+// Content fields (title, summary, full description) are prioritized;
+// for short tokens we only search in content fields to avoid noise like
+// "ufo" matching "udforsk" or "pension" matching an organizer name.
+function eventMatchesSearch(event, rawSearch) {
+  const tokens = rawSearch.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  // Build content blob (titles, summaries, full descriptions in both languages)
+  const contentBlob = [
+    event.title, event.title_en,
+    event.summary, event.summary_en,
+    event.more, event.more_en
+  ].filter(Boolean).join(' ');
+
+  // Build metadata blob (organizers, venue, speakers, themes)
+  const themes = Array.isArray(event.themes) ? event.themes : [];
+  const themesAsString = themes.concat(themes.map(translateTheme)).join(' ');
+  const speakersString = Array.isArray(event.speakers)
+    ? event.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || '') + ' ' + (s.org || ''))).join(' ')
+    : '';
+  const metaBlob = [event.organizers, event.venue, themesAsString, speakersString].filter(Boolean).join(' ');
+
+  // Every token must match — short tokens only in content, long tokens in either
+  for (const tok of tokens) {
+    const isShort = normalizeForSearch(tok).length < 4;
+    if (isShort) {
+      if (!tokenMatchesText(tok, contentBlob)) return false;
+    } else {
+      if (!tokenMatchesText(tok, contentBlob) && !tokenMatchesText(tok, metaBlob)) return false;
+    }
+  }
+  return true;
+}
+
 function applyFilters() {
   const day = document.getElementById("filterDay").value;
   const venue = document.getElementById("filterVenue").value;
-  const search = document.getElementById("filterSearch").value.trim().toLowerCase();
+  const search = document.getElementById("filterSearch").value.trim();
   const selectedThemes = [...programState.selectedThemes];
 
   programState.filtered = programState.events.filter(e => {
@@ -2113,22 +2176,7 @@ function applyFilters() {
     }
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
-    if (search) {
-      // Search across title, summary, full description, organizers, venue, speakers
-      // AND their English translations + translated theme names. This way an English
-      // user can find an event whose Danish title contains the search term, and vice versa.
-      const themes = Array.isArray(e.themes) ? e.themes : [];
-      const themesAsString = themes.concat(themes.map(translateTheme)).join(' ');
-      const hay = [
-        e.title, e.title_en,
-        e.summary, e.summary_en,
-        e.more, e.more_en,
-        e.organizers, e.venue,
-        themesAsString,
-        Array.isArray(e.speakers) ? e.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || ''))).join(' ') : ''
-      ].filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(search)) return false;
-    }
+    if (search && !eventMatchesSearch(e, search)) return false;
     if (selectedThemes.length > 0) {
       const evThemes = e.themes || [];
       const matches = selectedThemes.some(t => evThemes.includes(t));
