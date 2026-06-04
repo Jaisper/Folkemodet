@@ -2099,9 +2099,13 @@ function populateFilters() {
   });
 }
 
-// Normalize text for search: lowercase, strip diacritics, unify quotes
+// Normalize text for search: insert spaces at camelCase boundaries (so smushed
+// data like "ModeratorKim" becomes "Moderator Kim" and "Kim" can be found),
+// then lowercase, strip diacritics, unify quotes.
 function normalizeForSearch(s) {
-  return (s || '').toLowerCase()
+  return (s || '')
+    .replace(/([a-zæøå])([A-ZÆØÅ])/g, '$1 $2')
+    .toLowerCase()
     .replace(/[\u2018\u2019\u02BC]/g, "'")
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -2111,8 +2115,10 @@ function escapeRegex(s) {
 }
 
 // Match a single search token against text.
-// Short tokens (<4 chars like "ufo", "ai", "eu") require whole-word matches.
-// Longer tokens match as word-prefix (so "klima" finds "klimaforandring").
+// Short tokens (<4 chars like "ufo", "ai", "eu") require whole-word matches to avoid
+// noise like "ufo" matching "udforsk". Longer tokens (4+) try a word-prefix match first
+// for clean results ("klima" → "klimaforandring"), then fall back to plain substring
+// match so names that got smushed together in scraped data ("ModeratorKehlet") still work.
 function tokenMatchesText(token, text) {
   if (!token || !text) return false;
   const t = normalizeForSearch(token);
@@ -2120,44 +2126,42 @@ function tokenMatchesText(token, text) {
   if (t.length < 4) {
     const re = new RegExp(`(^|[^a-zæøå0-9])${escapeRegex(t)}([^a-zæøå0-9]|$)`, 'i');
     return re.test(txt);
-  } else {
-    const re = new RegExp(`(^|[^a-zæøå0-9])${escapeRegex(t)}`, 'i');
-    return re.test(txt);
   }
+  // Long tokens: word-prefix preferred, plain substring as fallback
+  const wordPrefixRe = new RegExp(`(^|[^a-zæøå0-9])${escapeRegex(t)}`, 'i');
+  if (wordPrefixRe.test(txt)) return true;
+  return txt.includes(t);
 }
 
 // Decide if event matches the search string.
 // Splits search into tokens (space-separated). Every token must match somewhere.
-// Content fields (title, summary, full description) are prioritized;
-// for short tokens we only search in content fields to avoid noise like
-// "ufo" matching "udforsk" or "pension" matching an organizer name.
+// Token matching is by word-boundary (short tokens) or word-prefix (long tokens),
+// which already prevents noise like "ufo" matching "udforsk". Tokens can match in
+// either content fields (title/summary/description) or metadata (organizers/venue/
+// speakers/themes) — useful for searching speaker names.
 function eventMatchesSearch(event, rawSearch) {
   const tokens = rawSearch.trim().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return true;
 
-  // Build content blob (titles, summaries, full descriptions in both languages)
-  const contentBlob = [
-    event.title, event.title_en,
-    event.summary, event.summary_en,
-    event.more, event.more_en
-  ].filter(Boolean).join(' ');
-
-  // Build metadata blob (organizers, venue, speakers, themes)
   const themes = Array.isArray(event.themes) ? event.themes : [];
   const themesAsString = themes.concat(themes.map(translateTheme)).join(' ');
   const speakersString = Array.isArray(event.speakers)
     ? event.speakers.map(s => typeof s === 'string' ? s : (s.name + ' ' + (s.role || '') + ' ' + (s.org || ''))).join(' ')
     : '';
-  const metaBlob = [event.organizers, event.venue, themesAsString, speakersString].filter(Boolean).join(' ');
 
-  // Every token must match — short tokens only in content, long tokens in either
+  // Single haystack covering content and metadata. Word-boundary rules in
+  // tokenMatchesText handle precision (so "ufo" doesn't match "udforsk").
+  const hay = [
+    event.title, event.title_en,
+    event.summary, event.summary_en,
+    event.more, event.more_en,
+    event.organizers, event.venue,
+    themesAsString,
+    speakersString
+  ].filter(Boolean).join(' ');
+
   for (const tok of tokens) {
-    const isShort = normalizeForSearch(tok).length < 4;
-    if (isShort) {
-      if (!tokenMatchesText(tok, contentBlob)) return false;
-    } else {
-      if (!tokenMatchesText(tok, contentBlob) && !tokenMatchesText(tok, metaBlob)) return false;
-    }
+    if (!tokenMatchesText(tok, hay)) return false;
   }
   return true;
 }
