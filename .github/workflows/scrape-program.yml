@@ -3,14 +3,19 @@ name: Scrape Folkemødet Program
 on:
   schedule:
     # Daily at 06:00 UTC = 08:00 CEST
+    # Daily cron uses FAST_MODE for cheap incremental updates.
     - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       max_events:
-        description: 'Max events to scrape (leave blank for ALL ~3600). Use 100 for fast test.'
+        description: 'Max events (leave empty for full scrape; e.g. 20 for test mode that does NOT commit)'
         required: false
         default: ''
-        type: string
+      fast_mode:
+        description: 'Fast mode: only translate genuinely new events (cheap). Disable for full freshness check.'
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: write
@@ -31,18 +36,41 @@ jobs:
           npm install playwright@1.49.0
           npx playwright install chromium --with-deps
 
-      - name: Run scraper
-        run: node scripts/scrape.mjs
-        env:
-          # Pass MAX_EVENTS through only if provided in workflow_dispatch input
-          MAX_EVENTS: ${{ github.event.inputs.max_events }}
-          # If GROQ_API_KEY repo-secret is set, scraper translates titles + summaries to English.
-          # Caches translations across runs so only new events incur API cost.
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      - name: Determine run mode
+        id: mode
+        run: |
+          MAX_EVENTS="${{ github.event.inputs.max_events }}"
+          FAST_MODE="${{ github.event.inputs.fast_mode }}"
+          # Schedule (cron) runs default to FAST_MODE=1 for cheap daily updates
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            FAST_MODE="true"
+            MAX_EVENTS=""
+          fi
+          # Default FAST_MODE to true if blank
+          if [ -z "$FAST_MODE" ]; then
+            FAST_MODE="true"
+          fi
+          echo "MAX_EVENTS=$MAX_EVENTS" >> $GITHUB_OUTPUT
+          echo "FAST_MODE=$FAST_MODE" >> $GITHUB_OUTPUT
+          echo "Mode: MAX_EVENTS=$MAX_EVENTS · FAST_MODE=$FAST_MODE"
 
-      - name: Commit program.json if changed
-        # Skip commit when running in test mode (MAX_EVENTS set) to avoid polluting the live file
-        if: github.event.inputs.max_events == ''
+      - name: Run scraper
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MAX_EVENTS: ${{ steps.mode.outputs.MAX_EVENTS }}
+          FAST_MODE: ${{ steps.mode.outputs.FAST_MODE == 'true' && '1' || '0' }}
+        run: node scripts/scrape.mjs
+
+      - name: Upload test artifact (when MAX_EVENTS is set)
+        if: steps.mode.outputs.MAX_EVENTS != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-program-json
+          path: program.json
+          retention-days: 3
+
+      - name: Commit program.json if changed (full runs only)
+        if: steps.mode.outputs.MAX_EVENTS == ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -53,14 +81,15 @@ jobs:
             EVENTS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('program.json')).events.length)")
             git commit -m "Update program.json (${EVENTS} events)"
 
+            # Retry-push with rebase in case remote has new commits during our long scrape
             MAX_RETRIES=5
             for i in $(seq 1 $MAX_RETRIES); do
-              echo "Push attempt $i/$MAX_RETRIESâ€¦"
+              echo "Push attempt $i/$MAX_RETRIES…"
               if git push; then
-                echo "âœ“ Pushed successfully"
+                echo "✓ Pushed successfully"
                 exit 0
               fi
-              echo "Push rejected â€” pulling with rebaseâ€¦"
+              echo "Push rejected — pulling with rebase…"
               git pull --rebase origin main || {
                 echo "Rebase failed, aborting"
                 git rebase --abort 2>/dev/null || true
@@ -68,14 +97,6 @@ jobs:
               }
               sleep 2
             done
-            echo "Ã— Could not push after $MAX_RETRIES attempts"
+            echo "× Could not push after $MAX_RETRIES attempts"
             exit 1
           fi
-
-      - name: Upload test artifact
-        if: github.event.inputs.max_events != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-program-json
-          path: program.json
-          retention-days: 3
