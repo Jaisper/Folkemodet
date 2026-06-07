@@ -16,6 +16,15 @@ if (MAX_EVENTS !== Infinity) {
   console.log(`[test mode] MAX_EVENTS=${MAX_EVENTS} — will stop scraping early`);
 }
 
+// FAST_MODE: trust the cache fully — only translate events that have no cached
+// translation at all. Skips both signature checks and bloat heuristics.
+// Use for daily incremental updates to keep Groq cost minimal.
+// Set FAST_MODE=0 or leave unset to enable the full freshness check.
+const FAST_MODE = process.env.FAST_MODE === '1' || process.env.FAST_MODE === 'true';
+if (FAST_MODE) {
+  console.log(`[fast mode] enabled — only new events will be translated`);
+}
+
 const DAY_MAP = {
   '11': 'Torsdag',
   '12': 'Fredag',
@@ -554,12 +563,30 @@ async function scrape() {
               }
             }
 
-            return { themes, more, speakers: speakers.slice(0, 25) };
+            // === ORGANIZERS ===
+            // The detail page often has a fuller, comma-separated organizer list
+            // than the listing card (which can be truncated).
+            let detailOrganizers = "";
+            const orgEl = findLabelEl(['Arrangører', 'Arrangør']);
+            if (orgEl) {
+              detailOrganizers = collectAfter(orgEl, 10);
+              // Clean up: collapse whitespace, remove leading/trailing punctuation
+              detailOrganizers = detailOrganizers.replace(/\s+/g, ' ').trim();
+              if (detailOrganizers.length > 500) detailOrganizers = detailOrganizers.slice(0, 500) + '…';
+            }
+
+            return { themes, more, speakers: speakers.slice(0, 25), detailOrganizers };
           });
 
           ev.themes = details.themes;
           ev.more = details.more;
           ev.speakers = details.speakers;
+          // Prefer the detail-page organizer list when it has more content
+          // (the listing card sometimes truncates long lists like "X, Y, Z+3").
+          if (details.detailOrganizers &&
+              details.detailOrganizers.length > (ev.organizers || '').length) {
+            ev.organizers = details.detailOrganizers;
+          }
           fetched++;
 
           // Diagnostic: log first 3 events' DOM structure around the labels we're missing
@@ -772,6 +799,19 @@ function extractEventIdFromUrl(url) {
   return m ? m[1] : null;
 }
 
+// Build a short signature of the source text (title|summary|more) so the cache
+// can detect when the source has changed since the last translation. We use a
+// length-prefixed concatenation of normalised first-and-last chars per field,
+// which is cheap, deterministic, and very unlikely to collide for our purposes.
+function buildSourceSignature(title, summary, more) {
+  const fp = (s) => {
+    const t = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!t) return '0';
+    return t.length + ':' + t.slice(0, 24) + '|' + t.slice(-16);
+  };
+  return [fp(title), fp(summary), fp(more)].join('§');
+}
+
 async function translateBatch(items, attempt = 1) {
   // items: array of { id, title, summary, more } objects
   // Returns { results: [...], tokensUsed: number }
@@ -949,20 +989,31 @@ async function translateEvents(out) {
       e.title_en = cached.title_en;
       e.summary_en = cached.summary_en;
       e.more_en = cached.more_en;
-      // Check if cached translation is COMPLETE and CONSISTENT:
-      // - All three _en fields exist when their input counterpart exists
-      // - title_en is not absurdly longer than title (sign of summary being merged into it)
-      const missingTitle = e.title && !cached.title_en;
-      const missingSummary = e.summary && !cached.summary_en;
-      const missingMore = e.more && !cached.more_en;
-      // Heuristic: if title_en is more than 2.5x the length of title (in chars),
-      // the LLM probably merged summary into title — re-translate this event.
-      const titleBloated = e.title && cached.title_en &&
-        cached.title_en.length > Math.max(60, e.title.length * 2.5);
-      if (missingTitle || missingSummary || missingMore || titleBloated) {
-        // Fall through to translation queue
+      // FAST_MODE: trust the cache absolutely — only re-translate if a field is
+      // outright missing from the cache. Skips signature and bloat checks.
+      if (FAST_MODE) {
+        const missingTitle = e.title && !cached.title_en;
+        const missingSummary = e.summary && !cached.summary_en;
+        const missingMore = e.more && !cached.more_en;
+        if (!missingTitle && !missingSummary && !missingMore) {
+          continue;
+        }
+        // Fall through to translation queue for events with missing fields
       } else {
-        continue;
+        // Full freshness check: signature, completeness, and bloat heuristics.
+        const currentSig = buildSourceSignature(e.title, e.summary, e.more);
+        const cachedSig = cached._source_sig || null;
+        const sigChanged = cachedSig && cachedSig !== currentSig;
+        const missingTitle = e.title && !cached.title_en;
+        const missingSummary = e.summary && !cached.summary_en;
+        const missingMore = e.more && !cached.more_en;
+        const titleBloated = !cachedSig && e.title && cached.title_en &&
+          cached.title_en.length > Math.max(60, e.title.length * 2.5);
+        if (sigChanged || missingTitle || missingSummary || missingMore || titleBloated) {
+          // Fall through to translation queue
+        } else {
+          continue;
+        }
       }
     }
 
@@ -1009,6 +1060,7 @@ async function translateEvents(out) {
         item._ref.title_en = r.title_en || item.title;
         item._ref.summary_en = r.summary_en || item.summary;
         item._ref.more_en = r.more_en || item.more;
+        item._ref._source_sig = buildSourceSignature(item.title, item.summary, item.more);
       }
     }
   } catch (e) {
@@ -1069,11 +1121,13 @@ async function translateEvents(out) {
             item._ref.title_en = r.title_en || item.title;
             item._ref.summary_en = r.summary_en || item.summary;
             item._ref.more_en = r.more_en || item.more;
+            item._ref._source_sig = buildSourceSignature(item.title, item.summary, item.more);
             if (r.lang === 'en') item._ref.language = 'en';
           } else {
             item._ref.title_en = item.title;
             item._ref.summary_en = item.summary;
             item._ref.more_en = item.more;
+            item._ref._source_sig = buildSourceSignature(item.title, item.summary, item.more);
           }
         }
         done += batch.length;
