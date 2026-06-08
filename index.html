@@ -1427,8 +1427,6 @@ const I18N = {
     "chip.favoritesTitle": "Vis kun arrangementer du har hjertet",
     "chip.upcoming": "Aktuelle",
     "chip.upcomingTitle": "Skjul arrangementer der allerede er overstået",
-    "chip.freebies": "Gratis 🍺",
-    "chip.freebiesTitle": "Vis kun arrangementer hvor der serveres gratis mad eller drikke",
     "fav.add": "Tilføj til favoritter",
     "fav.remove": "Fjern fra favoritter",
     "fav.aria": "Favorit",
@@ -1477,8 +1475,6 @@ const I18N = {
     "chip.favoritesTitle": "Show only events you have hearted",
     "chip.upcoming": "Upcoming",
     "chip.upcomingTitle": "Hide events that have already ended",
-    "chip.freebies": "Free 🍺",
-    "chip.freebiesTitle": "Show only events with free food or drinks",
     "fav.add": "Add to favourites",
     "fav.remove": "Remove from favourites",
     "fav.aria": "Favourite",
@@ -1686,89 +1682,44 @@ const programState = {
   officialThemes: [],
   favorites: new Set(),
   showFavoritesOnly: false,
-  showOnlyUpcoming: false,
-  showOnlyFreebies: false  // true when "Gratis 🍺" chip is active
+  showOnlyUpcoming: false
 };
 
-// Detect events that mention free food/drink in their description or summary.
-// We compile the regexes once (FOODISH_PATTERNS) and check the combined text
-// of summary + more (descriptions tend to mention "vi byder på", "gratis",
-// "kaffe og kage" etc.). Conservative: false-positives reduce signal, so we
-// require fairly specific language ("gratis" + food, "X på huset", etc.) and
-// avoid matching mere mentions ("øl-branchen", "fri abort", "Pop-up bar").
-const _FOODISH = "(?:øl|fadøl|vin|bobler|champagne|drinks?|cocktails?|kaffe|drikke(?:varer)?|the|te|saft|smoothie|juice|vand|mad|frokost|morgenmad|aftensmad|brunch|snacks?|sandwich(?:es)?|pizza|burger|kage(?:r)?|is|popcorn|hotdogs?|pølser?|kringle|wienerbrød|brød|tapas|smørrebrød|frugt|forfriskning(?:er)?)";
-const FREEBIE_PATTERNS = [
-  // "gratis ... FOODISH" within 25 chars (catches "gratis kop kaffe")
-  new RegExp("\\b(?:gratis|fri)\\b[^.!?]{0,25}\\b" + _FOODISH + "\\b", "i"),
-  // FOODISH "på huset" etc.
-  new RegExp("\\b" + _FOODISH + "\\b[^.!?]{0,10}(?:på huset|fra (?:huset|baren|køkkenet)|inkluderet|inkl\\.)", "i"),
-  // "vi serverer/byder på/tilbyder ..."
-  new RegExp("(?:vi|der) (?:serverer|byder på|udskænker|tilbyder|deler ud|disker op med|servere)\\s+(?:gratis\\s+)?(?:\\w+\\s+){0,3}\\b" + _FOODISH + "\\b", "i"),
-  // Faste vendinger
-  /\b(?:happy hour|fri bar|åben bar|fri forplejning|gratis forplejning|gratis servering)\b/i,
-  /\bkaffe (?:og|&) (?:kage|brød|kringle|wienerbrød)\b/i,
-  // Smagsprøver
-  /\b(?:gratis )?smagsprøver?\b/i,
-  /\bsmag (?:vores|på vores)\b/i,
-  // "kom forbi/og X" + FOODISH
-  new RegExp("\\b(?:kom|kig forbi|forbi)\\b[^.!?]{0,30}\\b" + _FOODISH + "\\b", "i"),
-];
-
-function eventHasFreebies(event) {
-  try {
-    const text = [event.title, event.summary, event.more].filter(Boolean).join(" ");
-    if (!text) return false;
-    return FREEBIE_PATTERNS.some(re => re.test(text));
-  } catch (e) {
-    console.warn("freebie check failed", e);
-    return false;
-  }
-}
-
-// Folkemødet 2026 dates — used to filter "currently relevant" events.
-// (Day labels in the data are Danish weekday names; we map them to specific dates.)
+// Folkemødet 2026 dates — used for time-aware sorting and "Aktuelle" filter.
 const FOLKEMODET_DATES = {
   'Torsdag': '2026-06-11',
   'Fredag':  '2026-06-12',
   'Lørdag':  '2026-06-13',
-  'Søndag':  '2026-06-14'  // safety; not actually a Folkemødet day
+  'Søndag':  '2026-06-14'
 };
 
-// Return true if event is in the past (i.e., its end time has already happened
-// according to the user's wall clock). Used by the "Aktuelle" filter.
-//
-// Festival convention: events between 00:00 and 05:59 belong to the *night* of
-// the previous calendar day. E.g. "Torsdag 00:30" really means Friday 11 June
-// 00:30 (the night after Thursday's programme), NOT Thursday morning.
+// Return true if event is in the past (its end time has already passed).
+// Festival convention: events starting 00:00-05:59 belong to the *night* of the
+// previous calendar day. "Torsdag 00:30" really means Friday 11 June 00:30.
 function isEventPast(event) {
   if (!event.day || !event.time) return false;
   const dateStr = FOLKEMODET_DATES[event.day];
   if (!dateStr) return false;
-  // event.time is like "15:00-15:45"; use end-time as the "still relevant" cutoff
   const m = String(event.time).match(/(\d{1,2})[:.](\d{2})\s*[-–—]\s*(\d{1,2})[:.](\d{2})/);
   if (!m) return false;
   const startHour = parseInt(m[1], 10);
   const endHour = parseInt(m[3], 10);
   const endMin = parseInt(m[4], 10);
   const [y, mo, d] = dateStr.split('-').map(n => parseInt(n, 10));
-  // If the start hour is in early-morning territory (00:00-05:59), this is a
-  // night event belonging to the night AFTER its labelled day → shift +1 day.
-  // Same for the end if start was also shifted.
+  // Night event (start 00:00-05:59) → end belongs to the day AFTER the label
   const dayOffset = (startHour < 6) ? 1 : 0;
-  // Handle event that crosses midnight (e.g. 23:00-01:00): if end < start time-wise
-  // and we didn't already shift, the end is on the next day.
+  // Event crossing midnight (e.g. 23:00-01:00): end is next day
   let endDayOffset = dayOffset;
   if (dayOffset === 0 && endHour < startHour) endDayOffset = 1;
   const endTime = new Date(y, mo - 1, d + endDayOffset, endHour, endMin, 0, 0);
   return endTime.getTime() < Date.now();
 }
 
-// Return true if we're currently inside the Folkemødet window (11-13 June 2026).
-// During the festival, default to showing only upcoming events.
+// True if we're currently inside the Folkemødet window (11-13 June 2026).
 function isFolkemodetActive() {
   const now = Date.now();
-  const start = new Date(2026, 5, 11, 0, 0, 0).getTime();  // 11 June 00:00
-  const end = new Date(2026, 5, 13, 23, 59, 59).getTime(); // 13 June 23:59
+  const start = new Date(2026, 5, 11, 0, 0, 0).getTime();
+  const end = new Date(2026, 5, 13, 23, 59, 59).getTime();
   return now >= start && now <= end;
 }
 programState.showOnlyUpcoming = isFolkemodetActive();
@@ -2259,25 +2210,6 @@ function populateFilters() {
     console.warn("upcoming chip render failed", e);
   }
 
-  // "Gratis 🍺" chip — toggles showing only events with free food/drink
-  try {
-    const freebieChip = document.createElement("div");
-    freebieChip.className = "pg-chip freebie-chip";
-    freebieChip.id = "freebieChip";
-    const freebieLabel = (typeof t === "function" ? t("chip.freebies") : null) || "Gratis";
-    const freebieTitle = (typeof t === "function" ? t("chip.freebiesTitle") : null) || "Vis kun gratis-events";
-    freebieChip.innerHTML = `🍺 <span data-i18n="chip.freebies">${esc(freebieLabel)}</span>`;
-    freebieChip.title = freebieTitle;
-    if (programState.showOnlyFreebies) freebieChip.classList.add("active");
-    freebieChip.addEventListener("click", () => {
-      programState.showOnlyFreebies = !programState.showOnlyFreebies;
-      freebieChip.classList.toggle("active", programState.showOnlyFreebies);
-      applyFilters();
-    });
-    chipsEl.appendChild(freebieChip);
-  } catch (e) {
-    console.warn("freebie chip render failed", e);
-  }
 
   // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
   const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
@@ -2426,8 +2358,6 @@ function applyFilters() {
     }
     // "Aktuelle" — hide events whose end-time has passed
     if (programState.showOnlyUpcoming && isEventPast(e)) return false;
-    // "Gratis 🍺" — show only events that mention free food/drink
-    if (programState.showOnlyFreebies && !eventHasFreebies(e)) return false;
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
     if (search && !eventMatchesSearch(e, search)) return false;
@@ -2579,4 +2509,42 @@ function renderProgram() {
       </div>
     `;
     }).join("");
-    return
+    return `<div class="pg-day-header">${esc(t("day." + d) !== "day." + d ? t("day." + d) : d)} ${esc(t("date." + date) !== "date." + date ? t("date." + date) : date)} · ${events.length}</div>${rows}`;
+  }).join("");
+
+  out.innerHTML = html;
+
+  // Attach map button handlers (any element with data-venue)
+  out.querySelectorAll("[data-venue]").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openVenueMap(btn.getAttribute("data-venue"), btn.getAttribute("data-title"));
+    });
+  });
+
+  // Attach favorite-button handlers
+  out.querySelectorAll("[data-fav-id]").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      toggleFavorite(btn.getAttribute("data-fav-id"), btn);
+    });
+  });
+
+  loadBtn.style.display = visible < total ? "block" : "none";
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+// GO — kick everything off now that all declarations are in scope
+loadOfficialProgram();
+</script>
+</body>
+</html>
