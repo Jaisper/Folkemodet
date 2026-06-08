@@ -272,6 +272,22 @@
     color: white;
   }
 
+  /* Freebie chip — golden amber, the colour of free beer 🍺 */
+  .pg-chip.freebie-chip {
+    border-color: #c8941e;
+    color: #8a6512;
+  }
+  .pg-chip.freebie-chip:hover {
+    background: #fdf3dd;
+    border-color: #c8941e;
+    color: #8a6512;
+  }
+  .pg-chip.freebie-chip.active {
+    background: #c8941e;
+    border-color: #c8941e;
+    color: white;
+  }
+
   .program-filters {
     display: flex;
     gap: 8px;
@@ -1411,6 +1427,8 @@ const I18N = {
     "chip.favoritesTitle": "Vis kun arrangementer du har hjertet",
     "chip.upcoming": "Aktuelle",
     "chip.upcomingTitle": "Skjul arrangementer der allerede er overstået",
+    "chip.freebies": "Gratis 🍺",
+    "chip.freebiesTitle": "Vis kun arrangementer hvor der serveres gratis mad eller drikke",
     "fav.add": "Tilføj til favoritter",
     "fav.remove": "Fjern fra favoritter",
     "fav.aria": "Favorit",
@@ -1459,6 +1477,8 @@ const I18N = {
     "chip.favoritesTitle": "Show only events you have hearted",
     "chip.upcoming": "Upcoming",
     "chip.upcomingTitle": "Hide events that have already ended",
+    "chip.freebies": "Free 🍺",
+    "chip.freebiesTitle": "Show only events with free food or drinks",
     "fav.add": "Add to favourites",
     "fav.remove": "Remove from favourites",
     "fav.aria": "Favourite",
@@ -1663,11 +1683,42 @@ const programState = {
   pageSize: 50,
   scrapedAt: null,
   selectedThemes: new Set(),
-  officialThemes: [],  // [{name, count}, ...] from program.json
-  favorites: new Set(),     // event IDs the user has hearted
-  showFavoritesOnly: false, // true when "Egne favoritter" theme chip is active
-  showOnlyUpcoming: false   // true when "Aktuelle" toggle is on (hides past events)
+  officialThemes: [],
+  favorites: new Set(),
+  showFavoritesOnly: false,
+  showOnlyUpcoming: false,
+  showOnlyFreebies: false  // true when "Gratis 🍺" chip is active
 };
+
+// Detect events that mention free food/drink in their description or summary.
+// We compile the regexes once (FOODISH_PATTERNS) and check the combined text
+// of summary + more (descriptions tend to mention "vi byder på", "gratis",
+// "kaffe og kage" etc.). Conservative: false-positives reduce signal, so we
+// require fairly specific language ("gratis" + food, "X på huset", etc.) and
+// avoid matching mere mentions ("øl-branchen", "fri abort", "Pop-up bar").
+const _FOODISH = "(?:øl|fadøl|vin|bobler|champagne|drinks?|cocktails?|kaffe|drikke(?:varer)?|the|te|saft|smoothie|juice|vand|mad|frokost|morgenmad|aftensmad|brunch|snacks?|sandwich(?:es)?|pizza|burger|kage(?:r)?|is|popcorn|hotdogs?|pølser?|kringle|wienerbrød|brød|tapas|smørrebrød|frugt|forfriskning(?:er)?)";
+const FREEBIE_PATTERNS = [
+  // "gratis ... FOODISH" within 25 chars (catches "gratis kop kaffe")
+  new RegExp("\\b(?:gratis|fri)\\b[^.!?]{0,25}\\b" + _FOODISH + "\\b", "i"),
+  // FOODISH "på huset" etc.
+  new RegExp("\\b" + _FOODISH + "\\b[^.!?]{0,10}(?:på huset|fra (?:huset|baren|køkkenet)|inkluderet|inkl\\.)", "i"),
+  // "vi serverer/byder på/tilbyder ..."
+  new RegExp("(?:vi|der) (?:serverer|byder på|udskænker|tilbyder|deler ud|disker op med|servere)\\s+(?:gratis\\s+)?(?:\\w+\\s+){0,3}\\b" + _FOODISH + "\\b", "i"),
+  // Faste vendinger
+  /\b(?:happy hour|fri bar|åben bar|fri forplejning|gratis forplejning|gratis servering)\b/i,
+  /\bkaffe (?:og|&) (?:kage|brød|kringle|wienerbrød)\b/i,
+  // Smagsprøver
+  /\b(?:gratis )?smagsprøver?\b/i,
+  /\bsmag (?:vores|på vores)\b/i,
+  // "kom forbi/og X" + FOODISH
+  new RegExp("\\b(?:kom|kig forbi|forbi)\\b[^.!?]{0,30}\\b" + _FOODISH + "\\b", "i"),
+];
+
+function eventHasFreebies(event) {
+  const text = [event.title, event.summary, event.more].filter(Boolean).join(" ");
+  if (!text) return false;
+  return FREEBIE_PATTERNS.some(re => re.test(text));
+}
 
 // Folkemødet 2026 dates — used to filter "currently relevant" events.
 // (Day labels in the data are Danish weekday names; we map them to specific dates.)
@@ -2197,6 +2248,20 @@ function populateFilters() {
   });
   chipsEl.appendChild(upcomingChip);
 
+  // "Gratis 🍺" chip — toggles showing only events with free food/drink
+  const freebieChip = document.createElement("div");
+  freebieChip.className = "pg-chip freebie-chip";
+  freebieChip.id = "freebieChip";
+  freebieChip.innerHTML = `🍺 <span data-i18n="chip.freebies">${esc(t("chip.freebies"))}</span>`;
+  freebieChip.title = t("chip.freebiesTitle");
+  if (programState.showOnlyFreebies) freebieChip.classList.add("active");
+  freebieChip.addEventListener("click", () => {
+    programState.showOnlyFreebies = !programState.showOnlyFreebies;
+    freebieChip.classList.toggle("active", programState.showOnlyFreebies);
+    applyFilters();
+  });
+  chipsEl.appendChild(freebieChip);
+
   // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
   const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
   let themeList;
@@ -2344,6 +2409,8 @@ function applyFilters() {
     }
     // "Aktuelle" — hide events whose end-time has passed
     if (programState.showOnlyUpcoming && isEventPast(e)) return false;
+    // "Gratis 🍺" — show only events that mention free food/drink
+    if (programState.showOnlyFreebies && !eventHasFreebies(e)) return false;
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
     if (search && !eventMatchesSearch(e, search)) return false;
@@ -2511,26 +2578,4 @@ function renderProgram() {
 
   // Attach favorite-button handlers
   out.querySelectorAll("[data-fav-id]").forEach(btn => {
-    btn.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      toggleFavorite(btn.getAttribute("data-fav-id"), btn);
-    });
-  });
-
-  loadBtn.style.display = visible < total ? "block" : "none";
-}
-
-function debounce(fn, ms) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
-  };
-}
-
-// GO — kick everything off now that all declarations are in scope
-loadOfficialProgram();
-</script>
-</body>
-</html>
+    btn.addEventLis
