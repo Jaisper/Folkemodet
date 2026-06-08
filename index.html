@@ -256,6 +256,22 @@
     margin-right: 2px;
   }
 
+  /* Upcoming chip — orange to distinguish it from theme chips and favorites */
+  .pg-chip.upcoming-chip {
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .pg-chip.upcoming-chip:hover {
+    background: #fff2e6;
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .pg-chip.upcoming-chip.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+
   .program-filters {
     display: flex;
     gap: 8px;
@@ -822,6 +838,43 @@
     color: var(--ink);
   }
 
+  /* Floating scroll-to-top button: appears once user scrolls down */
+  .scroll-top-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+    z-index: 99;
+  }
+  .scroll-top-btn.visible {
+    opacity: 0.92;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .scroll-top-btn:hover,
+  .scroll-top-btn:focus-visible {
+    opacity: 1;
+    background: #d2421a;
+    outline: none;
+  }
+  @media (max-width: 600px) {
+    .scroll-top-btn { bottom: 18px; right: 18px; width: 42px; height: 42px; }
+  }
+
   @media (max-width: 600px) {
     .wrap { padding: 20px 16px 60px; }
     .panel { padding: 16px; }
@@ -881,6 +934,12 @@
       <button class="load-more" id="loadMoreBtn" type="button" style="display:none" data-i18n="loadMore">Vis flere</button>
     </div>
   </section>
+
+  <button id="scrollTopBtn" class="scroll-top-btn" type="button" aria-label="Til toppen" title="Til toppen">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/>
+    </svg>
+  </button>
 
   <footer>
     <div data-i18n-html="footer.line1">Folkemødet 2026 · 11.–13. juni i Allinge på Bornholm · programmet opdateres dagligt fra <a href="https://program.folkemoedet.dk" target="_blank">program.folkemoedet.dk</a>.</div>
@@ -1350,6 +1409,8 @@ const I18N = {
     "chip.allThemes": "Alle temaer",
     "chip.favorites": "Egne favoritter",
     "chip.favoritesTitle": "Vis kun arrangementer du har hjertet",
+    "chip.upcoming": "Aktuelle",
+    "chip.upcomingTitle": "Skjul arrangementer der allerede er overstået",
     "fav.add": "Tilføj til favoritter",
     "fav.remove": "Fjern fra favoritter",
     "fav.aria": "Favorit",
@@ -1396,6 +1457,8 @@ const I18N = {
     "chip.allThemes": "All themes",
     "chip.favorites": "My favourites",
     "chip.favoritesTitle": "Show only events you have hearted",
+    "chip.upcoming": "Upcoming",
+    "chip.upcomingTitle": "Hide events that have already ended",
     "fav.add": "Add to favourites",
     "fav.remove": "Remove from favourites",
     "fav.aria": "Favourite",
@@ -1556,6 +1619,43 @@ function initFavoriteTools() {
   if (importBtn) importBtn.addEventListener("click", importFavorites);
 }
 
+// Show/hide the floating "scroll to top" button based on scroll position,
+// and wire its click + a double-tap shortcut on event cards.
+function initScrollToTop() {
+  const btn = document.getElementById("scrollTopBtn");
+  if (!btn) return;
+
+  // Toggle visibility once the user has scrolled past ~400px
+  const updateVisibility = () => {
+    if (window.scrollY > 400) {
+      btn.classList.add("visible");
+    } else {
+      btn.classList.remove("visible");
+    }
+  };
+  window.addEventListener("scroll", updateVisibility, { passive: true });
+  updateVisibility();
+
+  // Click handler
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Double-click anywhere on a program event = jump to top.
+  // We attach at document level so the handler survives re-renders. We avoid
+  // hijacking double-clicks on links, buttons, or inputs so they keep working.
+  document.addEventListener("dblclick", (e) => {
+    const target = e.target;
+    if (!target || !(target instanceof Element)) return;
+    // Ignore double-clicks that started on interactive elements
+    if (target.closest("a, button, input, textarea, select, summary, .pg-fav-btn")) return;
+    // Only react if the user double-clicked inside an event card
+    const inCard = target.closest(".pg-event");
+    if (!inCard) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
 const programState = {
   events: [],
   filtered: [],
@@ -1565,8 +1665,45 @@ const programState = {
   selectedThemes: new Set(),
   officialThemes: [],  // [{name, count}, ...] from program.json
   favorites: new Set(),     // event IDs the user has hearted
-  showFavoritesOnly: false  // true when "Egne favoritter" theme chip is active
+  showFavoritesOnly: false, // true when "Egne favoritter" theme chip is active
+  showOnlyUpcoming: false   // true when "Aktuelle" toggle is on (hides past events)
 };
+
+// Folkemødet 2026 dates — used to filter "currently relevant" events.
+// (Day labels in the data are Danish weekday names; we map them to specific dates.)
+const FOLKEMODET_DATES = {
+  'Torsdag': '2026-06-11',
+  'Fredag':  '2026-06-12',
+  'Lørdag':  '2026-06-13',
+  'Søndag':  '2026-06-14'  // safety; not actually a Folkemødet day
+};
+
+// Return true if event is in the past (i.e., its end time has already happened
+// according to the user's wall clock). Used by the "Aktuelle" filter.
+function isEventPast(event) {
+  if (!event.day || !event.time) return false;
+  const dateStr = FOLKEMODET_DATES[event.day];
+  if (!dateStr) return false;
+  // event.time is like "15:00-15:45"; use end-time as the "still relevant" cutoff
+  const m = String(event.time).match(/(\d{1,2})[:.](\d{2})\s*[-–—]\s*(\d{1,2})[:.](\d{2})/);
+  if (!m) return false;
+  const endHour = parseInt(m[3], 10);
+  const endMin = parseInt(m[4], 10);
+  // Build Date for the event's end in local time (Danish time)
+  const [y, mo, d] = dateStr.split('-').map(n => parseInt(n, 10));
+  const endTime = new Date(y, mo - 1, d, endHour, endMin, 0, 0);
+  return endTime.getTime() < Date.now();
+}
+
+// Return true if we're currently inside the Folkemødet window (11-13 June 2026).
+// During the festival, default to showing only upcoming events.
+function isFolkemodetActive() {
+  const now = Date.now();
+  const start = new Date(2026, 5, 11, 0, 0, 0).getTime();  // 11 June 00:00
+  const end = new Date(2026, 5, 13, 23, 59, 59).getTime(); // 13 June 23:59
+  return now >= start && now <= end;
+}
+programState.showOnlyUpcoming = isFolkemodetActive();
 
 // === FAVORITES (saved to localStorage) ===
 const FAV_STORAGE_KEY = "folkemodet2026_favorites_v1";
@@ -1920,6 +2057,7 @@ async function loadOfficialProgram() {
   setLanguage(currentLang);
   initLanguageToggle();
   initFavoriteTools();
+  initScrollToTop();
 
   // Load saved favorites first
   loadFavorites();
@@ -2032,6 +2170,20 @@ function populateFilters() {
   });
   chipsEl.appendChild(favChip);
   updateFavoritesChip();
+
+  // "Aktuelle" chip — toggles hiding of past events (independent of theme/favorites)
+  const upcomingChip = document.createElement("div");
+  upcomingChip.className = "pg-chip upcoming-chip";
+  upcomingChip.id = "upcomingChip";
+  upcomingChip.innerHTML = `⏱ <span data-i18n="chip.upcoming">${esc(t("chip.upcoming"))}</span>`;
+  upcomingChip.title = t("chip.upcomingTitle");
+  if (programState.showOnlyUpcoming) upcomingChip.classList.add("active");
+  upcomingChip.addEventListener("click", () => {
+    programState.showOnlyUpcoming = !programState.showOnlyUpcoming;
+    upcomingChip.classList.toggle("active", programState.showOnlyUpcoming);
+    applyFilters();
+  });
+  chipsEl.appendChild(upcomingChip);
 
   // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
   const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
@@ -2178,6 +2330,8 @@ function applyFilters() {
       const eventId = extractEventId(e.url);
       if (!eventId || !programState.favorites.has(eventId)) return false;
     }
+    // "Aktuelle" — hide events whose end-time has passed
+    if (programState.showOnlyUpcoming && isEventPast(e)) return false;
     if (day && e.day !== day) return false;
     if (venue && e.venue !== venue) return false;
     if (search && !eventMatchesSearch(e, search)) return false;
