@@ -1680,6 +1680,10 @@ const FOLKEMODET_DATES = {
 
 // Return true if event is in the past (i.e., its end time has already happened
 // according to the user's wall clock). Used by the "Aktuelle" filter.
+//
+// Festival convention: events between 00:00 and 05:59 belong to the *night* of
+// the previous calendar day. E.g. "Torsdag 00:30" really means Friday 11 June
+// 00:30 (the night after Thursday's programme), NOT Thursday morning.
 function isEventPast(event) {
   if (!event.day || !event.time) return false;
   const dateStr = FOLKEMODET_DATES[event.day];
@@ -1687,11 +1691,19 @@ function isEventPast(event) {
   // event.time is like "15:00-15:45"; use end-time as the "still relevant" cutoff
   const m = String(event.time).match(/(\d{1,2})[:.](\d{2})\s*[-–—]\s*(\d{1,2})[:.](\d{2})/);
   if (!m) return false;
+  const startHour = parseInt(m[1], 10);
   const endHour = parseInt(m[3], 10);
   const endMin = parseInt(m[4], 10);
-  // Build Date for the event's end in local time (Danish time)
   const [y, mo, d] = dateStr.split('-').map(n => parseInt(n, 10));
-  const endTime = new Date(y, mo - 1, d, endHour, endMin, 0, 0);
+  // If the start hour is in early-morning territory (00:00-05:59), this is a
+  // night event belonging to the night AFTER its labelled day → shift +1 day.
+  // Same for the end if start was also shifted.
+  const dayOffset = (startHour < 6) ? 1 : 0;
+  // Handle event that crosses midnight (e.g. 23:00-01:00): if end < start time-wise
+  // and we didn't already shift, the end is on the next day.
+  let endDayOffset = dayOffset;
+  if (dayOffset === 0 && endHour < startHour) endDayOffset = 1;
+  const endTime = new Date(y, mo - 1, d + endDayOffset, endHour, endMin, 0, 0);
   return endTime.getTime() < Date.now();
 }
 
@@ -2388,6 +2400,22 @@ function renderProgram() {
     if (!byDay[d]) byDay[d] = [];
     byDay[d].push(e);
   });
+
+  // Sort events within each day so that early-morning night events (00:00-05:59)
+  // appear AFTER the daytime/evening programme — they belong to "the night after".
+  // We convert "HH:MM" to a numeric key where 00-05 hours are treated as 24-29.
+  const nightTimeKey = (timeStr) => {
+    if (!timeStr) return 9999;
+    const m = String(timeStr).match(/(\d{1,2})[:.](\d{2})/);
+    if (!m) return 9999;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    if (h < 6) h += 24; // night hour → push to end of day
+    return h * 60 + min;
+  };
+  for (const d of Object.keys(byDay)) {
+    byDay[d].sort((a, b) => nightTimeKey(a.time) - nightTimeKey(b.time));
+  }
 
   const DAY_ORDER = ["Torsdag", "Fredag", "Lørdag", "Søndag"];
   const DAY_DATES = { "Torsdag": "11. juni", "Fredag": "12. juni", "Lørdag": "13. juni", "Søndag": "14. juni" };
