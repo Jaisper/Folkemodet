@@ -1715,9 +1715,14 @@ const FREEBIE_PATTERNS = [
 ];
 
 function eventHasFreebies(event) {
-  const text = [event.title, event.summary, event.more].filter(Boolean).join(" ");
-  if (!text) return false;
-  return FREEBIE_PATTERNS.some(re => re.test(text));
+  try {
+    const text = [event.title, event.summary, event.more].filter(Boolean).join(" ");
+    if (!text) return false;
+    return FREEBIE_PATTERNS.some(re => re.test(text));
+  } catch (e) {
+    console.warn("freebie check failed", e);
+    return false;
+  }
 }
 
 // Folkemødet 2026 dates — used to filter "currently relevant" events.
@@ -2235,32 +2240,44 @@ function populateFilters() {
   updateFavoritesChip();
 
   // "Aktuelle" chip — toggles hiding of past events (independent of theme/favorites)
-  const upcomingChip = document.createElement("div");
-  upcomingChip.className = "pg-chip upcoming-chip";
-  upcomingChip.id = "upcomingChip";
-  upcomingChip.innerHTML = `⏱ <span data-i18n="chip.upcoming">${esc(t("chip.upcoming"))}</span>`;
-  upcomingChip.title = t("chip.upcomingTitle");
-  if (programState.showOnlyUpcoming) upcomingChip.classList.add("active");
-  upcomingChip.addEventListener("click", () => {
-    programState.showOnlyUpcoming = !programState.showOnlyUpcoming;
-    upcomingChip.classList.toggle("active", programState.showOnlyUpcoming);
-    applyFilters();
-  });
-  chipsEl.appendChild(upcomingChip);
+  try {
+    const upcomingChip = document.createElement("div");
+    upcomingChip.className = "pg-chip upcoming-chip";
+    upcomingChip.id = "upcomingChip";
+    const upLabel = (typeof t === "function" ? t("chip.upcoming") : null) || "Aktuelle";
+    const upTitle = (typeof t === "function" ? t("chip.upcomingTitle") : null) || "Skjul overståede events";
+    upcomingChip.innerHTML = `⏱ <span data-i18n="chip.upcoming">${esc(upLabel)}</span>`;
+    upcomingChip.title = upTitle;
+    if (programState.showOnlyUpcoming) upcomingChip.classList.add("active");
+    upcomingChip.addEventListener("click", () => {
+      programState.showOnlyUpcoming = !programState.showOnlyUpcoming;
+      upcomingChip.classList.toggle("active", programState.showOnlyUpcoming);
+      applyFilters();
+    });
+    chipsEl.appendChild(upcomingChip);
+  } catch (e) {
+    console.warn("upcoming chip render failed", e);
+  }
 
   // "Gratis 🍺" chip — toggles showing only events with free food/drink
-  const freebieChip = document.createElement("div");
-  freebieChip.className = "pg-chip freebie-chip";
-  freebieChip.id = "freebieChip";
-  freebieChip.innerHTML = `🍺 <span data-i18n="chip.freebies">${esc(t("chip.freebies"))}</span>`;
-  freebieChip.title = t("chip.freebiesTitle");
-  if (programState.showOnlyFreebies) freebieChip.classList.add("active");
-  freebieChip.addEventListener("click", () => {
-    programState.showOnlyFreebies = !programState.showOnlyFreebies;
-    freebieChip.classList.toggle("active", programState.showOnlyFreebies);
-    applyFilters();
-  });
-  chipsEl.appendChild(freebieChip);
+  try {
+    const freebieChip = document.createElement("div");
+    freebieChip.className = "pg-chip freebie-chip";
+    freebieChip.id = "freebieChip";
+    const freebieLabel = (typeof t === "function" ? t("chip.freebies") : null) || "Gratis";
+    const freebieTitle = (typeof t === "function" ? t("chip.freebiesTitle") : null) || "Vis kun gratis-events";
+    freebieChip.innerHTML = `🍺 <span data-i18n="chip.freebies">${esc(freebieLabel)}</span>`;
+    freebieChip.title = freebieTitle;
+    if (programState.showOnlyFreebies) freebieChip.classList.add("active");
+    freebieChip.addEventListener("click", () => {
+      programState.showOnlyFreebies = !programState.showOnlyFreebies;
+      freebieChip.classList.toggle("active", programState.showOnlyFreebies);
+      applyFilters();
+    });
+    chipsEl.appendChild(freebieChip);
+  } catch (e) {
+    console.warn("freebie chip render failed", e);
+  }
 
   // Pick theme list: ALL official themes alphabetically, else our 16 fallback themes
   const useOfficial = programState.officialThemes && programState.officialThemes.length > 0;
@@ -2562,20 +2579,4 @@ function renderProgram() {
       </div>
     `;
     }).join("");
-    return `<div class="pg-day-header">${esc(t("day." + d) !== "day." + d ? t("day." + d) : d)} ${esc(t("date." + date) !== "date." + date ? t("date." + date) : date)} · ${events.length}</div>${rows}`;
-  }).join("");
-
-  out.innerHTML = html;
-
-  // Attach map button handlers (any element with data-venue)
-  out.querySelectorAll("[data-venue]").forEach(btn => {
-    btn.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      openVenueMap(btn.getAttribute("data-venue"), btn.getAttribute("data-title"));
-    });
-  });
-
-  // Attach favorite-button handlers
-  out.querySelectorAll("[data-fav-id]").forEach(btn => {
-    btn.addEventLis
+    return
