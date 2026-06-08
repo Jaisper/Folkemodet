@@ -684,13 +684,24 @@ async function scrape() {
   console.log(`\nFound ${officialThemes.length} unique themes`);
   console.log(`Top 20:`, officialThemes.slice(0, 20).map(t => `${t.name} (${t.count})`).join(', '));
 
-  // Sort: by day order, then by start time
+  // Sort: by day order, then by start time (with night-time correction:
+  // events starting 00:00-05:59 belong to the night AFTER their labelled day,
+  // so they should sort to the end of that day's listing, not the start).
   const DAY_ORDER = { 'Torsdag': 0, 'Fredag': 1, 'Lørdag': 2, 'Søndag': 3 };
+  const nightTimeKey = (timeStr) => {
+    if (!timeStr) return 9999;
+    const m = String(timeStr).match(/(\d{1,2})[:.](\d{2})/);
+    if (!m) return 9999;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    if (h < 6) h += 24;
+    return h * 60 + min;
+  };
   allEvents.sort((a, b) => {
     const da = DAY_ORDER[a.day] ?? 99;
     const db = DAY_ORDER[b.day] ?? 99;
     if (da !== db) return da - db;
-    return a.time.localeCompare(b.time);
+    return nightTimeKey(a.time) - nightTimeKey(b.time);
   });
 
   const out = {
