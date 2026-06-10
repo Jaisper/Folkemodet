@@ -442,12 +442,69 @@ async function scrape() {
 
             // === MORE (full description) ===
             let more = "";
-            // Find ANY element whose own text is exactly "Mere om" / "Beskrivelse"
+            // Find element whose own text is exactly "Mere om" / "Beskrivelse" / "Deltagere"
+            // — strictly within the MAIN event article, and only matching heading
+            // tags (h2/h3) since labels on Folkemødet's design are rendered as headings.
+            // Rejects matches inside "Andre events"-style recommendation sections.
             const findLabelEl = (labels) => {
-              const els = Array.from(document.querySelectorAll('*'));
-              for (const el of els) {
-                // Skip large containers — we want the actual label element
-                if (el.children.length > 2) continue;
+              const mainContent =
+                document.querySelector('main') ||
+                document.querySelector('article') ||
+                document.querySelector('[role="main"]') ||
+                document.body;
+
+              // A recommendation/related-events section anywhere in the page has
+              // these heading texts. We compute the set of DOM ranges to exclude.
+              const RECOMMENDATION_MARKERS = [
+                'Andre events', 'Relaterede events', 'Lignende events',
+                'I samme telt', 'Næste event', 'Du kunne også', 'På samme dag',
+                'Lignende programpunkter', 'Andre programpunkter',
+                'Anbefalede events', 'Mere fra', 'Andre arrangementer',
+                'Lignende arrangementer'
+              ];
+
+              // Find the parent section/article of each recommendation marker
+              // and remember those as "forbidden zones".
+              const forbiddenZones = [];
+              for (const h of mainContent.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
+                const ht = (h.textContent || '').trim();
+                if (RECOMMENDATION_MARKERS.some(m => ht.startsWith(m))) {
+                  // The forbidden zone is the closest section/aside/div ancestor
+                  let zone = h.parentElement;
+                  while (zone && zone !== mainContent) {
+                    if (zone.tagName === 'SECTION' || zone.tagName === 'ASIDE' ||
+                        zone.tagName === 'ARTICLE' || zone.tagName === 'DIV') {
+                      // Use the smallest reasonable ancestor — but not too small
+                      if (zone.children.length >= 2) break;
+                    }
+                    zone = zone.parentElement;
+                  }
+                  if (zone && zone !== mainContent) forbiddenZones.push(zone);
+                }
+              }
+
+              const isInForbidden = (el) => {
+                for (const zone of forbiddenZones) {
+                  if (zone.contains(el)) return true;
+                }
+                return false;
+              };
+
+              // Prefer heading tags (h2/h3 most common for these labels)
+              const HEADING_TAGS = ['H2', 'H3', 'H4'];
+              const headings = Array.from(mainContent.querySelectorAll('h2, h3, h4'));
+              for (const h of headings) {
+                if (isInForbidden(h)) continue;
+                const t = (h.textContent || '').trim();
+                if (labels.includes(t)) return h;
+              }
+
+              // Fallback: any other element that exactly matches the label text
+              // (some Folkemødet pages use <strong> or <div class="label"> instead)
+              const allEls = Array.from(mainContent.querySelectorAll('strong, b, div, span, p, label, dt'));
+              for (const el of allEls) {
+                if (isInForbidden(el)) continue;
+                if (el.children.length > 2) continue; // skip large containers
                 const t = (el.textContent || '').trim();
                 if (labels.includes(t)) return el;
               }
@@ -484,7 +541,18 @@ async function scrape() {
 
             const mereEl = findLabelEl(['Mere om', 'Beskrivelse']);
             more = collectAfter(mereEl, 15);
+
+            // Hard cap on length: anything beyond ~2500 chars is almost certainly
+            // bleeding into a "related events" section that we failed to detect.
+            // We also stop at a "fake heading" pattern (Title followed by short
+            // newline-separated subtitle), which is what related-event cards look like.
+            const FAKE_HEADING_PATTERN = /\n\n[A-ZÆØÅ][^\n.!?]{5,80}\n[A-ZÆØÅ][^\n]{5,200}\n/;
             if (more.length > 2500) more = more.slice(0, 2500) + '…';
+            // Cut at the first "related event"-style block if present
+            const cutMatch = more.match(FAKE_HEADING_PATTERN);
+            if (cutMatch && cutMatch.index > 100) {
+              more = more.slice(0, cutMatch.index).trim();
+            }
 
             // === SPEAKERS ===
             // Each speaker on a Folkemødet page is a separate child element.
