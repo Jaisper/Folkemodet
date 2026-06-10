@@ -16,6 +16,11 @@ on:
         type: boolean
         required: false
         default: true
+      refetch_details:
+        description: 'Re-fetch ALL event detail pages (more, speakers). Use once after a scraper bug fix.'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -41,24 +46,31 @@ jobs:
         run: |
           MAX_EVENTS="${{ github.event.inputs.max_events }}"
           FAST_MODE="${{ github.event.inputs.fast_mode }}"
+          REFETCH_DETAILS="${{ github.event.inputs.refetch_details }}"
           # Schedule (cron) runs default to FAST_MODE=1 for cheap daily updates
           if [ "${{ github.event_name }}" = "schedule" ]; then
             FAST_MODE="true"
             MAX_EVENTS=""
+            REFETCH_DETAILS="false"
           fi
           # Default FAST_MODE to true if blank
           if [ -z "$FAST_MODE" ]; then
             FAST_MODE="true"
           fi
+          if [ -z "$REFETCH_DETAILS" ]; then
+            REFETCH_DETAILS="false"
+          fi
           echo "MAX_EVENTS=$MAX_EVENTS" >> $GITHUB_OUTPUT
           echo "FAST_MODE=$FAST_MODE" >> $GITHUB_OUTPUT
-          echo "Mode: MAX_EVENTS=$MAX_EVENTS · FAST_MODE=$FAST_MODE"
+          echo "REFETCH_DETAILS=$REFETCH_DETAILS" >> $GITHUB_OUTPUT
+          echo "Mode: MAX_EVENTS=$MAX_EVENTS · FAST_MODE=$FAST_MODE · REFETCH_DETAILS=$REFETCH_DETAILS"
 
       - name: Run scraper
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           MAX_EVENTS: ${{ steps.mode.outputs.MAX_EVENTS }}
           FAST_MODE: ${{ steps.mode.outputs.FAST_MODE == 'true' && '1' || '0' }}
+          REFETCH_DETAILS: ${{ steps.mode.outputs.REFETCH_DETAILS == 'true' && '1' || '0' }}
         run: node scripts/scrape.mjs
 
       - name: Upload test artifact (when MAX_EVENTS is set)
@@ -74,29 +86,40 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add program.json
-          if git diff --staged --quiet; then
-            echo "No changes to program"
-          else
+
+          # The scraper output is a full snapshot, not an incremental patch.
+          # If a concurrent push lands while we're scraping, attempting to
+          # rebase causes inevitable conflicts (entire file diverges). Instead
+          # we save our generated program.json, hard-reset to the remote tip,
+          # restore our file, and commit on top.
+          cp program.json /tmp/program.json.new
+
+          MAX_RETRIES=5
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Push attempt $i/$MAX_RETRIES…"
+
+            # Fetch the latest remote state and align our branch to it
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Restore our freshly scraped program.json on top of the remote
+            cp /tmp/program.json.new program.json
+            git add program.json
+
+            if git diff --staged --quiet; then
+              echo "No changes after sync — nothing to commit"
+              exit 0
+            fi
+
             EVENTS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('program.json')).events.length)")
             git commit -m "Update program.json (${EVENTS} events)"
 
-            # Retry-push with rebase in case remote has new commits during our long scrape
-            MAX_RETRIES=5
-            for i in $(seq 1 $MAX_RETRIES); do
-              echo "Push attempt $i/$MAX_RETRIES…"
-              if git push; then
-                echo "✓ Pushed successfully"
-                exit 0
-              fi
-              echo "Push rejected — pulling with rebase…"
-              git pull --rebase origin main || {
-                echo "Rebase failed, aborting"
-                git rebase --abort 2>/dev/null || true
-                exit 1
-              }
-              sleep 2
-            done
-            echo "× Could not push after $MAX_RETRIES attempts"
-            exit 1
-          fi
+            if git push; then
+              echo "✓ Pushed successfully on attempt $i"
+              exit 0
+            fi
+            echo "Push rejected — retrying with fresh remote state…"
+            sleep 3
+          done
+          echo "× Could not push after $MAX_RETRIES attempts"
+          exit 1
