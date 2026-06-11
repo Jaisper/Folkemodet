@@ -461,23 +461,23 @@
   }
   .pg-details-toggle {
     font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--orange);
     cursor: pointer;
     list-style: none;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     user-select: none;
-    padding: 2px 0;
+    padding: 3px 0;
   }
   .pg-details-toggle::-webkit-details-marker { display: none; }
   .pg-details-toggle::before {
     content: "▸";
     display: inline-block;
     transition: transform .15s ease;
-    font-size: 10px;
+    font-size: 11px;
   }
   .pg-details[open] .pg-details-toggle::before {
     transform: rotate(90deg);
@@ -552,6 +552,7 @@
     gap: 12px;
     margin-top: 8px;
     flex-wrap: wrap;
+    align-items: center;
   }
   .pg-action-link {
     background: transparent;
@@ -567,6 +568,13 @@
     text-underline-offset: 3px;
   }
   .pg-action-link:hover { color: var(--red); }
+  .pg-action-hint {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    color: #888;
+    margin-left: -6px;
+  }
   .load-more {
     margin: 16px auto 0;
     display: block;
@@ -1434,6 +1442,7 @@ const I18N = {
     "fav.import": "📂 Importér favoritter",
     "card.showDetails": "Vis detaljer",
     "card.officialPage": "🔗 Officiel side",
+    "card.officialHint": "(tjek hvis indholdet ser forkert ud)",
     "card.showOnMap": "📍 Vis på kort",
     "meta.count": "Viser <b>{visible}</b> af <b>{total}</b> events · Programmet senest opdateret: {date} · Kilde: <a href=\"https://program.folkemoedet.dk/2026\" target=\"_blank\" style=\"color:var(--orange)\">program.folkemoedet.dk</a>",
     "day.Torsdag": "Torsdag",
@@ -1482,6 +1491,7 @@ const I18N = {
     "fav.import": "📂 Import favourites",
     "card.showDetails": "Show details",
     "card.officialPage": "🔗 Official page",
+    "card.officialHint": "(check if content looks wrong)",
     "card.showOnMap": "📍 Show on map",
     "meta.count": "Showing <b>{visible}</b> of <b>{total}</b> events · Programme last updated: {date} · Source: <a href=\"https://program.folkemoedet.dk/2026\" target=\"_blank\" style=\"color:var(--orange)\">program.folkemoedet.dk</a>",
     "day.Torsdag": "Thursday",
@@ -2502,7 +2512,7 @@ function renderProgram() {
             </div>
           </details>` : ""}
           <div class="pg-actions">
-            ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(t("card.officialPage"))}</a>` : ""}
+            ${officialUrl ? `<a class="pg-action-link" href="${esc(officialUrl)}" target="_blank" rel="noopener">${esc(t("card.officialPage"))}</a><span class="pg-action-hint" data-i18n="card.officialHint">${esc(t("card.officialHint"))}</span>` : ""}
             <button class="pg-action-link" data-venue="${venueAttr}" data-title="${titleAttr}" type="button">${esc(t("card.showOnMap"))}</button>
           </div>
         </div>
