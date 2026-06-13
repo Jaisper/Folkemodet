@@ -59,6 +59,8 @@ Den daglige cron kører automatisk kl. 06:00 UTC (08:00 dansk sommertid) med:
 - `FAST_MODE=1` — kun nye/ændrede events oversættes (typisk <$0.05/dag)
 - `REFETCH_DETAILS=0` — eksisterende detail-cache genbruges
 
+**Auto-nedlukning:** Cron-kørsler stopper automatisk efter 13. juni 2026 (festivalens sidste dag). Manuelle `workflow_dispatch`-kørsler virker stadig — også til kommende års edition.
+
 ### Manuel kørsel
 
 **Actions → Scrape Folkemødet Program → Run workflow**, vælg input:
