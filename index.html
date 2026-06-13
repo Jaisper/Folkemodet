@@ -2269,7 +2269,11 @@ function populateFilters() {
     if (!e.venue) return;
     venues.add(e.venue.trim());
   });
-  const venueArr = [...venues].sort((a, b) => a.localeCompare(b, "da"));
+  // Natural sort: "A3" < "A4" < "A29" < "A30" < "B1" etc.
+  // localeCompare with { numeric: true } handles digit runs as numbers.
+  const venueArr = [...venues].sort((a, b) =>
+    a.localeCompare(b, "da", { numeric: true, sensitivity: "base" })
+  );
   const venueSel = document.getElementById("filterVenue");
   venueArr.forEach(v => {
     const opt = document.createElement("option");
