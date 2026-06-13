@@ -32,16 +32,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Folkemødet 2026 runs 11–13 June. After the festival ends, scheduled
+      # runs no longer need to update the program. Manual workflow_dispatch
+      # runs (e.g. for testing or for the next year's edition) still work.
+      - name: Check festival window
+        id: festival
+        run: |
+          NOW_DATE=$(date -u +%Y-%m-%d)
+          FESTIVAL_END="2026-06-13"
+          if [[ "${{ github.event_name }}" == "schedule" && "$NOW_DATE" > "$FESTIVAL_END" ]]; then
+            echo "Today is $NOW_DATE — Folkemødet 2026 ended on $FESTIVAL_END."
+            echo "Skipping scheduled run. Use workflow_dispatch to run manually."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Proceeding with run (event=${{ github.event_name }}, date=$NOW_DATE)"
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.festival.outputs.skip != 'true'
         with:
           node-version: '20'
 
       - name: Install dependencies
+        if: steps.festival.outputs.skip != 'true'
         run: |
           npm install playwright@1.49.0
           npx playwright install chromium --with-deps
 
       - name: Determine run mode
+        if: steps.festival.outputs.skip != 'true'
         id: mode
         run: |
           MAX_EVENTS="${{ github.event.inputs.max_events }}"
@@ -66,6 +86,7 @@ jobs:
           echo "Mode: MAX_EVENTS=$MAX_EVENTS · FAST_MODE=$FAST_MODE · REFETCH_DETAILS=$REFETCH_DETAILS"
 
       - name: Run scraper
+        if: steps.festival.outputs.skip != 'true'
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           MAX_EVENTS: ${{ steps.mode.outputs.MAX_EVENTS }}
@@ -74,7 +95,7 @@ jobs:
         run: node scripts/scrape.mjs
 
       - name: Upload test artifact (when MAX_EVENTS is set)
-        if: steps.mode.outputs.MAX_EVENTS != ''
+        if: steps.festival.outputs.skip != 'true' && steps.mode.outputs.MAX_EVENTS != ''
         uses: actions/upload-artifact@v4
         with:
           name: test-program-json
@@ -82,7 +103,7 @@ jobs:
           retention-days: 3
 
       - name: Commit program.json if changed (full runs only)
-        if: steps.mode.outputs.MAX_EVENTS == ''
+        if: steps.festival.outputs.skip != 'true' && steps.mode.outputs.MAX_EVENTS == ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
