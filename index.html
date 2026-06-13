@@ -2083,7 +2083,15 @@ async function loadOfficialProgram() {
   loadFavorites();
 
   try {
-    const resp = await fetch("./program.json?t=" + Date.now());
+    // Cache key changes once per UTC day. The browser keeps program.json in
+    // its HTTP cache the rest of the day, so refreshing the app is instant
+    // and doesn't re-download ~10 MB. The daily cron updates the file once
+    // per day, so a once-per-day fetch is more than enough.
+    //
+    // To force a fresh fetch mid-day (e.g. after a manual scrape), do a hard
+    // reload (Ctrl+Shift+R / Cmd+Shift+R) — that bypasses the browser cache.
+    const dateKey = new Date().toISOString().slice(0, 10); // "2026-06-13"
+    const resp = await fetch("./program.json?d=" + dateKey);
     if (!resp.ok) throw new Error("Not found");
     const data = await resp.json();
     programState.events = (data.events || []).map(normalizeEvent);
